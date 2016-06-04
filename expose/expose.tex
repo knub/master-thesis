@@ -1,0 +1,122 @@
+\documentclass{sig-alternate-05-2015}
+\begin{document}
+
+% DOI
+%\doi{}
+
+% ISBN
+%\isbn{123-4567-24-567/08/06}
+\title{Topic Models and Word Embeddings}
+\subtitle{Master Thesis Expos\'e}
+
+\numberofauthors{1}
+\author{
+\alignauthor
+Stefan Bunk\\
+       \affaddr{Hasso Plattner Institute, University of Potsdam}\\
+       \affaddr{Prof.-Dr.-Helmert-Str. 2-3}\\
+       \affaddr{14482 Potsdam, Germany}\\
+       \email{stefan.bunk@student.hpi.uni-potsdam.de}
+}
+\date{9 June 2016}
+
+\maketitle
+\begin{abstract}
+Abstract
+\end{abstract}
+
+\section{Introduction}
+\section{Related Work}
+\subsection{Topic Modelling}
+Focus on LDA
+
+Very expensive on large data sets
+
+(subject to parameter choice, but still) LDA encourages sparse models, both topic-documents as topic-wordpor
+
+LDA has problems on small texts/documents
+
+LDA output is two-fold:
+
+Usages:
+
+\subsection{Word Embeddings}
+Undistributed representations like word vectors
+Instead of discrete word vectors 
+[0 0 1 0] and [1 0 0 0]
+arbitrary encoding
+no information about the relationship between words
+%https://en.wikipedia.org/wiki/Distributional_semantics#Distributional_Hypothesis
+
+The foundations of \emph{distributed representations} dates back to the mid-eighties\cite{Hinton1986,Rumelhart1988}.
+The idea of using 
+Long history
+
+How to get them: Earlier deep models, now also shallow models (Mikolov)
+
+cbow
+skip-gram
+Given a word, predict surrounding words.
+This means that surrounding words have to be encoded in the word vector for each word or as Mikolov et al.\cite{Mikolov2013} state ``vectors can be seen as representing the distribution of the context in which a word appears''.
+``the system naturally learns to assign similar vectors to simlar words'' \cite{Baroni2014}
+
+nice properties, like keeping linearity
+It was shown that $vector("King") - vector("Man") + vector("Woman")$ is closest to the vector representation of the word queen\cite{Mikolov2013b}.
+Interestingly, this relationship holds for both semantic as well as syntactic similary\cite{Mikolov2013a}.
+
+This seems to be a great strength of neural networks: they learn better ways to represent data, automatically. Representing data well, in turn, seems to be essential to success at many machine learning problems. Word embeddings are just a particularly striking example of learning a representation.
+
+
+Usages:
+Statistical language modelling
+Machine translation\cite{Zou2013}
+sentiment analysis\cite{Maas2011}
+paraphrase detection
+many more uses cases in Mikolov2013.
+\section{Data sets}
+
+\subsection{Microsoft Research Sentence Completion Challenge}
+\subsection{Other data sets}
+ukWaC
+English Wikipedia
+British National Corpus
+
+\subsection{Semantic Relatedness}
+Given two words, how similar are they?
+\subsection{Concept categorization}
+Cluster words, measure cluster purity
+
+\subsection{Catch out of the list words?}
+dataset?
+\section{Comparing the two approaches}
+both somewhat use vector space model TODO: add seminal reference
+distributional semantic models (DSMs)
+count-based methods (LDA)
+predictive methods (word2vec)
+\cite{Baroni2014}
+bridging the gap
+
+``A long tradition in computational linguistics has shown that contextual information provides a good approximation to word meaning, since semanti- cally similar words tend to have similar contex- tual distributions (Miller and Charles, 1991).''
+``It remains to be seen whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting av- enue for further work.''
+one is supervised, the other one is unsupervised
+there has been a shift from the LDA to the word embeddings
+
+word embeddings work on a very large scale
+
+\section{Approach}
+No-stemming (does harm in both word2vec and topic modelling), as it destroys the difference between Apple and apples and (TODO: other example) as well as small/smallest.
+Quoting lots of stuff from the lda2vec
+
+LDA could also provide word vectors, however it is not good at keeping linear relationships\cite{Mikolov2013b,Mikolov2013a}.
+We will reconfirm this .
+\subsection{Run LDA, get topics of words}
+Use LDA for word disambiguation to distinguish different word-topics as different tokens in the word2vec training.
+
+\subsection{Enhancing topic models?}
+Then we need evaluation for topic models and show that they are better
+Use pretrained word vectors to improve \cite{Das2015}
+
+
+\bibliographystyle{abbrv}
+\bibliography{expose}
+\end{document}
