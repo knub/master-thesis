@@ -2,7 +2,13 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{hyperref}
 \usepackage[utf8]{inputenc}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\specialcell}[2][c]{%
+         \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
 \begin{document}
 %\doi{}
@@ -58,9 +64,10 @@ Hence, there is relatively little research in combination of these two methods.
 In this master thesis, we aim to explore potential synergies between these technologies.
 In particular, it might be useful to investigate ``whether the the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
 
-This expos\'e is organized as follows: Section~\ref{sec:related-work} will introduce topic modelling and word embeddings, compare the two approaches and show existing work in combining the two.
-Section~\ref{sec:approach} will highlight potential for combining the two approaches during this master thesis.
-Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate a joint system.
+This expos\'e is organized as follows: Section~\ref{sec:related-work} will introduce topic modelling and word embeddings, compare the two approaches and show existing work in combining the two methods.
+Section~\ref{sec:experiments} will present first experiments, which we want to conduct at the start of this master thesis.
+Section~\ref{sec:approach} will show our approach for this master thesis.
+Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modelling and word embeddings.
 
 \section{Related Work}
 \label{sec:related-work}
@@ -190,7 +197,6 @@ The continuous bag-of-words model (CBOW) works by predicting the center word in 
 The continuous skip-gram model works the other way round: given a word, it tries to predict the context.
 We focus on the skip-gram model in the following, as it had the better evaluation results in the original paper.
 In the skip-gram model, surrounding words have to be encoded in the word vector for each word or as Mikolov et al.~\cite{Mikolov2013} state ``vectors can be seen as representing the distribution of the context in which a word appears''.
-
 % TODO: Skip-Grams with Negative Sampling
 
 A nice property of the trained word vectors is, that linear relationships between words are kept in the vector space.
@@ -238,7 +244,7 @@ Also, it tends to yield sparse vectors as LDA tries to keep the number of topics
 Baroni et al.~\cite{Baroni2014} also introduce the classification of count-based methods and prediction-based methods in distributional semantic models.
 Prediction-based methods try to set word vectors so that they are able to predict the context words.
 Count-based methods are based on counting the occurrence of words and co-occurrence with other words.
-Popular count-based methods are pointwise-mutual information and TODO.
+Popular count-based methods typically use pointwise-mutual information and matrix transformation on the co-occurrence matrix.
 While word embeddings are clearly a prediction-based method, LDA constitutes a hybrid type in this classification.
 LDA is based on word counts and co-occurrences and treats words as discrete observations, however, the model parameters are chosen to maximize its predictive power.
 
@@ -259,51 +265,81 @@ The method by Mikolov has been successfully trained on a corpus with about 100 b
 \subsection{Existing combinations}
 The existing related work, which combines topic modelling approaches with word embeddings, can be roughly divided in two directions.
 One type of model tries to improve topic models by incorporating word vectors, while the other aims to improve word embeddings with topic models.
-We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinations}.
+We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinations}\footnote{ToCoh: Topic Coherence, WordSim: Word Similarity, DocClass: Document Classification, DocClust: Document Clustering, Analogy: Word Analogy Reasoning, SentComp: Sentence Completion}.
 \begin{table*}
        \centering
-       \caption{Overview over related work of combinations between topic models and word embeddings}
-       \begin{tabular}{|l|l|}
+       \caption{Overview over related work of combinations between topic models (TM) and word embeddings (WE) and how they have been evaluated}
+       \begin{tabular}{|l||c|c||c|c|c|c|c|c|}
               \hline
-              \textbf{Output: Topic Model} & \textbf{Output: Word Embeddings} \\
+              \textbf{Paper}                  & \textbf{TM} & \textbf{WE} & \textbf{ToCoh} & \textbf{WordSim} & \textbf{DocClass} & \textbf{DocClust} & \textbf{Analogy} & \textbf{SentComp} \\
               \hline
-              • Gaussian LDA, Das et al.~\cite{Das2015}                                                          & • Topical Word Embeddings, Liu et al.~\cite{Liu2015} \\
-              • \parbox[t]{7cm}{Improving Topic Models with Latent Feature Word Representations, Nguyen et al.~\cite{Nguyen2015}} & • \parbox[t]{7cm}{Conceptual Text Understand in Distributional Semantic Space, Cheng et al.~\cite{Cheng2015}} \\
-              • \parbox[t]{7cm}{Unsupervised Topic Modelling for Short Texts Using Distributed Representations of Words, Sridhar~\cite{Sridhar2015}} & • lda2vec, Moody~\cite{Moody2016} \\
+              Blei et al.~\cite{Blei2003}     & \cmark &  &                &                  & \specialcell{\cmark\\\textsc{Reuters}}  &                   &  & \\
+              \hline
+              Mikolov et al.~\cite{Mikolov2013a} &     & \cmark &                &           &                      &                   & \cmark & \specialcell{\cmark\\\textsc{Microsoft}\\\textsc{sentence}\\\textsc{completion}} \\
+              \hline \hline
+              Das et al.~\cite{Das2015}       & \cmark &  & \specialcell{\cmark\\Wikipedia\\co-occurrence} &      &                   &                   & & \\
+              \hline
+              Nguyen et al.~\cite{Nguyen2015} & \cmark &  & \specialcell{\cmark\\Wikipedia\\co-occurrence} &      & \specialcell{\cmark\\\textsc{20-News-}\\\textsc{Group},\\\textsc{TagMyNews}} & \specialcell[h]{\cmark\\Same as\\left} & & \\
+              \hline
+              Sridhar~\cite{Sridhar2015}      & \cmark &  & \specialcell{\cmark\\Manual\\annotation}               &                  &                   &  & & \\
+              \hline
+              Moody~\cite{Moody2016}          & \cmark & \cmark & \specialcell{\cmark\\Palmetto\footnotemark\\evaluation tool}         & \specialcell{\cmark\\Only\\qualitative} &                      &         & & \\
+              \hline
+              Liu et al.~\cite{Liu2015} &     & \cmark &                & \specialcell{\cmark\\\textsc{SCWS}}    & \specialcell{\cmark\\\textsc{20-News-}\\\textsc{Group}}               &                   &  & \\
+              \hline
+              Cheng et al.~\cite{Cheng2015} &     & \cmark &                & \specialcell{\cmark\\\textsc{SCWS} +\\paraphrase\\detection\\\textsc{MSRPC}}    &  &                   &  & \\
+              % • Nguyen et al.~\cite{Nguyen2015}} & • \parbox[t]{7cm}{Conceptual Text Understand in Distributional Semantic Space, Cheng et al.~\cite{Cheng2015}} \\
+              % • \parbox[t]{7cm}{Unsupervised Topic Modelling for Short Texts Using Distributed Representations of Words, Sridhar~\cite{Sridhar2015}} & • lda2vec, Moody~\cite{Moody2016} \\
+% • Topical Word Embeddings, Liu et al.~\cite{Liu2015}
               \hline
        \end{tabular}
        \label{table:tm_and_we_combinations}
 \end{table*}
+\footnotetext{The online evaluation tool can be accessed at \url{http://palmetto.aksw.org/palmetto-webapp}}
+% \begin{table*}
+%        \centering
+%        \caption{Overview over related work of combinations between topic models and word embeddings}
+%        \begin{tabular}{|l|l|}
+%               \hline
+%               \textbf{Output: Topic Model} & \textbf{Output: Word Embeddings} \\
+%               \hline
+%               • Gaussian LDA, Das et al.~\cite{Das2015}                                                          & • Topical Word Embeddings, Liu et al.~\cite{Liu2015} \\
+%               • \parbox[t]{7cm}{Improving Topic Models with Latent Feature Word Representations, Nguyen et al.~\cite{Nguyen2015}} & • \parbox[t]{7cm}{Conceptual Text Understand in Distributional Semantic Space, Cheng et al.~\cite{Cheng2015}} \\
+%               • \parbox[t]{7cm}{Unsupervised Topic Modelling for Short Texts Using Distributed Representations of Words, Sridhar~\cite{Sridhar2015}} & • lda2vec, Moody~\cite{Moody2016} \\
+%               \hline
+%        \end{tabular}
+%        \label{table:tm_and_we_combinations_previous}
+% \end{table*}
 
 The work by Das et al.~\cite{Das2015} belongs to the first group. They propose a method named Gaussian LDA.
-In this approach, a topic is no longer distribution over the words in the vocabulary, but a gaussian distribution in the word embedding space.
+In this approach, a topic is no longer a distribution over words in the vocabulary, but a gaussian distribution in the word embedding space.
 Also, words are no longer atomic units, but are represented by their corresponding pre-trained word embeddings.
 Each topic is associated with a mean $\mu_k$ and a covariance matrix $\Sigma_k$.
 The prior distribution over the means is a normal distribution, and the prior distribution over the covariances is an inverse Wishart distribution.
-These parameters are inferred using Gibbs Sampling as in standard LDA. % together with linear algebra tricks
+These parameters are inferred using Gibbs sampling as in standard LDA. % together with linear algebra tricks
 Another idea is proposed by Sridhar~\cite{Sridhar2015}.
 They start by training word embeddings.
 Afterwards they fit a Gaussian mixture model directly on the word embedding space.
 A topic is represented by mean and covariance matrix.
-In contrast to Das et al.~\cite{Das2015}, Sridhar~\cite{Sridhar2015} assumes the topics as fixed given the word embeddings, while Das et al.~\cite{Das2015} only take the embeddings as a basis and still learn the topics based on the word co-occurrences in the corpus.
+In contrast to Das et al.~\cite{Das2015}, Sridhar~\cite{Sridhar2015} assumes the topics to be fixed given the word embeddings, while Das et al.~\cite{Das2015} only take the embeddings as a basis and still learn the topics based on the word co-occurrences in the corpus.
 Another approach is taken by Nguyen et al.~\cite{Nguyen2015}.
 They use word embeddings, ``latent feature word representations'' in their words, to sample words not only from the multinomial topic distribution, but also from the embedding space.
 Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
 This parameter decides, whether the word is sampled as usual from the topic-word distribution or from the latent feature vectors.
-To sample in the embedding space, we sample from a softmax-normalized categorical distribution defined by:
+To sample in the embedding space, they sample from a softmax-normalized categorical distribution defined by:
 \begin{equation*}
        Cat(w | \tau_t, \omega) = \frac{exp(\tau_t * \omega_w)}{\sum_{w' \in W} exp(\tau_t * \omega_{w'})},
 \end{equation*}
 where $\tau_t$ is the representation of topic $t$ in the word embedding space and $\omega$ are the pretrained and fixed word embedding vectors.
-The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and GloVe~\cite{Pennington2014}.
+The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014}.
 The topic embeddings $\tau$ are updated in each iteration of Gibbs sampling via a MAP estimate based on all other parameters given.
-A similar idea is used by Cheng~\cite{Cheng2015} et al.
-In fact, the first model they propose is the same as the first model from Nguyen et al.
+A similar idea is used by Cheng et al.~\cite{Cheng2015}.
+In fact, the first model they propose is the same as the first model from Nguyen et al~\cite{Nguyen2015}.
 In addition to some other new models, which are similar to Cheng et al.'s work, they also propose new models, which do not assume independence between word and concept embeddings.
 These \emph{generative word-concept skip-gram} models perform best in their word-similarity and paraphrase detection benchmarks.
 
 We now focus on methods for better word embeddings.
-Liu~\cite{Liu2015} propose Topical Word Embeddings.
+Liu et al.~\cite{Liu2015} propose Topical Word Embeddings.
 These embeddings make use of word topics inferred via LDA to generate better word vectors.
 They propose three different architectures.
 The first method regards topic as pseude words, which are added to the context of each word.
@@ -316,8 +352,27 @@ Using the additional topic information when training word embeddings has practic
 When the model is asked for similar words to the word ``apple'', it returns ``peach'', ``juice'', ``strawberry'' or it returns ``mac'', ``ipod'', ``android'' depending on the topic of the word.
 
 Moody~\cite{Moody2016} proposes lda2vec.
-His method learns word vectors together with learning an intuitive topic-based document interpretation.
-% TODO: Expand
+His method learns word vectors together with learning topic vectors and an intuitive topic-based document interpretation.
+Even though trained in the word embedding space, the topic-document vectors are still kept parse to be interpretable for humans.
+However, the method is not evaluated extensively and it is unclear, whether this method yields improved word vectors.
+
+% FROM MIKOLOV COLING 2014 tutorial
+% Sentence-level representations
+% • To obtain sentence level representations, we can add unique tokens
+% to the data, one for each sentence (or short document)
+% • These tokens are trained in a similar way like other words in the skipgram
+% or CBOW models, just using unlimited context window (within
+% the sentence boundaries)
+
+A word vector can be seen as a summary of the word with all its meanings.
+Many applications require not only word vectors, but also summaries of longer chunks of text.
+Therefore, it is necessary to embed sentences or documents in the word embedding space.
+For this problem, Le and Mikolov~\cite{Le2014} proposed paragraph vectors.
+In their work, paragraph can mean an arbitrary long text, ranging from sentences to entire documents.
+Paragraph vectors are trained by adding an artificial word to each context, which represents the current paragraph.
+These paragraph vectors can then be viewed as a summary of the meaning of the entire paragraph, which is useful for further downstream applications.
+%for sentiment analysis by training logistic regression classifier on the vectors.
+% http://sentic.net/sentire2011ott.pdf
 
 %one is supervised, the other one is unsupervised
 
@@ -325,11 +380,11 @@ His method learns word vectors together with learning an intuitive topic-based d
 %``It remains to be seen whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting av- enue for further work.''
 %there has been a shift from the LDA to the word embeddings
 
-\section{Experiments}
-\label{sec:approach}
+\section{Starting Experiments}
+\label{sec:experiments}
 
 In the master thesis, we try to find ways of combining word embeddings and topic modelling.
-We will start with a set of experiments to explore both approaches.
+We will start with a set of experiments to explore both base methods.
 \begin{itemize}
        \item
               \emph{Visualize similar words in topic space}:
@@ -341,7 +396,7 @@ We will start with a set of experiments to explore both approaches.
        \item
               \emph{Visualize words from one topic in embedding space}:
               Again, we will train \emph{word2vec} and apply LDA to the English Wikipedia.
-              Using dimensionality reduction techniques like t-SNE\cite{VanDerMaaten2008} or Principal Component Analysis, we can project the high-dimensional embedding space down to a two-dimensional map.
+              Using dimensionality reduction techniques like t-SNE~\cite{VanDerMaaten2008} or Principal Component Analysis, we can project the high-dimensional embedding space down to a two-dimensional map.
               It will be interesting to see whether the words from one topic cluster in similar regions in the two-dimensional embedding map.
 \end{itemize}
 These experiments will also help set up the code and infrastructure for further experiments during the master thesis.
@@ -377,99 +432,106 @@ We estimate these experiments to take three weeks.
 % Use pretrained word vectors to improve~\cite{Das2015}
 
 
-\section{Approach}
+\section{Master Thesis Approach}
+\label{sec:approach}
 
-\subsection{Comparative Evaluation}
+\subsection{Comparative Evaluation of Existing Approaches}
 In the master thesis, we will start with a comparative evaluation of word embeddings and topic models.
-We now present several evaluation tasks and data set, as well as how both methods can be used for the given approach.
-
+As shown in Table~\ref{table:tm_and_we_combinations} there is no evaluation strategy for the different models.
+We will build a set of evaluation tasks, ranging from low-level, artificial tasks to higher-level use cases.
+Concretely, we plan:
+\begin{itemize}
+       \item
+              \emph{Word Similarity}:
+              Word similarity can be measured for models, which output word embeddings.
+              We will use the Stanford Contextual Word Similarity data set (\textsc{SCWS}) by Huang et al.~\cite{Huang2008}.
+              This data set evaluates word similarity given the context of the word.
+              For example, ``bank'' might be similar to the word ``money'', when used in the context ``My \emph{bank} account number is 123.'', but not when used in the context ``the east \emph{bank} of the river''.
+              We will also use the \textsc{WordSim-353} data set by Finkelstein et al.~\cite{Finkelstein2002}, which judges the similarity of words without a context.
+              It will be interesting to see whether the topic-model-enhanced word embeddings have better improvements on the SCWS data set than the standard model.
+% \subsection{Topic Coherence}
+% Standard method to evaluate topic models: measure the likelihood of held-out documents.
+% Another approach to evaluate the topic coherence is to compute the Pointwise Mutual Information of the top $k$ words of a topic with co-occurrence counts from Wikipedia.
+       \item
+              \emph{Topic Coherence}:
+              This is the standard evaluation for topic models.
+              We will evaluate with a co-occurrence measure based on Wikipedia.
+       \item
+              \emph{Sentence Completion}:
+              The Microsoft Research Sentence Completion Challenge~\cite{Zweig2011} consists of 1,040 sentences, in which one word is missing.
+              Five options are offered for the missing word, and an algorithm must decide, which one fits best.
+              This is a natural task for word embeddings, as they are trained on exactly that task.
+              It is also a task, where topic models could help achieve better performance, as they could help distinguish between different concepts and topics.
+       \item
+              \emph{Document Classification}:
+              We will use two standard text classification data sets, namely the \textsc{Reuters-21578} data set (8,000 documents) and the \textsc{20-News-Group} (20,000 documents) data set.
+       \item
+              \emph{Information Retrieval}:
+              Wei et al.~\cite{Wei2006} proposed an approach to use LDA in information retrieval.
+              We will evaluate the different LDA adaptions using this approach on different TREC data sets.
+              We will also conduct further research, how word embeddings are used in information retrieval.
+              % OHSUMED
+       \item
+              \emph{Other Applications}: We will investigate other use cases, which can be used for evaluation, for example sentiment analysis or recommendation tasks.
+% OTHER IDEAS:
+% \subsection{Concept categorization}
+% Cluster words, measure cluster purity
+% Sentiment Analysis
+% \cite{Wei2006}
+%\paragraph{Document Clustering}
+% Not particular useful, as they do different things
+% \paragraph{Sentiment Analysis}
+% \subsection{Catch out of the list words?}
+% Given a word, find the word, which does not fit in the list.  % data set?
 % \paragraph{Language Modelling}
 % Blei et al.~\cite{Blei2003} present ... We use perplexity as our evaluation metric.
 % This is out, as LDA is no language modelling technique. Word embeddings will win.
 
-\paragraph{Document Classification}
-%\paragraph{Document Clustering}
-% Not particular useful, as they do different things
-\paragraph{Sentiment Analysis}
+\end{itemize}
+These evaluation task list will be adapted throughout the thesis.
 
-% FROM MIKOLOV COLING 2014 tutorial
-% Sentence-level representations
-% • To obtain sentence level representations, we can add unique tokens
-% to the data, one for each sentence (or short document)
-% • These tokens are trained in a similar way like other words in the skipgram
-% or CBOW models, just using unlimited context window (within
-% the sentence boundaries)
-
-To provide sentiment analysis using word embeddings, it is necessary to embed sentences or documents in the word embedding space.
-For this, Le and Mikolov~\cite{Le2014} proposed paragraph vectors.
-In their work, paragraph can mean an arbitrary long text, ranging from sentences to entire documents.
-Paragraph vectors are trained by adding an artificial word to each context, which represents the current paragraph.
-These paragraph vectors can then be used for sentiment analysis by training logistic regression classifier on the vectors.
-
-% http://sentic.net/sentire2011ott.pdf
-
-\paragraph{Information Retrieval}
-
-In particular, we want to test an adaption
-Language Modelling
-
-Real end-user-use-cases are missing for topic models.
-Document classification
-
-Topic model in information retrieval
-TREC
-Tag recommendation
-
-Sentiment Analysis
-\cite{Wei2006}
-
-Document clustering
-
-\subsection{New Combination}
+\subsection{New Approach}
 We plan to experiment with a new combination of word embeddings and topic models.
-Concretely, 
-Solve data sparsity issues in short documents.
+We currently believe, that a new LDA-model incorporating the word embeddings in the sampling process is the most promising direction for further research.
+Concretely, we plan to work on short documents.
+Plain LDA usually has problems finding good topics in short documents, because there are only a few co-occurrences of words.
+In this case, it could help to use word embeddings to make use of similar words.
 
-\section{Data Sets and Evaluation Tasks}
+\section{Data Sets}
 \label{sec:data-sets-and-evaluation}
 
-For the evaluation we prefer tasks, which can be performed by both topic models and word embeddings, so we can compare the performance of different joint systems.
+%For the evaluation we prefer tasks, which can be performed by both topic models and word embeddings, so we can compare the performance of different joint systems.
 % https://cloud.google.com/bigquery/public-data/hacker-news#exploring_the_data_using_looker
 
-\subsection{Topic Coherence}
-Standard method to evaluate topic models: measure the likelihood of held-out documents.
-Another approach to evaluate the topic coherence is to compute the Pointwise Mutual Information of the top $k$ words of a topic with co-occurrence counts from Wikipedia.
-\subsection{Microsoft Research Sentence Completion Challenge}
-The task is to find a word out of five which best completes a given fill-in-the-blank sentence.
-\subsection{Semantic Relatedness}
-Given two words, how similar are they?
-\subsection{Concept categorization}
-Cluster words, measure cluster purity
-
-\subsection{Catch out of the list words?}
-Given a word, find the word, which does not fit in the list.  % data set?
-\subsection{WordSim353}
-LDA use topic distributions per word
-\subsection{Large text corpora}
 Both LDA and word embedding require large amount of text data.
 Unfortunately, the offical data set for \emph{word2vec}, a compilation of 100 billion words from Google News, is not publicly available.
-Other large corpora include:
+Thus, we will use other text corpora in this master thesis to train topic models and word embeddings.
 \begin{itemize}
        \item
-              English Wikipedia: Available as XML data
+              \textsc{Wikipedia}:
+              The full text of the English Wikipedia is available as an XML data dump.
+              We will focus on this data set first as it is reasonably sized, well known and covers a wide range of general topics.
        \item
-              1 Billion Word Language Model Benchmark
+              \textsc{CommonCrawl}:
+              This data set includes full web pages and text extractions from 7 years of crawling the web.
+              This data set is much bigger than \textsc{Wikipedia} and will be used, if larger scale experiments are needed.
        \item
-              ukWaC: 2 billion word corpus constructed from web crawling limited to .uk domain
-       \item
-              British National Corpus: 100 million word collection of written and spoken English language from the 1980s and 1990s, requires application
-       \item
-              Hacker News comments corpus:75 million tokens in 66 thousand documents with 110,000 unique tokens
+              \textsc{Hacker News comments}:
+              This corpus contains 75 million tokens in 66 thousand documents with 110,000 unique tokens.
+              It is interesting, because it contains news about a specialialized topic, which are only interesting too a small group of people.
+              The topics in this corpus are expected to be significantly different than standard topics in news data sets.
+       % \item
+       %        \textsc{1 Billion Word Language Model Benchmark}:
+       % \item
+       %        ukWaC: 2 billion word corpus constructed from web crawling limited to .uk domain
+       % \item
+       %        \textsc{British National Corpus}: 100 million word collection of written and spoken English language from the 1980s and 1990s, requires application
 \end{itemize}
 
 
 % \section{Conclusion}
 % \label{sec:conclusion}
+% In this master thesis, we will investigate methods
 
 
 \bibliographystyle{abbrv}
