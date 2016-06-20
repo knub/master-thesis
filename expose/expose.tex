@@ -62,12 +62,12 @@ Word embeddings have their roots in the neural network and deep learning communi
 % These different contextual representations capture different types of semantic similarity; the document-based models capture semantic relatedness (e.g. “boat” – “water”) while the word-based models capture semantic similarity (e.g. “boat” – “ship”). This very basic difference is too often misunderstood.
 Hence, there is relatively little research in combination of these two methods.
 In this master thesis, we aim to explore potential synergies between these technologies.
-In particular, it might be useful to investigate ``whether the the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
+In particular, it might be useful to investigate ``whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
 
 This expos\'e is organized as follows: Section~\ref{sec:related-work} will introduce topic modelling and word embeddings, compare the two approaches and show existing work in combining the two methods.
-Section~\ref{sec:experiments} will present first experiments, which we want to conduct at the start of this master thesis.
+Section~\ref{sec:comparative-evaluation} will present first experiments, which we want to conduct at the start of this master thesis.
 Section~\ref{sec:approach} will show our approach for this master thesis.
-Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modelling and word embeddings.
+% Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modelling and word embeddings.
 
 \section{Related Work}
 \label{sec:related-work}
@@ -334,7 +334,7 @@ where $\tau_t$ is the representation of topic $t$ in the word embedding space an
 The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014}.
 The topic embeddings $\tau$ are updated in each iteration of Gibbs sampling via a MAP estimate based on all other parameters given.
 A similar idea is used by Cheng et al.~\cite{Cheng2015}.
-In fact, the first model they propose is the same as the first model from Nguyen et al~\cite{Nguyen2015}.
+In fact, the first model they propose is the same as the first model from Nguyen et al.~\cite{Nguyen2015}.
 In addition to some other new models, which are similar to Cheng et al.'s work, they also propose new models, which do not assume independence between word and concept embeddings.
 These \emph{generative word-concept skip-gram} models perform best in their word-similarity and paraphrase detection benchmarks.
 
@@ -343,7 +343,7 @@ Liu et al.~\cite{Liu2015} propose Topical Word Embeddings.
 These embeddings make use of word topics inferred via LDA to generate better word vectors.
 They propose three different architectures.
 The first method regards topic as pseude words, which are added to the context of each word.
-The embeddings for a word and its topic is learned independently.
+Thus, an embedding for a word and its topic is learned independently.
 The second method considers each pair of word and topic as a pseudo word.
 The third method works the same way, except that it learns only one word embedding vector per word and one topic embedding vector per topic.
 These two vectors are then combined for the vector of the word-topic pair.
@@ -380,27 +380,6 @@ These paragraph vectors can then be viewed as a summary of the meaning of the en
 %``It remains to be seen whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting av- enue for further work.''
 %there has been a shift from the LDA to the word embeddings
 
-\section{Starting Experiments}
-\label{sec:experiments}
-
-In the master thesis, we try to find ways of combining word embeddings and topic modelling.
-We will start with a set of experiments to explore both base methods.
-\begin{itemize}
-       \item
-              \emph{Visualize similar words in topic space}:
-              We will train word vectors using \emph{word2vec} on the English Wikipedia.
-              Similarly, we will apply LDA on the same corpus to compute topics.
-              Then, using cosine similarity for comparing vectors, we will identify similar words in the word embedding space.
-              Using these data, we can compare how much similar words overlap with topics from the LDA model.
-              % Plot: Similarity threshold vs. "topicness"/topic overlap. The lower the similarity threshold, the higher should be the topic overlap.
-       \item
-              \emph{Visualize words from one topic in embedding space}:
-              Again, we will train \emph{word2vec} and apply LDA to the English Wikipedia.
-              Using dimensionality reduction techniques like t-SNE~\cite{VanDerMaaten2008} or Principal Component Analysis, we can project the high-dimensional embedding space down to a two-dimensional map.
-              It will be interesting to see whether the words from one topic cluster in similar regions in the two-dimensional embedding map.
-\end{itemize}
-These experiments will also help set up the code and infrastructure for further experiments during the master thesis.
-We estimate these experiments to take three weeks.
 
 % \begin{itemize}
        % \item
@@ -432,14 +411,12 @@ We estimate these experiments to take three weeks.
 % Use pretrained word vectors to improve~\cite{Das2015}
 
 
-\section{Master Thesis Approach}
-\label{sec:approach}
-
-\subsection{Comparative Evaluation of Existing Approaches}
+\section{Comparative Evaluation of Existing Approaches}
+\label{sec:comparative-evaluation}
 In the master thesis, we will start with a comparative evaluation of word embeddings and topic models.
 As shown in Table~\ref{table:tm_and_we_combinations} there is no evaluation strategy for the different models.
-We will build a set of evaluation tasks, ranging from low-level, artificial tasks to higher-level use cases.
-Concretely, we plan:
+There is a wide range of tasks, which we can use to evaluate and compare different approaches.
+We build on the following set of evaluation tasks, ranging from low-level, artificial tasks to higher-level use cases:
 \begin{itemize}
        \item
               \emph{Word Similarity}:
@@ -455,7 +432,17 @@ Concretely, we plan:
        \item
               \emph{Topic Coherence}:
               This is the standard evaluation for topic models.
-              We will evaluate with a co-occurrence measure based on Wikipedia.
+              We will build on the work by Röder et al.~\cite{Roder2015}.
+              They evaluate more than 200,000 coherence measures on several data sets, and determine the coherence measure with the highest correlation to human-annotated coherence ratings.
+              We will use their results to decide on a topic coherence measure for our evaluations.
+       \item
+              \emph{Concept Categorization}:
+              This task can be done by both topic models and word embeddings.
+              The task is to sort instances of an abstract entity into the same category.
+              For example, both the terms ``chicken'' and ``dog'' or ``car'' and ``boat'' should be in the same category, as both are ``animals'' and``vehicles'', respectively.
+              We will use two existing data sets for this task.
+              The first one from the ESSLLI 2008 Distributional Semantic Workshop contains 44 words in 6 categories.
+              The second data set from Baroni et al.~\cite{Baroni2010} includes 83 words from 83 words in 10 categories.
        \item
               \emph{Sentence Completion}:
               The Microsoft Research Sentence Completion Challenge~\cite{Zweig2011} consists of 1,040 sentences, in which one word is missing.
@@ -488,45 +475,77 @@ Concretely, we plan:
 % This is out, as LDA is no language modelling technique. Word embeddings will win.
 
 \end{itemize}
-These evaluation task list will be adapted throughout the thesis.
+These evaluation task list will probably be adapted and changed throughout the thesis.
+The list of approaches for evaluation also depends on the availability of the code for the respective systems.
+We estimate this evaluation to take two months.
 
-\subsection{New Approach}
-We plan to experiment with a new combination of word embeddings and topic models.
+\section{Approach}
+\label{sec:approach}
+
+In the master thesis, we try to find ways of combining word embeddings and topic modelling.
+We will start with a set of experiments to explore both base methods and to work out their differences:
+\begin{itemize}
+       \item
+              \emph{Visualize similar words in topic space}:
+              We will train word vectors using \emph{word2vec} on the English Wikipedia.
+              Similarly, we will apply LDA on the same corpus to compute topics.
+              Then, using cosine similarity for comparing vectors, we will identify similar words in the word embedding space.
+              Using these data, we can compare how much similar words overlap with topics from the LDA model.
+              % Plot: Similarity threshold vs. "topicness"/topic overlap. The lower the similarity threshold, the higher should be the topic overlap.
+       \item
+              \emph{Visualize words from one topic in embedding space}:
+              Again, we will train \emph{word2vec} and apply LDA to the English Wikipedia.
+              Using dimensionality reduction techniques like t-SNE~\cite{VanDerMaaten2008} or Principal Component Analysis, we can project the high-dimensional embedding space down to a two-dimensional map.
+              It will be interesting to see whether the words from one topic cluster in similar regions in the two-dimensional embedding map.
+\end{itemize}
+
+These experiments will also help set up the code and infrastructure for further experiments during the master thesis.
+We estimate these experiments to take two weeks.
+
+Next, we plan to experiment with a new combination of word embeddings and topic models.
 We currently believe, that a new LDA-model incorporating the word embeddings in the sampling process is the most promising direction for further research.
 Concretely, we plan to work on short documents.
 Plain LDA usually has problems finding good topics in short documents, because there are only a few co-occurrences of words.
 In this case, it could help to use word embeddings to make use of similar words.
+To achieve this, we plan to have a deeper look at the work of Nguyen et al.~\cite{Nguyen2015}.
+We will reimplement their approach and try to find improvements using our background from the experiments and the comparative evaluation.
+This part of the master thesis will take estimated two months.
 
-\section{Data Sets}
-\label{sec:data-sets-and-evaluation}
+To summarize our approach to the master thesis, we will start with experiments to work out the differences between topic models and word embeddings.
+Then we will work on two work streams in parallel.
+One, we will evaluate existing systems to find out their weaknesses and strengths.
+Second, we will reimplement the paper by Nguyen et al.~\cite{Nguyen2015} and try to improve from there.
 
-%For the evaluation we prefer tasks, which can be performed by both topic models and word embeddings, so we can compare the performance of different joint systems.
-% https://cloud.google.com/bigquery/public-data/hacker-news#exploring_the_data_using_looker
+% \section{Data Sets}
+% \label{sec:data-sets-and-evaluation}
 
-Both LDA and word embedding require large amount of text data.
-Unfortunately, the offical data set for \emph{word2vec}, a compilation of 100 billion words from Google News, is not publicly available.
-Thus, we will use other text corpora in this master thesis to train topic models and word embeddings.
-\begin{itemize}
-       \item
-              \textsc{Wikipedia}:
-              The full text of the English Wikipedia is available as an XML data dump.
-              We will focus on this data set first as it is reasonably sized, well known and covers a wide range of general topics.
-       \item
-              \textsc{CommonCrawl}:
-              This data set includes full web pages and text extractions from 7 years of crawling the web.
-              This data set is much bigger than \textsc{Wikipedia} and will be used, if larger scale experiments are needed.
-       \item
-              \textsc{Hacker News comments}:
-              This corpus contains 75 million tokens in 66 thousand documents with 110,000 unique tokens.
-              It is interesting, because it contains news about a specialialized topic, which are only interesting too a small group of people.
-              The topics in this corpus are expected to be significantly different than standard topics in news data sets.
-       % \item
-       %        \textsc{1 Billion Word Language Model Benchmark}:
-       % \item
-       %        ukWaC: 2 billion word corpus constructed from web crawling limited to .uk domain
-       % \item
-       %        \textsc{British National Corpus}: 100 million word collection of written and spoken English language from the 1980s and 1990s, requires application
-\end{itemize}
+% %For the evaluation we prefer tasks, which can be performed by both topic models and word embeddings, so we can compare the performance of different joint systems.
+% % https://cloud.google.com/bigquery/public-data/hacker-news#exploring_the_data_using_looker
+
+% Both LDA and word embedding require large amount of text data.
+% Unfortunately, the offical data set for \emph{word2vec}, a compilation of 100 billion words from Google News, is not publicly available.
+% Thus, we will use other text corpora in this master thesis to train topic models and word embeddings.
+% \begin{itemize}
+%        \item
+%               \textsc{Wikipedia}:
+%               The full text of the English Wikipedia is available as an XML data dump.
+%               We will focus on this data set first as it is reasonably sized, well known and covers a wide range of general topics.
+%        \item
+%               \textsc{CommonCrawl}:
+%               This data set includes full web pages and text extractions from 7 years of crawling the web.
+%               This data set is much bigger than \textsc{Wikipedia} and will be used, if larger scale experiments are needed.
+%        \item
+%               \textsc{Hacker News comments}:
+%               This corpus contains 75 million tokens in 66 thousand documents with 110,000 unique tokens.
+%               It is interesting, because it contains news about a specialialized topic, which are only interesting too a small group of people.
+%               The topics in this corpus are expected to be significantly different than standard topics in news data sets.
+%        % \item
+%        %        \textsc{1 Billion Word Language Model Benchmark}:
+%        % \item
+%        %        ukWaC: 2 billion word corpus constructed from web crawling limited to .uk domain
+%        % \item
+%        %        \textsc{British National Corpus}: 100 million word collection of written and spoken English language from the 1980s and 1990s, requires application
+% \end{itemize}
 
 
 % \section{Conclusion}
