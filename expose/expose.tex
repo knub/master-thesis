@@ -13,7 +13,7 @@
 \begin{document}
 %\doi{}
 %\isbn{123-4567-24-567/08/06}
-\title{Topic Models and Word Embeddings}
+\title{Improving Topic Models with Word Embeddings and vice versa}
 \subtitle{Master Thesis Expos\'e}
 
 \numberofauthors{1}
@@ -40,10 +40,10 @@ A popular concept to qualify the meaning of a word is to look at the contexts, i
 A famous quote by Firth says: ``You shall know a word by the company it keeps''~\cite{Firth1957}.
 This assumption is also known as the distributional hypothesis.
 
-Two existing approaches in this area are topic modelling and word embeddings.
-Topic modelling assumes, that an author has certain topics in mind when writing a document, which are chosen beforehand.
+Two existing approaches in this area are topic modeling and word embeddings.
+Topic modeling assumes, that an author has certain topics in mind when writing a document, which are chosen beforehand.
 For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then picks the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
-Topic modelling techniques, with Latent Dirichlet Allocation being the most popular one, try to recover the hidden topics in large corpora, i.e.\ find out that ``soccer'' and ``ball'' come from the same topic.
+Topic modeling techniques, with Latent Dirichlet Allocation being the most popular one, try to recover the hidden topics in large corpora, i.e.\ find out that ``soccer'' and ``ball'' come from the same topic.
 As topic models are probabilistic models and hence provide probability distributions as the result, the topics can be easily interpreted by humans.
 
 In word embedding, each word is assigned a vector in a high-dimensional vector space.
@@ -57,23 +57,23 @@ Second, the word vectors exhibit interesting linear relationships.
 For example, when calculating the vector $vector("King") - vector("Man") + vector("Woman")$ and looking for the closest word at the vector result, the result is the word ``queen''~\cite{Mikolov2013b}.
 
 The two approaches have different origins.
-Word embeddings have their roots in the neural network and deep learning community, while topic modelling stems from information retrieval and Bayesian statistics.
+Word embeddings have their roots in the neural network and deep learning community, while topic modeling stems from information retrieval and Bayesian statistics.
 % https://www.gavagai.se/blog/2015/09/30/a-brief-history-of-word-embeddings/ THIS BLOG POST IS VERY ENLIGHTENING, GIVES A GOOD OVERVIEW
 % These different contextual representations capture different types of semantic similarity; the document-based models capture semantic relatedness (e.g. “boat” – “water”) while the word-based models capture semantic similarity (e.g. “boat” – “ship”). This very basic difference is too often misunderstood.
 Hence, there is relatively little research in combination of these two methods.
 In this master thesis, we aim to explore potential synergies between these technologies.
 In particular, it might be useful to investigate ``whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
 
-This expos\'e is organized as follows: Section~\ref{sec:related-work} will introduce topic modelling and word embeddings, compare the two approaches and show existing work in combining the two methods.
+This expos\'e is organized as follows: Section~\ref{sec:related-work} will introduce topic modeling and word embeddings, compare the two approaches and show existing work in combining the two methods.
 Section~\ref{sec:comparative-evaluation} will present first experiments, which we want to conduct at the start of this master thesis.
 Section~\ref{sec:approach} will show our approach for this master thesis.
 % Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modelling and word embeddings.
 
 \section{Related Work}
 \label{sec:related-work}
-\subsection{Topic Modelling}
+\subsection{Topic Modeling}
 
-Many methods for modelling natural language text have been proposed.
+Many methods for modeling natural language text have been proposed.
 An early popular method was tf-idf~\cite{SparckJones1972} scheme, which reduced each document in a corpus to a vector of term frequencies normalized by inverse document frequencies.
 Later, Latent Semantic Analysis (LSA)~\cite{Deerwester1990} was proposed to reduce the large matrix to a smaller subspace using singular value decomposition.
 While these approaches have their origins in linear algebra, topic models have been developed from a probabilistic view to allow better interpretation.
@@ -88,12 +88,12 @@ In this model, a topic is a fixed probability distribution over the vocabulary.
 However, only one topic is allowed per document, which limits its predictive power.
 
 A more sophisticated topic model is the probabilistic latent semantic analysis (pLSA), which allows multiple topics per document.
-The model is fitted with an Expection-Maximization algorithm.
+The model is fitted with an Expectation-Maximization algorithm.
 However, pLSA does not provide a full generative model applicable to unseen documents.
 Also, as the number of parameters grows linearly with the number of training documents, it tends to overfit~\cite{Blei2003}.
 
 \subsubsection{Latent Dirichlet Allocation (LDA)}
-LDA was proposed by Blei et al.~\cite{Blei2003} for modelling text corpora and other collections of discrete data.
+LDA was proposed by Blei et al.~\cite{Blei2003} for modeling text corpora and other collections of discrete data.
 In an unsupervised fashion, it can automatically detect similarities between words and group them in one topic.
 The number $K$ of topics is constant and must be chosen beforehand.
 % TODO thesis: Add nice example document with figure, e.g. k=3 and some topics
@@ -150,7 +150,7 @@ Other use cases include population genetics~\cite{Pritchard2000} and computer vi
 
 \paragraph{Implementations}
 There exist implementations of LDA in Java, C/C++, Python and Matlab.
-In this thesis, we will use two particulary fast and robust implementations:
+In this thesis, we will use two particularly fast and robust implementations:
 \begin{itemize}
        \item Mallet by McCallum~\cite{McCallum2002}, Java
        \item gensim by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, Python
@@ -160,7 +160,7 @@ In this thesis, we will use two particulary fast and robust implementations:
 
 \subsection{Word Embeddings}
 
-In traditional language modelling, words are treated as atomic units by a discrete one-hot encoding.
+In traditional language modeling, words are treated as atomic units by a discrete one-hot encoding.
 Given a vocabulary $V$, each word $w$ is assigned a vector of length $|V|$ with all values set to zero except one to uniquely identify the word.
 A typical architecture involves n-grams, which try to predict the next word based on previous words.
 This approach has two disadvantages.
@@ -168,7 +168,7 @@ First, it limits the context to an arbitrary range.
 When n is too small, only the immediate preceding words are taken into account, failing to capture long-range word dependencies.
 When n is too large, the \emph{curse of dimensionality} becomes a problem: when representing a joint sequence of $n$ words, there are $|V|^n$ potential combinations.
 As most n-grams are never observed, this leads to very sparse vectors.
-Second, this type of language modelling does not capture similarity between words and also does not capture information about the relationship between words.
+Second, this type of language modeling does not capture similarity between words and also does not capture information about the relationship between words.
 When using the one-hot encoding, both the words ``house'' and ``houses'' get a unique vector with no indication of similarity.
 If one would employ cosine distance or euclidean distance to assess similarity in the vector space, all words would be equally similar.
 
@@ -205,7 +205,7 @@ It was shown that
        $vector("King") - vector("Man") + vector("Woman")$
 \end{center}
 is closest to the vector representation of the word ``queen''~\cite{Mikolov2013b}.
-Interestingly, this relationship holds for both semantic and syntactic similary~\cite{Mikolov2013a}, such as
+Interestingly, this relationship holds for both semantic and syntactic similarly~\cite{Mikolov2013a}, such as
 \begin{center}
        $vector("houses") - vector("house") + vector("car")$
 \end{center}
@@ -214,7 +214,7 @@ is closest to $vector("cars")$.
 
 Word embeddings have been used in many natural language and machine learning tasks.
 They are a natural input to many machine learning algorithms, as they provide a better encoding than the traditional one-hot encoding.
-Concrete use cases involve statistical language modelling, machine translation~\cite{Zou2013}, sentiment analysis~\cite{Maas2011} and paraphrase detection.
+Concrete use cases involve statistical language modeling, machine translation~\cite{Zou2013}, sentiment analysis~\cite{Maas2011} and paraphrase detection.
 
 \paragraph{Implementations}
 The original implementation of the approach by Mikolov et al.~was open sourced under the name \emph{word2vec}.
@@ -244,7 +244,7 @@ Also, it tends to yield sparse vectors as LDA tries to keep the number of topics
 Baroni et al.~\cite{Baroni2014} also introduce the classification of count-based methods and prediction-based methods in distributional semantic models.
 Prediction-based methods try to set word vectors so that they are able to predict the context words.
 Count-based methods are based on counting the occurrence of words and co-occurrence with other words.
-Popular count-based methods typically use pointwise-mutual information and matrix transformation on the co-occurrence matrix.
+Popular count-based methods typically use pointwise mutual information (PMI) and matrix transformation on the co-occurrence matrix.
 While word embeddings are clearly a prediction-based method, LDA constitutes a hybrid type in this classification.
 LDA is based on word counts and co-occurrences and treats words as discrete observations, however, the model parameters are chosen to maximize its predictive power.
 
@@ -263,7 +263,7 @@ The method by Mikolov has been successfully trained on a corpus with about 100 b
 % distributional semantic models (DSMs)
 
 \subsection{Existing combinations}
-The existing related work, which combines topic modelling approaches with word embeddings, can be roughly divided in two directions.
+The existing related work, which combines topic modeling approaches with word embeddings, can be roughly divided in two directions.
 One type of model tries to improve topic models by incorporating word vectors, while the other aims to improve word embeddings with topic models.
 We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinations}\footnote{ToCoh: Topic Coherence, WordSim: Word Similarity, DocClass: Document Classification, DocClust: Document Clustering, Analogy: Word Analogy Reasoning, SentComp: Sentence Completion}.
 \begin{table*}
@@ -312,7 +312,7 @@ We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinat
 % \end{table*}
 
 The work by Das et al.~\cite{Das2015} belongs to the first group. They propose a method named Gaussian LDA.
-In this approach, a topic is no longer a distribution over words in the vocabulary, but a gaussian distribution in the word embedding space.
+In this approach, a topic is no longer a distribution over words in the vocabulary, but a Gaussian distribution in the word embedding space.
 Also, words are no longer atomic units, but are represented by their corresponding pre-trained word embeddings.
 Each topic is associated with a mean $\mu_k$ and a covariance matrix $\Sigma_k$.
 The prior distribution over the means is a normal distribution, and the prior distribution over the covariances is an inverse Wishart distribution.
@@ -342,7 +342,7 @@ We now focus on methods for better word embeddings.
 Liu et al.~\cite{Liu2015} propose Topical Word Embeddings.
 These embeddings make use of word topics inferred via LDA to generate better word vectors.
 They propose three different architectures.
-The first method regards topic as pseude words, which are added to the context of each word.
+The first method regards topic as pseudo words, which are added to the context of each word.
 Thus, an embedding for a word and its topic is learned independently.
 The second method considers each pair of word and topic as a pseudo word.
 The third method works the same way, except that it learns only one word embedding vector per word and one topic embedding vector per topic.
@@ -482,7 +482,7 @@ We estimate this evaluation to take two months.
 \section{Approach}
 \label{sec:approach}
 
-In the master thesis, we try to find ways of combining word embeddings and topic modelling.
+In the master thesis, we try to find ways of combining word embeddings and topic modeling.
 We will start with a set of experiments to explore both base methods and to work out their differences:
 \begin{itemize}
        \item
