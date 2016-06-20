@@ -23,7 +23,7 @@ error:
 
 
 bibtex:
-	@cp $(FILE).bib .output/ && cd .output && bibtex $(FILE) && cd ..
+	@cp library.bib .output/ && cd .output && bibtex $(FILE) && cd ..
 
 clean:
 	rm .output/*.aux .output/*.log

@@ -216,6 +216,16 @@ Word embeddings have been used in many natural language and machine learning tas
 They are a natural input to many machine learning algorithms, as they provide a better encoding than the traditional one-hot encoding.
 Concrete use cases involve statistical language modeling, machine translation~\cite{Zou2013}, sentiment analysis~\cite{Maas2011} and paraphrase detection.
 
+A word vector can be seen as a summary of the word with all its meanings.
+Many applications require not only word vectors, but also summaries of longer chunks of text.
+Therefore, it is necessary to embed sentences or documents in the word embedding space.
+For this problem, Le and Mikolov~\cite{Le2014} proposed paragraph vectors.
+In their work, paragraph can mean an arbitrary long text, ranging from sentences to entire documents.
+Paragraph vectors are trained by adding an artificial word to each context, which represents the current paragraph.
+These paragraph vectors can then be viewed as a summary of the meaning of the entire paragraph, which is useful for further downstream applications.
+%for sentiment analysis by training logistic regression classifier on the vectors.
+% http://sentic.net/sentire2011ott.pdf
+
 \paragraph{Implementations}
 The original implementation of the approach by Mikolov et al.~was open sourced under the name \emph{word2vec}.
 It is implemented in C and can be used as a command line tool.
@@ -364,15 +374,6 @@ However, the method is not evaluated extensively and it is unclear, whether this
 % or CBOW models, just using unlimited context window (within
 % the sentence boundaries)
 
-A word vector can be seen as a summary of the word with all its meanings.
-Many applications require not only word vectors, but also summaries of longer chunks of text.
-Therefore, it is necessary to embed sentences or documents in the word embedding space.
-For this problem, Le and Mikolov~\cite{Le2014} proposed paragraph vectors.
-In their work, paragraph can mean an arbitrary long text, ranging from sentences to entire documents.
-Paragraph vectors are trained by adding an artificial word to each context, which represents the current paragraph.
-These paragraph vectors can then be viewed as a summary of the meaning of the entire paragraph, which is useful for further downstream applications.
-%for sentiment analysis by training logistic regression classifier on the vectors.
-% http://sentic.net/sentire2011ott.pdf
 
 %one is supervised, the other one is unsupervised
 
@@ -554,6 +555,6 @@ Second, we will reimplement the paper by Nguyen et al.~\cite{Nguyen2015} and try
 
 
 \bibliographystyle{abbrv}
-\bibliography{expose}
+\bibliography{library}
 \end{document}
 
