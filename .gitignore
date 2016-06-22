@@ -1,4 +1,5 @@
 *.pyc
 papers/
+resources/
 data/
 */.ipynb_checkpoints/*
