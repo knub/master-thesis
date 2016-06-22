@@ -1,7 +1,9 @@
 import logging, gensim, bz2
+import mkl
 from knub.thesis.util.memory import limit_memory
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+mkl.set_num_threads(8)
 
 def main():
     logging.info("Starting Wikipedia LDA")
