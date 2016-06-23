@@ -1,0 +1,514 @@
+\documentclass[
+        a4paper,
+        titlepage,
+        twoside,
+        parskip
+        ]{scrbook}
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{15pt}
+
+\usepackage[table,usenames]{xcolor}
+\definecolor{darkred}{rgb}{0.5,0,0}
+\definecolor{darkgreen}{rgb}{0,0.4,0}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+% \usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\specialcell}[2][c]{%
+         \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\usepackage{textcomp,amsmath}     % Mathezeichen etc.
+\usepackage{graphicx}             % Graphiken einbinden
+\usepackage{makecell}
+\graphicspath{{./figures/}}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage{rotating}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{threeparttable}
+
+% bibtex
+\usepackage{url}
+\usepackage[backend=bibtex, style=numeric]{biblatex}
+
+\bibliography{library}
+
+\usepackage{paralist}
+\usepackage{tabularx}
+\usepackage{tabulary}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage[toc,page]{appendix}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  citecolor=darkgreen,
+  linkcolor=darkred,
+  urlcolor=darkblue,
+  filecolor=red,
+  pdftitle={TODO},
+  pdfauthor={Stefan Bunk},
+  pdfpagemode={UseNone}
+}
+\usepackage{cleveref}
+\usepackage{varwidth}
+\DeclareCaptionFormat{centerformat}{%
+  % #1: label (e.g. "Table 1")
+  % #2: separator (e.g. ": ")
+  % #3: caption text
+  \begin{varwidth}{\linewidth}%
+    \centering
+    #1#2#3%
+  \end{varwidth}%
+}
+\captionsetup{format=centerformat}% global activation
+
+\renewcommand\theadfont{\bfseries}
+\newcommand*{\tsubhead}[1]{\itshape #1}
+
+\usepackage{amsthm}
+\newtheorem{keyexmp}{Keyword Example}[section]
+
+\newtheoremstyle{break}%
+{}{}%
+{\itshape}{}%
+{\bfseries}{}% % Note that final punctuation is omitted.
+{\newline}{}
+\theoremstyle{break}
+\newtheorem{exmp}{Example}[section]
+\crefname{exmp}{Example}{Examples}
+
+%\newenvironment{fexmp}
+%  {\begin{mdframed}\begin{exmp}}
+%  {\end{exmp}\end{mdframed}}
+
+% Make a | to a | surrounded by spaces
+\newcommand{\spacedpipe}{\ |\ }
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\titlehead{
+\includegraphics{figures/hpi_logo_cmyk_wb_sl2}
+} \subject{Masterarbeit}
+\title{English Title
+\\ \bigskip 
+\large{German Title}}
+\author{Stefan Bunk\\{\small{\url{stefan.bunk@student.hpi.uni-potsdam.de}}}}
+\date{Eingereicht am 23.12.2016}
+\publishers{
+Fachgebiet Informationssysteme \\ 
+Betreuung: Dr. Ralf Krestel}
+
+\pagestyle{headings}
+
+\begin{document}
+\maketitle
+\cleardoublepage
+
+\include{abstract}
+\tableofcontents
+
+\chapter{Introduction}
+A core task in natural language processing (NLP) is to understand the meaning of words.
+Many downstream NLP tasks benefit from this, for example, text categorization, part-of-speech tagging, and machine translation.
+A popular concept to qualify the meaning of a word is to look at the contexts in which the word appears.
+A famous quote by Firth says: ``You shall know a word by the company it keeps''~\cite{Firth1957}.
+This assumption is also known as the distributional hypothesis.
+
+Two existing approaches in this area are topic modeling and word embeddings.
+Topic modeling assumes that an author has certain topics in mind when writing a document, which are chosen beforehand.
+For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then picks the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
+Topic modeling techniques, with latent Dirichlet allocation being the most popular one, try to recover the hidden topics in large corpora, i.e.\ find out that ``soccer'' and ``ball'' come from the same topic.
+As topic models are probabilistic models and hence provide probability distributions as the result, the topics can be easily interpreted by humans.
+
+With word embeddings each word is assigned a vector in a high-dimensional vector space.
+These vectors are automatically learned using neural networks.
+During the supervised training each word must try to predict its surrounding words.
+This way, the context of a word is encoded in the vector representation of a word.
+Using a clever network architecture, these vectors exhibit interesting properties.
+First, similar words tend to be in similar positions in the vector space.
+For example, when looking for the most similar words for ``France'' using cosine distance, the model outputs ``Spain'', ``Belgium'', ``Netherlands'' and ``Italy''.
+Second, the word vectors exhibit interesting linear relationships.
+For example, when calculating the vector $vector("King") - vector("Man") + vector("Woman")$ and looking for the closest word at the vector result, the result is the word ``queen''~\cite{Mikolov2013b}.
+
+The two approaches have different origins.
+Word embeddings have their roots in the neural network and deep learning community, while topic modeling stems and Bayesian statistics.
+% https://www.gavagai.se/blog/2015/09/30/a-brief-history-of-word-embeddings/ THIS BLOG POST IS VERY ENLIGHTENING, GIVES A GOOD OVERVIEW
+% These different contextual representations capture different types of semantic similarity; the document-based models capture semantic relatedness (e.g. “boat” – “water”) while the word-based models capture semantic similarity (e.g. “boat” – “ship”). This very basic difference is too often misunderstood.
+Hence, there is relatively little research in combination of these two methods.
+In this master thesis, we aim to explore potential synergies between these technologies.
+In particular, it might be useful to investigate ``whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
+
+This master thesis is organized as follows: Chapter~\ref{sec:related-work} will introduce topic modeling and word embeddings, compare the two approaches and show existing work in combining the two methods.
+Chapter~\ref{sec:comparative-evaluation} will present first experiments, which we want to conduct at the start of this master thesis.
+Chapter~\ref{sec:approach} will show our approach for this master thesis.
+% Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modelling and word embeddings.
+
+\chapter{Related work}
+\label{chapter:related-work}
+\section{Topic modeling}
+
+Many methods for modeling natural language text have been proposed.
+An early popular method was the tf-idf~\cite{SparckJones1972} scheme, which reduced each document in a corpus to a vector of term frequencies normalized by inverse document frequencies.
+Later, latent semantic analysis (LSA)~\cite{Deerwester1990} was proposed to reduce the large matrix to a smaller subspace using singular value decomposition.
+While these approaches have their origins in linear algebra, topic models have been developed from a probabilistic view to allow better interpretation.
+Topic models are generative probabilistic models of a document collection, which assume hidden topics have guided the generation of the text.
+In this way of thinking, an author picks certain topics to write about, and then picks words associated with these topics for a specific document.
+The goal is then to uncover the unseen, so called ``latent'', topics from a text corpus.
+All of these approaches have in common that they assume a bag-of-words representation of documents.
+
+\subsection{Earlier approaches}
+A basic generative topic model is the mixture of unigrams model~\cite{Nigam2000}.
+In this model, a topic is a fixed probability distribution over the vocabulary.
+However, only one topic is allowed per document, which limits its predictive power.
+
+A more sophisticated topic model is probabilistic latent semantic analysis (pLSA), which allows multiple topics per document.
+The model is fitted with an expectation-maximization algorithm.
+However, pLSA does not provide a full generative model applicable to unseen documents.
+Also, as the number of parameters grows linearly with the number of training documents, it tends to overfit~\cite{Blei2003}.
+
+\subsection{Latent Dirichlet allocation (LDA)}
+LDA was proposed by Blei et al.~\cite{Blei2003} for modeling text corpora and other collections of discrete data.
+In an unsupervised fashion, it can automatically detect similarities between words and group them in one topic.
+The number $K$ of topics is constant and must be chosen beforehand.
+% TODO thesis: Add nice example document with figure, e.g. k=3 and some topics
+
+LDA defines a topic as a distribution over a fixed vocabulary.
+Different topics assign different probabilities to the same word, for example, the word ``soccer'' would have a much higher probability in a \emph{sports} topic than in a \emph{politics} topics.
+The opposite would hold for the word ``coalition''.
+Note that a topic is only a distribution over words, i.e.\ LDA does not generate a name or a summary for a topic.
+
+A document is assumed to consist of one or several topics with a certain, fixed distribution.
+A document could be $20~\%$ about \emph{sports} and $80~\%$ percents about \emph{politics}, or $30~\%$ about \emph{climate}, $25~\%$ about \emph{cars} and $45~\%$ about \emph{politics}.
+In general, LDA aims to generate sparse distributions for both cases, i.e.\ a topic should have only a few words (relative to the vocabulary of the entire corpus) with high probability and a document should have only a few topics.
+This is governed by two scalar hyperparameters $\alpha$ and $\beta$, which influence two symmetrical prior Dirichlet distributions.
+
+With these two hyperparameters, the generative document creation process of LDA can be summarized as follows:
+\begin{enumerate}
+       \item Fix number of topics $K$ in the document collection
+       \item Choose word distributions $\phi_j \sim Dirichlet(\beta)$ for each topic $j \in \{1~..~K\}$
+       \item Now, for each document $d$:
+       \begin{enumerate}
+              \item Choose topic distribution $\theta_d \sim Dirichlet(\alpha)$
+              \item For each position $i$ in the document
+              \begin{enumerate}
+                     \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
+                     \item Choose word $w \sim Multinomial(\phi_{z_{d,i}})$ for current word
+              \end{enumerate}
+       \end{enumerate}
+\end{enumerate}
+This process is also illustrated in the probabilistic graphical model in plate notation in Figure \ref{fig:lda}.
+This model can also be seen as a soft-classification of documents: instead of assuming exactly one topic per document, each word in a document can potentially come from a different topic.
+
+\begin{figure}
+       \centering
+       \includegraphics{figures/lda.pdf}
+       \caption{Graphical model for latent Dirichlet allocation with $K$ topics, $M$ documents and $N$ words in a document.}
+       \label{fig:lda}
+\end{figure}
+
+In reality, we only observe the words in the documents, and need to reverse engineer the hidden, ``latent'' parameters of the model, namely the word distribution per topic $\phi$, the topic distribution per document $\theta$ and the word-topic assignments $z$.
+In this process, called \emph{inference}, we try to find the most probable parameter assignments, which could have generated our document collection.
+Computationally, this is equivalent to finding the posterior distribution of the parameters given the observed words.
+Blei et al.~\cite{Blei2003} propose an algorithm based on variational approximation, however Griffiths and Steyvers~\cite{Griffiths2004} proposed an algorithm based on Gibbs sampling. %, which is more popular nowadays. -- reference missing
+% expand here: limiting distribution, sampling formula etc.
+
+The output of running LDA on a corpus is three-fold:
+\begin{itemize}
+       \item Topics as set of similar words, e.g.\ the terms ``soccer'', ``ball'', ``league'' could form a topic named \emph{sports}.
+       \item Topic distribution of a single word, e.g.\ the term ``jaguar'' occurs 80~\% in the \emph{cars} topic and 20~\% in the \emph{animals} topic
+       \item Topic distribution inside a specific document or inside the entire corpus
+\end{itemize}
+
+LDA has been applied to many domains, namely document modeling, text classification, collaborative filtering~\cite{Blei2003} and document summarization~\cite{Wang2009}.
+Other use cases include population genetics~\cite{Pritchard2000} and computer vision~\cite{LiFei-Fei2005}.
+
+\paragraph{Implementations}
+There exist implementations of LDA in Java, C/C++, Python and Matlab.
+In this thesis, we will use two particularly fast and robust implementations:
+\begin{itemize}
+       \item Mallet by McCallum~\cite{McCallum2002}, Java
+       \item gensim by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, Python
+\end{itemize}
+
+% LDA has problems on small texts/documents
+
+\section{Word embeddings}
+
+In traditional language modeling, words are treated as atomic units by a discrete one-hot encoding.
+Given a vocabulary $V$, each word $w$ is assigned a vector of length $|V|$ with all values set to zero except one to uniquely identify the word.
+A typical architecture involves $n$-grams, which try to predict the next word based on previous words.
+This approach has two disadvantages.
+First, it limits the context to an arbitrary range.
+When $n$ is too small, only the immediate preceding words are taken into account, failing to capture long-range word dependencies.
+When $n$ is too large, the \emph{curse of dimensionality} becomes a problem: when representing a joint sequence of $n$ words, there are $|V|^n$ potential combinations.
+As most $n$-grams are never observed, this leads to very sparse vectors.
+Second, this type of language modeling does not capture similarity between words and also does not capture information about the relationship between words.
+When using the one-hot encoding, both the words ``house'' and ``houses'' get a unique vector with no indication of similarity.
+If one would employ cosine distance or euclidean distance to assess similarity in the vector space, all words would be equally similar.
+
+In contrast to this, the idea of \emph{distributed representations} is to not represent objects by discrete counts but rather by continuous points in a vector space $\mathbb{R}^m$, where $m$ is much smaller than $|V|$.
+The idea of distributed representations has a long history, dating back to the mid-eighties with work from Hinton and Rumelhart~\cite{Hinton1986,Rumelhart1988}.
+Intuitively, instead of using one dimension for each atomic unit, distributed representations assign meanings to the dimensions and then recombine these meanings for a specific object.
+%For example to represent , one dimension could indicate the size of an object, another one the color.
+%With just three dimensions, one could represent small 
+%If one dimension indicates how green an object is and another dimension indicates whether an object is a flower, then one could represent a green flower with high values in both dimensions instead of requiring one dimension for red, blue, and green flowers.
+Recently, the term \emph{word embeddings} was also used to describe the approach of embedding words in a vector space.
+We will use the terms \emph{distributed representation}, \emph{word vectors} and \emph{word embeddings} interchangeably in this document.
+
+The use of distributed representations for words was proposed by Bengio et al.~\cite{Bengio2003}.
+In their work, they train a neural network to predict a word given the preceding context.
+This prediction model is again based on the distributional hypothesis: words are similar, if they occur in the same contexts.
+With this architecture, ``the system naturally learns to assign similar vectors to similar words''~\cite{Baroni2014}.
+%https://en.wikipedia.org/wiki/Distributional_semantics#Distributional_Hypothesis
+
+In a series of papers, Mikolov et al.~\cite{Mikolov2013,Mikolov2013a,Mikolov2013b} provided a better neural architecture to train the word vectors.
+Contrary to the trend of ever deeper models, a shallower model with no hidden layer was more successful in building better word vectors, because it can be trained on more data.
+As Mikolov et al.~\cite{Mikolov2013a} state, ``it might not be able to represent data as precisely as neural networks, but can possibly be trained on much more data efficiently.''
+Due to the state-of-the-art performance and the free open source implementation \emph{word2vec}\footnote{\url{https://code.google.com/archive/p/word2vec/}} this method gained popularity and will also be used in this thesis.
+
+Mikolov et al.\ presented two models.
+The continuous bag-of-words model (CBOW) works by predicting the center word in a symmetric context window.
+The continuous skip-gram model works the other way round: given a word, it tries to predict the context.
+We focus on the skip-gram model in the following, as it had the better evaluation results in the original paper.
+In the skip-gram model, surrounding words have to be encoded in the word vector for each word or as Mikolov et al.~\cite{Mikolov2013} state ``vectors can be seen as representing the distribution of the context in which a word appears''.
+% TODO: Skip-Grams with Negative Sampling
+
+A nice property of the trained word vectors is, that linear relationships between words are kept in the vector space.
+It was shown that
+\begin{center}
+       $vector("King") - vector("Man") + vector("Woman")$
+\end{center}
+is closest to the vector representation of the word ``queen''~\cite{Mikolov2013b}.
+Interestingly, this relationship holds for both semantic and syntactic similarly~\cite{Mikolov2013a}, such as
+\begin{center}
+       $vector("houses") - vector("house") + vector("car")$
+\end{center}
+is closest to $vector("cars")$.
+% Quote from webpage: This seems to be a great strength of neural networks: they learn better ways to represent data, automatically. Representing data well, in turn, seems to be essential to success at many machine learning problems. Word embeddings are just a particularly striking example of learning a representation.
+
+Word embeddings have been used in many natural language and machine learning tasks.
+They are a natural input to many machine learning algorithms, as they provide a better encoding than the traditional one-hot encoding.
+Concrete use cases involve statistical language modeling, machine translation~\cite{Zou2013}, sentiment analysis~\cite{Maas2011} and paraphrase detection.
+
+A word vector can be seen as a summary of the word with all its meanings.
+Many applications require not only word vectors, but also summaries of longer chunks of text.
+Therefore, it is necessary to embed sentences or documents in the word embedding space.
+For this problem, Le and Mikolov~\cite{Le2014} proposed paragraph vectors.
+In their work, paragraph can mean an arbitrary long text, ranging from sentences to entire documents.
+Paragraph vectors are trained by adding an artificial word to each context, which represents the current paragraph.
+These paragraph vectors can then be viewed as a summary of the meaning of the entire paragraph, which is useful for further downstream applications.
+%for sentiment analysis by training logistic regression classifier on the vectors.
+% http://sentic.net/sentire2011ott.pdf
+
+\paragraph{Implementations}
+The original implementation of the approach by Mikolov et al.~was open sourced under the name \emph{word2vec}.
+It is implemented in C and can be used as a command line tool.
+There also exists another implementation in the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}.
+These two implementations can run multi-threaded in the CPU.
+There also exist some GPU implementations, however, these are not as stable.
+Therefore, we will concentrate on the CPU implementations first.
+
+\section{Comparison between LDA and word embeddings}
+
+% At their foundations, LDA and word embeddings come from different backgrounds.
+% LDA stems from Bayesian statistics, while word embeddings were first developed in the neural-network and deep learning community.
+% Baroni et al.~\cite{Baroni2014} show, that both methods fundamentally are based on the assumption that ``semantically similar words tend to have similar contextual distributions''.
+% However, the methods use this base hypothesis to come to different conclusions.
+% LDA works on the bag-of-words assumption, i.e.\ it treats a document as a whole and does not use the order of the words.
+% When making a prediction for the next word, LDA makes a global prediction based on the topic distribution in the current document.
+% Word embeddings, on the other hand, generate the next word based on the context of the word and are per se local.
+%%%% Edited out by Ralf, because of repetition. Probably try to incorporate the important parts from here (local-global, distributional hypothesis) in the earlier chapters.
+
+Both LDA and word embeddings can provide distributed representations for words.
+In LDA, this works by taking the topic distribution for a word as the embedding in the topic space.
+However, this representation is not good at keeping linear relationships~\cite{Mikolov2013b,Mikolov2013a}.
+Also, it tends to yield sparse vectors as LDA tries to keep the number of topics per word small.
+
+Baroni et al.~\cite{Baroni2014} also introduce the classification of count-based methods and prediction-based methods in distributional semantic models.
+Prediction-based methods try to set word vectors so that they are able to predict the context words.
+Count-based methods are based on counting the occurrence of words and co-occurrence with other words.
+Popular count-based methods typically use pointwise mutual information (PMI) and matrix transformation on the co-occurrence matrix.
+While word embeddings are clearly a prediction-based method, LDA constitutes a hybrid type in this classification.
+LDA is based on word counts and co-occurrences and treats words as discrete observations, however, the model parameters are chosen to maximize its predictive power.
+
+Another aspect is the interpretability of the model.
+LDA forces the elements in a vector to sum up to 1 and all values must be non-negative.
+Thus, the embedding of a word in the topic space is easily interpretable by humans.
+With a word vector of $[0~0~0.2~0.8]$ and given the meanings of a topic, a word can be interpreted as being used $20~\%$ in \emph{sports} and $80~\%$ in \emph{politics}.
+When working with word embeddings, a vector like $[{-2.4}~0.3~1.3~{-0.1}]$ is not interpretable.
+The arbitrary dimensions and values of a word embedding vector cannot be understood by humans.
+
+Regarding the performance, LDA operates much slower than word embeddings.
+LDA becomes very expensive on large data sets, because it needs to repeatedly iterate over the entire corpus.
+The method by Mikolov has been successfully trained on a corpus with about 100 billion words.
+
+% TODO: both somewhat use vector space model TODO: add seminal reference
+% distributional semantic models (DSMs)
+
+\section{Existing combinations}
+The existing related work, which combines topic modeling approaches with word embeddings, can be roughly divided in two directions.
+One type of model tries to improve topic models by incorporating word vectors, while the other aims to improve word embeddings with topic models.
+We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinations}.\footnote{ToCoh: Topic Coherence; WordSim: Word Similarity; DocClass: Document Classification; DocClust: Document Clustering; Analogy: Word Analogy Reasoning; SentComp: Sentence Completion}
+\begin{table*}
+       \centering
+       \caption{Overview over related work of combinations between topic models (TM) and word embeddings (WE) and how they have been evaluated}
+       \begin{tabular}{|l||c|c||c|c|c|c|c|c|}
+              \hline
+              \textbf{Paper}                  & \textbf{TM} & \textbf{WE} & \textbf{ToCoh} & \textbf{WordSim} & \textbf{DocClass} & \textbf{DocClust} & \textbf{Analogy} & \textbf{SentComp} \\
+              \hline
+              Blei et al.~\cite{Blei2003}     & \cmark &  &                &                  & \specialcell{\cmark\\\textsc{Reuters}}  &                   &  & \\
+              \hline
+              Mikolov et al.~\cite{Mikolov2013a} &     & \cmark &                &           &                      &                   & \cmark & \specialcell{\cmark\\\textsc{Microsoft}\\\textsc{sentence}\\\textsc{completion}} \\
+              \hline \hline
+              Das et al.~\cite{Das2015}       & \cmark &  & \specialcell{\cmark\\Wikipedia\\co-occurrence} &      &                   &                   & & \\
+              \hline
+              Nguyen et al.~\cite{Nguyen2015} & \cmark &  & \specialcell{\cmark\\Wikipedia\\co-occurrence} &      & \specialcell{\cmark\\\textsc{20-News-}\\\textsc{Group},\\\textsc{TagMyNews}} & \specialcell[h]{\cmark\\Same as\\left} & & \\
+              \hline
+              Sridhar~\cite{Sridhar2015}      & \cmark &  & \specialcell{\cmark\\Manual\\annotation}               &                  &                   &  & & \\
+              \hline
+              Moody~\cite{Moody2016}          & \cmark & \cmark & \specialcell{\cmark\\Palmetto\footnotemark\\evaluation tool}         & \specialcell{\cmark\\Only\\qualitative} &                      &         & & \\
+              \hline
+              Liu et al.~\cite{Liu2015} &     & \cmark &                & \specialcell{\cmark\\\textsc{SCWS}}    & \specialcell{\cmark\\\textsc{20-News-}\\\textsc{Group}}               &                   &  & \\
+              \hline
+              Cheng et al.~\cite{Cheng2015} &     & \cmark &                & \specialcell{\cmark\\\textsc{SCWS} +\\paraphrase\\detection\\\textsc{MSRPC}}    &  &                   &  & \\
+              % • Nguyen et al.~\cite{Nguyen2015}} & • \parbox[t]{7cm}{Conceptual Text Understand in Distributional Semantic Space, Cheng et al.~\cite{Cheng2015}} \\
+              % • \parbox[t]{7cm}{Unsupervised Topic Modelling for Short Texts Using Distributed Representations of Words, Sridhar~\cite{Sridhar2015}} & • lda2vec, Moody~\cite{Moody2016} \\
+% • Topical Word Embeddings, Liu et al.~\cite{Liu2015}
+              \hline
+       \end{tabular}
+       \label{table:tm_and_we_combinations}
+\end{table*}
+\footnotetext{The online evaluation tool can be accessed at \url{http://palmetto.aksw.org/palmetto-webapp}}
+% \begin{table*}
+%        \centering
+%        \caption{Overview over related work of combinations between topic models and word embeddings}
+%        \begin{tabular}{|l|l|}
+%               \hline
+%               \textbf{Output: Topic Model} & \textbf{Output: Word Embeddings} \\
+%               \hline
+%               • Gaussian LDA, Das et al.~\cite{Das2015}                                                          & • Topical Word Embeddings, Liu et al.~\cite{Liu2015} \\
+%               • \parbox[t]{7cm}{Improving Topic Models with Latent Feature Word Representations, Nguyen et al.~\cite{Nguyen2015}} & • \parbox[t]{7cm}{Conceptual Text Understand in Distributional Semantic Space, Cheng et al.~\cite{Cheng2015}} \\
+%               • \parbox[t]{7cm}{Unsupervised Topic Modelling for Short Texts Using Distributed Representations of Words, Sridhar~\cite{Sridhar2015}} & • lda2vec, Moody~\cite{Moody2016} \\
+%               \hline
+%        \end{tabular}
+%        \label{table:tm_and_we_combinations_previous}
+% \end{table*}
+
+The work by Das et al.~\cite{Das2015} belongs to the first group. They propose a method named Gaussian LDA.
+In this approach, a topic is no longer a distribution over words in the vocabulary, but a Gaussian distribution in the word embedding space.
+Also, words are no longer atomic units, but are represented by their corresponding pre-trained word embeddings.
+Each topic is associated with a mean $\mu_k$ and a covariance matrix $\Sigma_k$.
+The prior distribution over the means is a normal distribution, and the prior distribution over the covariances is an inverse Wishart distribution.
+These parameters are inferred using Gibbs sampling as in standard LDA. % together with linear algebra tricks
+Another idea is proposed by Sridhar~\cite{Sridhar2015}.
+They start by training word embeddings.
+Afterwards they fit a Gaussian mixture model directly on the word embedding space.
+A topic is represented by mean and covariance matrix.
+In contrast to Das et al.~\cite{Das2015}, Sridhar~\cite{Sridhar2015} assumes the topics to be fixed given the word embeddings, while Das et al.~\cite{Das2015} only take the embeddings as a basis and still learn the topics based on the word co-occurrences in the corpus.
+Another approach is taken by Nguyen et al.~\cite{Nguyen2015}.
+They use word embeddings to sample words not only from the multinomial topic distribution, but also from the embedding space.
+Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
+This parameter decides, whether the word is sampled as usual from the topic-word distribution or from the latent feature vectors.
+To sample in the embedding space, they sample from a softmax-normalized categorical distribution defined by:
+\begin{equation*}
+       Cat(w | \tau_t, \omega) = \frac{exp(\tau_t * \omega_w)}{\sum_{w' \in W} exp(\tau_t * \omega_{w'})},
+\end{equation*}
+where $\tau_t$ is the representation of topic $t$ in the word embedding space and $\omega$ are the pretrained and fixed word embedding vectors.
+The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014}.
+The topic embeddings $\tau$ are updated in each iteration of Gibbs sampling via a MAP estimate based on all other parameters given.
+A similar idea is used by Cheng et al.~\cite{Cheng2015}.
+In fact, the first model they propose is the same as the first model from Nguyen et al.~\cite{Nguyen2015}.
+In addition to some other new models, which are similar to Cheng et al.'s work, they also propose new models, which do not assume independence between word and concept embeddings.
+These \emph{generative word-concept skip-gram} models perform best in their word-similarity and paraphrase detection benchmarks.
+
+We now focus on methods for better word embeddings.
+Liu et al.~\cite{Liu2015} propose topical word embeddings.
+These embeddings make use of word topics inferred via LDA to generate better word vectors.
+They propose three different architectures.
+The first method regards topic as pseudo words, which are added to the context of each word.
+Thus, an embedding for a word and its topic is learned independently.
+The second method considers each pair of word and topic as a pseudo word.
+The third method works the same way, except that it learns only one word embedding vector per word and one topic embedding vector per topic.
+These two vectors are then combined for the vector of the word-topic pair.
+To the authors' surprise, the simplest method one performs best in their word similarity and text classification benchmarks.
+Using the additional topic information when training word embeddings has practical benefits for similarity evaluation.
+When the model is asked for similar words to the word ``apple'', it returns ``peach'', ``juice'', ``strawberry'' or it returns ``mac'', ``ipod'', ``android'' depending on the topic of the word.
+
+Moody~\cite{Moody2016} proposes lda2vec.
+His method learns word vectors together with learning topic vectors and an intuitive topic-based document interpretation.
+Even though trained in the word embedding space, the topic-document vectors are still kept parse to be interpretable for humans.
+However, the method is not evaluated extensively and it is unclear, whether this method yields improved word vectors.
+
+% FROM MIKOLOV COLING 2014 tutorial
+% Sentence-level representations
+% • To obtain sentence level representations, we can add unique tokens
+% to the data, one for each sentence (or short document)
+% • These tokens are trained in a similar way like other words in the skipgram
+% or CBOW models, just using unlimited context window (within
+% the sentence boundaries)
+
+
+%one is supervised, the other one is unsupervised
+
+%``A long tradition in computational linguistics has shown that contextual information provides a good approximation to word meaning, since semanti- cally similar words tend to have similar contex- tual distributions (Miller and Charles, 1991).''
+%``It remains to be seen whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting av- enue for further work.''
+%there has been a shift from the LDA to the word embeddings
+
+
+% \begin{itemize}
+       % \item
+       %        Directly run a GMM on the word embedding space --> See Gaussian LDA
+       % \item
+       %        Run LDA first.
+       %        Then run word embedding training, except that the word also has to predict the surrounding context.
+       %        Problem: LDA performance
+       % \item
+       %        Run LDA first.
+       %        Then run word embedding training, except that the same word from different topics gets a unique token
+       %        Problem: LDA performance
+       % \item
+       %        Try to interpret word embedding dimensions using topic models.
+       %        This requires a labelled topic model, i.e.\ topic 40 is about sports.
+       %        Then try to put a label on a word embedding dimension, for example, the large the value in dimension x the more about sports.
+       % \item
+       %        Run LDA, then calculate average word vector and covariance matrix for all topics.
+       %        Check, how well the topics are distributed in the topic space.
+       %        This also allows to assign unseen words to a topic.
+% \end{itemize}
+
+% \section{Preprocessing}
+% No-stemming (does harm in both \emph{word2vec} and topic modelling), as it destroys the difference between Apple and apples and (TODO: other example) as well as small/smallest.
+% Quoting lots of stuff from the lda2vec
+
+% \section{Enhancing topic models?}
+% Then we need evaluation for topic models and show that they are better
+% Use pretrained word vectors to improve~\cite{Das2015}
+
+
+
+%\include{chapters/introduction}
+%\include{chapters/related_work}
+%\include{chapters/definitions}
+%\include{chapters/dataset_creation}
+%\include{chapters/search_methods}
+%\include{chapters/recommending}
+%\include{chapters/future_work}
+
+
+\clearpage
+
+\printbibliography
+\begin{appendices}
+%\include{chapters/appendix}	
+\end{appendices}
+
+%\include{chapters/eigenstaendigkeit}
+\end{document}
