@@ -1,6 +1,6 @@
 package knub.master_thesis
 
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io._
 
 import cc.mallet.topics.ParallelTopicModel
 
@@ -73,7 +73,7 @@ object Main {
 
     def writeArticlesTextFile(args: Args): Unit = {
         val wpti = new WikiPlainTextIterator(args.dataFolderName)
-        val writer = new BufferedWriter(new FileWriter(args.modelFileName))
+        val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
         wpti.asScala.foreach { article =>
             writer.write(article.getData.asInstanceOf[String])
             writer.write("\n")
