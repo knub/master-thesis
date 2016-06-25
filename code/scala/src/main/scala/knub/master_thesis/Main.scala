@@ -73,7 +73,7 @@ object Main {
 
     def writeArticlesTextFile(args: Args): Unit = {
         val wpti = new WikiPlainTextIterator(args.dataFolderName)
-        val writer = new BufferedWriter(new FileWriter("./resources/articles.txt"))
+        val writer = new BufferedWriter(new FileWriter(args.modelFileName))
         wpti.asScala.foreach { article =>
             writer.write(article.getData.asInstanceOf[String])
             writer.write("\n")
