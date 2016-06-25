@@ -1,0 +1,24 @@
+#!/usr/bin/env /bin/bash
+
+# Prepare the params with an '|' character in between, as Maven requires
+PARAMS=
+for i in "$@"; do
+	# Concatenate with '|' in-between
+	PARAMS="$PARAMS|$i"
+done
+# Remove the leading '|'
+PARAMS="${PARAMS#"|"}"
+
+# Compile first ..
+echo -n "Packaging .."
+mvn package > target/package-output 2>&1
+if [ $? -eq 0 ]; then
+	# .. then run the app
+	echo " Done."
+	echo "Running .."
+	echo "--------------------------------------------------------------------------" | tee target/run-output
+	2>&1 mvn -q scala:run -Dlauncher=topic-model -DaddArgs="$PARAMS"                | tee -a target/run-output
+	echo "--------------------------------------------------------------------------" | tee -a target/run-output
+else
+	echo " Failed."
+fi
