@@ -17,6 +17,12 @@
     </properties>
 
     <dependencies>
+        <!-- Argument parsing -->
+        <dependency>
+            <groupId>com.github.scopt</groupId>
+            <artifactId>scopt_2.11</artifactId>
+            <version>3.5.0</version>
+        </dependency>
         <dependency>
             <groupId>cc.mallet</groupId>
             <artifactId>mallet</artifactId>
