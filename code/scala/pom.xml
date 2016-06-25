@@ -76,8 +76,8 @@
                             <id>topic-model</id>
                             <mainClass>knub.master_thesis.Main</mainClass>
                             <jvmArgs>
-                                <jvmArg>-Xms10g</jvmArg>
-                                <jvmArg>-Xmx10g</jvmArg>
+                                <jvmArg>-Xms40g</jvmArg>
+                                <jvmArg>-Xmx40g</jvmArg>
                             </jvmArgs>
                         </launcher>
                     </launchers>
