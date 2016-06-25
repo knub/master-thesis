@@ -29,8 +29,8 @@ class WikiPlainTextIterator(dataFolderName: String) extends java.util.Iterator[I
         sb.clear()
         var currentLine = ""
         while (!currentLine.startsWith("</doc")) {
-            currentLine = lineIterator.next
             sb.append(currentLine + " ")
+            currentLine = lineIterator.next
         }
         new Instance(sb.toString(), null, firstLine, null)
     }
