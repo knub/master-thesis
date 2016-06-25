@@ -24,7 +24,7 @@ class WikiPlainTextIterator(dataFolderName: String) extends java.util.Iterator[I
             lineIterator = scala.io.Source.fromFile(currentPath.toFile).getLines()
         }
         val firstLine = lineIterator.next
-        assert(firstLine.startsWith("<doc"), s"$currentPath: \"$firstLine\" does not start with <doc")
+        assert(firstLine.startsWith("<doc"), s"$currentPath: '$firstLine' does not start with <doc")
 
         sb.clear()
         var currentLine = ""
