@@ -70,6 +70,18 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <launchers>
+                        <launcher>
+                            <id>ProgramRunner</id>
+                            <mainClass>knub.master_thesis.Main</mainClass>
+                            <jvmArgs>
+                                <jvmArg>-Xms10g</jvmArg>
+                                <jvmArg>-Xmx10g</jvmArg>
+                            </jvmArgs>
+                        </launcher>
+                    </launchers>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

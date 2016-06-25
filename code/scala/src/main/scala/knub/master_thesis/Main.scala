@@ -7,7 +7,10 @@ import cc.mallet.topics.ParallelTopicModel
 case class Args(
     modelFileName: String = "/home/knub/Repositories/master-thesis/code/scala/resources/topic.model",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/scala/resources/plain-text-test",
-    createNewModel: Boolean = false)
+    createNewModel: Boolean = false,
+    numThreads: Int = 2,
+    numTopics: Int = 256,
+    numIterations: Int = 50)
 
 object Main {
 
@@ -18,6 +21,12 @@ object Main {
             c.copy(modelFileName = x))
         opt[String]('d', "data-folder-name").action( (x, c) =>
             c.copy(dataFolderName = x))
+        opt[Int]("num-threads").action( (x, c) =>
+            c.copy(numThreads = x))
+        opt[Int]("num-topics").action( (x, c) =>
+            c.copy(numTopics = x))
+        opt[Int]("num-iterations").action( (x, c) =>
+            c.copy(numIterations = x))
         opt[Unit]("create-new-model").action( (_, c) =>
             c.copy(createNewModel = true))
     }
@@ -41,7 +50,7 @@ object Main {
     }
 
     def trainAndSaveNewModel(args: Args): TopicModelResult = {
-        val tp = new TopicModel
+        val tp = new TopicModel(args)
         val res = tp.run(args.dataFolderName)
         res.save(args.modelFileName)
         res

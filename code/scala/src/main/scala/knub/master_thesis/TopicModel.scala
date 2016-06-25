@@ -1,23 +1,20 @@
 package knub.master_thesis
 
-import java.nio.file.{Files, Paths}
-
 import cc.mallet.topics.ParallelTopicModel
-import cc.mallet.types.{Instance, InstanceList}
+import cc.mallet.types.InstanceList
 
-import scala.collection.JavaConverters._
-
-class TopicModel {
+class TopicModel(args: Args) {
 
     def run(dataFolderName: String): TopicModelResult = {
         val instances = new InstanceList(PreprocessingPipe.pipe)
         instances.addThruPipe(new WikiPlainTextIterator(dataFolderName))
 
-        val numTopics = 100
-        val model = new ParallelTopicModel(numTopics, 1.0, 0.01)
+        val numTopics = args.numTopics
+        val model = new ParallelTopicModel(numTopics, 1.0, 1.0 / args.numTopics)
         model.addInstances(instances)
-        model.setNumThreads(2)
-        model.setNumIterations(50)
+        model.setNumThreads(args.numThreads)
+        model.setNumIterations(args.numIterations)
+        model.showTopicsInterval = 0
         model.estimate()
 
         new TopicModelResult(model)
