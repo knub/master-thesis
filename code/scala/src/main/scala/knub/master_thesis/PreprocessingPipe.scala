@@ -17,7 +17,7 @@ object PreprocessingPipe {
         new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")),
         new UseOnlyFirstNWordsOfDocument(1000),
         new TokenSequenceRemoveStopwords(
-            new File("./resources/stopwords.txt"), "UTF-8", false, false, false),
+            new File("../resources/stopwords.txt"), "UTF-8", false, false, false),
         new TokenSequence2FeatureSequence()
     )
     val pipe = new SerialPipes(pipeList.asJava)

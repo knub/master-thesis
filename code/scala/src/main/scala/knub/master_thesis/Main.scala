@@ -8,8 +8,8 @@ import scala.collection.JavaConverters._
 
 case class Args(
     mode: String = "",
-    modelFileName: String = "/home/knub/Repositories/master-thesis/code/scala/resources/topic.model",
-    dataFolderName: String = "/home/knub/Repositories/master-thesis/code/scala/resources/plain-text-test",
+    modelFileName: String = "/home/knub/Repositories/master-thesis/code/resources/topic.model",
+    dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     createNewModel: Boolean = false,
     numThreads: Int = 2,
     numTopics: Int = 256,
