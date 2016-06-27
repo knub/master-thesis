@@ -67,22 +67,27 @@ object Main {
     case class WordConcept(word: String, concept: String)
     def analyzeResult(res: TopicModelResult): Unit = {
         val conceptCategorizationFile =
-            "/home/knub/Repositories/master-thesis/data/concept-categorization/battig_concept-categorization.tsv"
+            "../../data/concept-categorization/battig_concept-categorization.tsv"
         val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
             val split = line.split("\t")
             WordConcept(split(0), split(1))
         }.toList.groupBy(_.concept)
 
         concepts.foreach { case (concept, wordConcepts) =>
-            println(s"Concept: $concept (${wordConcepts.size} words)")
             val words = wordConcepts.map(_.word)
+            println(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}")
             for (n <- 1 to 5) {
-                val topics = mutable.Bag[Int]()
-                words.foreach { word =>
-                    val highestTopics = res.findBestTopicsForWord(word, nrTopics = n)
-                    topics ++= highestTopics
+                val wordTopics = words.map { word =>
+                    (word, res.findBestTopicsForWord(word, nrTopics = n))
                 }
-                println(s"$n-purity: ${topics.maxMultiplicity * 100 / words.length} %")
+                val topics = mutable.Bag[Int]()
+                topics ++= wordTopics.flatMap(_._2)
+                val topicWithMaxMultiplicity = topics.multiplicities.maxBy(_._2)._1
+
+                val missingWords = wordTopics
+                    .filter { case (word, currentWordTopics) => !currentWordTopics.contains(topicWithMaxMultiplicity) }
+                    .map(_._1)
+                println(s"$n-purity: ${topics.maxMultiplicity * 100 / words.length} % -- missing words: $missingWords")
             }
         }
     }

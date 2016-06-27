@@ -42,7 +42,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
         //  by the numeric value of the int guarantees that
         //  higher counts will be before the lower counts.
         val idx = dataAlphabet.lookupIndex(word)
-        model.typeTopicCounts(idx).take(nrTopics).map(_ & model.topicMask)
+        model.typeTopicCounts(idx).take(nrTopics).filter(_ != 0).map(_ & model.topicMask)
 
         // OLD IMPLEMENTATION -- SLOW
 //        val wordId = dataAlphabet.lookupIndex(word)
