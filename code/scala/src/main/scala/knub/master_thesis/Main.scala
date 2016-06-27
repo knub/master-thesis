@@ -73,6 +73,7 @@ object Main {
             WordConcept(split(0), split(1))
         }.toList.groupBy(_.concept)
 
+        val purities = Array(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         concepts.foreach { case (concept, wordConcepts) =>
             val words = wordConcepts.map(_.word)
             println(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}")
@@ -82,14 +83,23 @@ object Main {
                 }
                 val topics = mutable.Bag[Int]()
                 topics ++= wordTopics.flatMap(_._2)
-                val topicWithMaxMultiplicity = topics.multiplicities.maxBy(_._2)._1
 
+                val topicWithMaxMultiplicity = topics.multiplicities.maxBy(_._2)._1
                 val missingWords = wordTopics
                     .filter { case (word, currentWordTopics) => !currentWordTopics.contains(topicWithMaxMultiplicity) }
                     .map(_._1)
-                println(s"$n-purity: ${topics.maxMultiplicity * 100 / words.length} % -- missing words: $missingWords")
+                val conceptPurity = topics.maxMultiplicity * 100.0 / words.length
+                purities(n) += conceptPurity * words.size
+
+                println(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords")
             }
         }
+        println("#" * 100)
+        for (n <- 1 to 5) {
+            val purity = purities(n) / concepts.values.map(_.size).sum
+            println(f"$n-purity: $purity%.1f %%")
+        }
+        println("#" * 100)
     }
 
     def trainAndSaveNewModel(args: Args): TopicModelResult = {
