@@ -4,8 +4,9 @@ import java.io.{File, PrintWriter}
 
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{FeatureSequence, Instance, InstanceList}
+import scala.collection.JavaConversions._
 
-class TopicModelResult(model: ParallelTopicModel) {
+class TopicModelResult(val model: ParallelTopicModel) {
     def save(fileName: String): Unit = {
         model.write(new File(fileName))
     }
@@ -31,6 +32,27 @@ class TopicModelResult(model: ParallelTopicModel) {
 //        model.printDocumentTopics(stdout)
 //        model.printTopicDocuments(stdout)
         model.printTopWords(System.out, 10, true)
+    }
+
+    def findBestTopicsForWord(word: String, nrTopics: Int = 3): Array[Int] = {
+        // The format for typeTopicCounts array is
+        //  the topic in the rightmost bits
+        //  the count in the remaining (left) bits.
+        // Since the count is in the high bits, sorting (desc)
+        //  by the numeric value of the int guarantees that
+        //  higher counts will be before the lower counts.
+        val idx = dataAlphabet.lookupIndex(word)
+        model.typeTopicCounts(idx).take(nrTopics).map(_ & model.topicMask)
+
+        // OLD IMPLEMENTATION -- SLOW
+//        val wordId = dataAlphabet.lookupIndex(word)
+//        val topicSortedWords = model.getSortedWords
+//        topicSortedWords.zipWithIndex.maxBy { case (topic, _) =>
+//            topic.iterator()
+//                .find { idSorter => idSorter.getID == wordId }
+//                .map(_.getWeight)
+//                .getOrElse(0.0)
+//        }._2
     }
 
     def estimateTopicDistribution(): Unit = {

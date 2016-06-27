@@ -17,6 +17,12 @@
     </properties>
 
     <dependencies>
+        <!-- Multisets -->
+        <dependency>
+            <groupId>io.github.nicolasstucki</groupId>
+            <artifactId>multisets_2.11</artifactId>
+            <version>0.3</version>
+        </dependency>
         <!-- Argument parsing -->
         <dependency>
             <groupId>com.github.scopt</groupId>

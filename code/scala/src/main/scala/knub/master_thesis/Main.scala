@@ -4,7 +4,9 @@ import java.io._
 
 import cc.mallet.topics.ParallelTopicModel
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.io.Source
 
 case class Args(
     mode: String = "",
@@ -16,6 +18,8 @@ case class Args(
     numIterations: Int = 50)
 
 object Main {
+
+    implicit val m1 = mutable.Bag.configuration.compact[Int]
 
     val parser = new scopt.OptionParser[Args]("topic-models") {
         head("topic-models", "0.01")
@@ -54,9 +58,32 @@ object Main {
                     else
                         loadExistingModel(args.modelFileName)
 
-                res.showTopWordsPerTopics()
+                analyzeResult(res)
             case "text-preprocessing" =>
                 writeArticlesTextFile(args)
+        }
+    }
+
+    case class WordConcept(word: String, concept: String)
+    def analyzeResult(res: TopicModelResult): Unit = {
+        val conceptCategorizationFile =
+            "/home/knub/Repositories/master-thesis/data/concept-categorization/battig_concept-categorization.tsv"
+        val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
+            val split = line.split("\t")
+            WordConcept(split(0), split(1))
+        }.toList.groupBy(_.concept)
+
+        concepts.foreach { case (concept, wordConcepts) =>
+            println(s"Concept: $concept (${wordConcepts.size} words)")
+            val words = wordConcepts.map(_.word)
+            for (n <- 1 to 5) {
+                val topics = mutable.Bag[Int]()
+                words.foreach { word =>
+                    val highestTopics = res.findBestTopicsForWord(word, nrTopics = n)
+                    topics ++= highestTopics
+                }
+                println(s"$n-purity: ${topics.maxMultiplicity * 100 / words.length} %")
+            }
         }
     }
 
@@ -74,7 +101,7 @@ object Main {
     def writeArticlesTextFile(args: Args): Unit = {
         val wpti = new WikiPlainTextIterator(args.dataFolderName)
         val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
-        wpti.asScala.foreach { article =>
+        wpti.foreach { article =>
             writer.write(article.getData.asInstanceOf[String])
             writer.write("\n")
         }
