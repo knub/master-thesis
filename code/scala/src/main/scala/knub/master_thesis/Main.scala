@@ -22,7 +22,7 @@ object Main {
     implicit val m1 = mutable.Bag.configuration.compact[Int]
 
     val parser = new scopt.OptionParser[Args]("topic-models") {
-        head("topic-models", "0.01")
+        head("topic-models", "0.0.1")
 
         cmd("topic-model").action { (_, c) => c.copy(mode = "topic-model") }
         cmd("text-preprocessing").action { (_, c) => c.copy(mode = "text-preprocessing") }
