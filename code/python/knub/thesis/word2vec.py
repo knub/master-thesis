@@ -23,7 +23,7 @@ if __name__ == "__main__":
     logging.info(model.doesnt_match("breakfast cereal dinner lunch".split()))
     logging.info(model.similarity('woman', 'man'))
 
-    print "=" * 100
+    logging.info("=" * 100)
 
     logging.info("Training word2vec")
     sentences = LineSentence(args.sentences)
