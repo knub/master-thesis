@@ -15,20 +15,8 @@ if __name__ == "__main__":
 
     logging.info("Training word2vec")
     sentences = LineSentence(args.sentences)
-    model = Word2Vec(sentences, size=100, window=5, min_count=5, workers=args.threads, sg=True)
-    model.save(args.model + ".skipgram")
-    logging.info("Finished training word2vec")
-
-    logging.info(model.most_similar(positive=['woman', 'king'], negative=['man']))
-    logging.info(model.doesnt_match("breakfast cereal dinner lunch".split()))
-    logging.info(model.similarity('woman', 'man'))
-
-    logging.info("=" * 100)
-
-    logging.info("Training word2vec")
-    sentences = LineSentence(args.sentences)
-    model = Word2Vec(sentences, size=100, window=5, min_count=5, workers=args.threads, sg=True)
-    model.save(args.model + ".cbow")
+    model = Word2Vec(sentences, size=200, window=5, min_count=50, workers=args.threads, sg=True)
+    model.save_word2vec_format(args.model + ".cbow", fvocab=True, binary=True)
     logging.info("Finished training word2vec")
 
     logging.info(model.most_similar(positive=['woman', 'king'], negative=['man']))
