@@ -5,8 +5,8 @@ import cc.mallet.types.InstanceList
 
 class TopicModel(args: Args) {
 
-    def run(dataFolderName: String): TopicModelResult = {
-        val instances = new InstanceList(PreprocessingPipe.pipe)
+    def run(dataFolderName: String, stopWordsFileName: String): TopicModelResult = {
+        val instances = new InstanceList(PreprocessingPipe.pipe(stopWordsFileName))
         instances.addThruPipe(new WikiPlainTextIterator(dataFolderName))
 
         val numTopics = args.numTopics

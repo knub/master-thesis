@@ -13,6 +13,8 @@ case class Args(
     modelFileName: String = "/home/knub/Repositories/master-thesis/code/resources/topic.model",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     createNewModel: Boolean = false,
+    stopWordsFileName: String = "../resources/stopwords.txt",
+    conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
     numThreads: Int = 2,
     numTopics: Int = 256,
     numIterations: Int = 50)
@@ -31,6 +33,10 @@ object Main {
             c.copy(modelFileName = x) }
         opt[String]('d', "data-folder-name").action { (x, c) =>
             c.copy(dataFolderName = x) }
+        opt[String]("stop-words").action { (x, c) =>
+            c.copy(stopWordsFileName = x) }
+        opt[String]("concept-categorization").action { (x, c) =>
+            c.copy(conceptCategorizationFileName = x) }
         opt[Int]("num-threads").action { (x, c) =>
             c.copy(numThreads = x) }
         opt[Int]("num-topics").action { (x, c) =>
@@ -58,16 +64,21 @@ object Main {
                     else
                         loadExistingModel(args.modelFileName)
 
-                analyzeResult(res)
+                analyzeResult(res, args)
             case "text-preprocessing" =>
                 writeArticlesTextFile(args)
         }
     }
 
     case class WordConcept(word: String, concept: String)
-    def analyzeResult(res: TopicModelResult): Unit = {
+    def analyzeResult(res: TopicModelResult, args: Args): Unit = {
+        conceptCategorization(res, args)
+//        res.showTopWordsPerTopics()
+    }
+
+    def conceptCategorization(res: TopicModelResult, args: Args): Unit = {
         val conceptCategorizationFile =
-            "../../data/concept-categorization/battig_concept-categorization.tsv"
+            args.conceptCategorizationFileName
         val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
             val split = line.split("\t")
             WordConcept(split(0), split(1))
@@ -96,15 +107,18 @@ object Main {
         }
         println("#" * 100)
         for (n <- 1 to 5) {
-            val purity = purities(n) / concepts.values.map(_.size).sum
-            println(f"$n-purity: $purity%.1f %%")
+            purities(n) = purities(n) / concepts.values.map(_.size).sum
+        }
+        for (n <- 1 to 5) {
+            println(f"$n-purity: ${purities(n)}%.1f %%")
         }
         println("#" * 100)
+        println(purities(1))
     }
 
     def trainAndSaveNewModel(args: Args): TopicModelResult = {
         val tp = new TopicModel(args)
-        val res = tp.run(args.dataFolderName)
+        val res = tp.run(args.dataFolderName, args.stopWordsFileName)
         res.save(args.modelFileName)
         res
     }

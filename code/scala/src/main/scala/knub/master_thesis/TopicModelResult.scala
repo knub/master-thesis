@@ -31,7 +31,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
 //        val stdout = new PrintWriter(System.out)
 //        model.printDocumentTopics(stdout)
 //        model.printTopicDocuments(stdout)
-        model.printTopWords(System.out, 10, true)
+        model.printTopWords(System.out, 10, false)
     }
 
     def findBestTopicsForWord(word: String, nrTopics: Int = 3): Array[Int] = {
@@ -86,13 +86,13 @@ class TopicModelResult(val model: ParallelTopicModel) {
             rank += 1
         }
 
-        // Create a new instance named "test instance" with empty target and source fields.
-        val testing = new InstanceList(PreprocessingPipe.pipe)
-        testing.addThruPipe(new Instance(topicZeroText.toString, null, "test instance", null))
-
-        val inferencer = model.getInferencer
-        val testProbabilities = inferencer.getSampledDistribution(testing.get(0), 10, 1, 5)
-        System.out.println("0\t" + testProbabilities(0))
+//        // Create a new instance named "test instance" with empty target and source fields.
+//        val testing = new InstanceList(PreprocessingPipe.pipe)
+//        testing.addThruPipe(new Instance(topicZeroText.toString, null, "test instance", null))
+//
+//        val inferencer = model.getInferencer
+//        val testProbabilities = inferencer.getSampledDistribution(testing.get(0), 10, 1, 5)
+//        System.out.println("0\t" + testProbabilities(0))
     }
 
 }
