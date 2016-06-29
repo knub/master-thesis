@@ -1,0 +1,28 @@
+{
+    "language"        : "PYTHON",
+    "main-file"       : "concept_categorization.py",
+    "experiment-name" : "concept_categorization",
+    "likelihood"      : "GAUSSIAN",
+    "resources": {
+        "my-machine": {
+            "max-concurrent": 2,
+            "max-finished-jobs": 20
+        }
+    },
+    "polling-time": 1,
+    "variables" : {
+        "topics" : {
+            "type" : "INT",
+            "size" : 1,
+            "min"  : 4,
+            "max"  : 512
+        },
+        "iterations" : {
+            "type" : "INT",
+            "size" : 1,
+            "min"  : 100,
+            "max"  : 400
+        }
+    }
+}
+
