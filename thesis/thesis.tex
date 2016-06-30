@@ -501,7 +501,17 @@ However, the method is not evaluated extensively and it is unclear, whether this
 %\include{chapters/search_methods}
 %\include{chapters/recommending}
 %\include{chapters/future_work}
-\chapter{Thoughts collection}
+\chapter{Thoughts}
+\section{Bayesian Optimization}
+\begin{itemize}
+  \item Good for noisy black-box functions, when evaluations are costly, no derivative and the problem is non convex
+  \item Builds a statistical model for the function from the hyperparameter space to the evaluation function
+  \item By using the information of all previous runs, the framework can suggest a new point to which provides max information
+  \item balances \emph{exploration} (checking previously unknown points in the hyperparameter space) vs. \emph{exploitation} (using the current best values to check nearby points in the hyperparameter space)
+  \item $\Rightarrow$ fewer experiments are necessary
+  \item \url{https://github.com/HIPS/Spearmint}
+\end{itemize}
+\section{Other}
 Using the nltk stop words list
 \chapter{Rest}
 
