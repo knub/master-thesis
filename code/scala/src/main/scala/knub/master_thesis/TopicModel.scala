@@ -10,7 +10,12 @@ class TopicModel(args: Args) {
         instances.addThruPipe(new WikiPlainTextIterator(dataFolderName))
 
         val numTopics = args.numTopics
+        // alpha = 1 / 100, 1 / 10
+        // beta - dependend on vocabulary size
+        // longer documents? not all documents
         val model = new ParallelTopicModel(numTopics, 1.0, 1.0 / args.numTopics)
+        model.setOptimizeInterval(10)
+        model.setBurninPeriod(100)
         model.addInstances(instances)
         model.setNumThreads(args.numThreads)
         model.setNumIterations(args.numIterations)
