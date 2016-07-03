@@ -44,4 +44,4 @@ if __name__ == "__main__":
             if most_similar[0] == task.answer:
                 correct_count += 1
 
-    print correct_count * 100.0 / task_count
+        print correct_count * 100.0 / task_count
