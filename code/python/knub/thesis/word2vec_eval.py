@@ -2,9 +2,11 @@ import argparse
 import logging
 from collections import namedtuple
 
+import mkl
 from gensim.models.word2vec import Word2Vec
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+mkl.set_num_threads(2)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
