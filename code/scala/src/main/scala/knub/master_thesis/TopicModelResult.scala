@@ -34,6 +34,24 @@ class TopicModelResult(val model: ParallelTopicModel) {
         model.printTopWords(System.out, 10, false)
     }
 
+    def displayTopWords(numWords: Int = 10): String = {
+        val out = new StringBuilder()
+        val topicSortedWords = model.getSortedWords
+        for (topic <- 0 until model.numTopics) {
+            val sortedWords = topicSortedWords.get(topic)
+            var word = 0
+            val iterator = sortedWords.iterator()
+
+            while (iterator.hasNext && word < numWords) {
+                val info = iterator.next()
+                out.append(dataAlphabet.lookupObject(info.getID) + ",")
+                word += 1
+            }
+            out.append("\n")
+        }
+        out.toString
+    }
+
     def findBestTopicsForWord(word: String, nrTopics: Int = 3): Array[Int] = {
         // The format for typeTopicCounts array is
         //  the topic in the rightmost bits

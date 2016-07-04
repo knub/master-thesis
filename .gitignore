@@ -4,3 +4,4 @@ papers/
 /resources/
 data/
 */.ipynb_checkpoints/*
+models/

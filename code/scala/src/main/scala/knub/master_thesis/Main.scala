@@ -10,7 +10,7 @@ import scala.io.Source
 
 case class Args(
     mode: String = "",
-    modelFileName: String = "/home/knub/Repositories/master-thesis/code/resources/topic.model",
+    modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     createNewModel: Boolean = false,
     stopWordsFileName: String = "../resources/stopwords.txt",
@@ -72,11 +72,24 @@ object Main {
 
     case class WordConcept(word: String, concept: String)
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
-        conceptCategorization(res, args)
+        val modelFile = new File(args.modelFileName)
+        val modelTextFile = new File(modelFile.getCanonicalPath + ".csv")
+        val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
+
+        writeTopWordsToTextFile(res, args, modelTextFile)
+        conceptCategorization(res, args, purityTextFile)
+
 //        res.showTopWordsPerTopics()
     }
 
-    def conceptCategorization(res: TopicModelResult, args: Args): Unit = {
+    def writeTopWordsToTextFile(res: TopicModelResult, args: Args, modelTextFile: File): Unit = {
+        val pw = new PrintWriter(modelTextFile)
+        pw.write(res.displayTopWords(10))
+        pw.close()
+    }
+
+    def conceptCategorization(res: TopicModelResult, args: Args, purityTextFile: File): Unit = {
+        val out = new StringBuilder()
         val conceptCategorizationFile =
             args.conceptCategorizationFileName
         val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
@@ -87,7 +100,7 @@ object Main {
         val purities = Array(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         concepts.foreach { case (concept, wordConcepts) =>
             val words = wordConcepts.map(_.word)
-            println(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}")
+            out.append(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}\n")
             for (n <- 1 to 5) {
                 val wordTopics = words.map { word =>
                     (word, res.findBestTopicsForWord(word, nrTopics = n))
@@ -102,18 +115,23 @@ object Main {
                 val conceptPurity = topics.maxMultiplicity * 100.0 / words.length
                 purities(n) += conceptPurity * words.size
 
-                println(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords")
+                out.append(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords\n")
             }
         }
-        println("#" * 100)
+        out.append("#" * 100 + "\n")
         for (n <- 1 to 5) {
             purities(n) = purities(n) / concepts.values.map(_.size).sum
         }
         for (n <- 1 to 5) {
-            println(f"$n-purity: ${purities(n)}%.1f %%")
+            out.append(f"$n-purity: ${purities(n)}%.1f %%\n")
         }
-        println("#" * 100)
-        println(purities(1))
+        out.append("#" * 100 + "\n")
+        out.append(purities(1))
+
+
+        val pw = new PrintWriter(purityTextFile)
+        pw.write(out.toString())
+        pw.close()
     }
 
     def trainAndSaveNewModel(args: Args): TopicModelResult = {
