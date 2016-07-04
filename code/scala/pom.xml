@@ -17,6 +17,18 @@
     </properties>
 
     <dependencies>
+        <!-- Guava collections -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+        </dependency>
+        <!-- Statistical computing -->
+        <dependency>
+            <groupId>org.scalanlp</groupId>
+            <artifactId>breeze_2.11</artifactId>
+            <version>0.12</version>
+        </dependency>
         <!-- Multisets -->
         <dependency>
             <groupId>io.github.nicolasstucki</groupId>

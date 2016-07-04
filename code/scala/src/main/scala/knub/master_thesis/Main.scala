@@ -1,8 +1,12 @@
 package knub.master_thesis
 
 import java.io._
+import java.util.Comparator
 
+import breeze.linalg.DenseMatrix
 import cc.mallet.topics.ParallelTopicModel
+import breeze.stats._
+import com.google.common.collect.MinMaxPriorityQueue
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -70,16 +74,99 @@ object Main {
         }
     }
 
+    def kullbackLeibler(p: Array[Double], q: Array[Double]): Double = {
+        var sum = 0.0
+        for (i <- p.indices) {
+            if (p(i) != 0.0 && q(i) != 0.0)
+                sum += p(i) * Math.log(p(i) / q(i))
+        }
+        sum
+    }
+
     case class WordConcept(word: String, concept: String)
+    case class WordPair(word1Idx: Int, word2Idx: Int, divergence: Double)
+    class WordPairComparator extends Comparator[WordPair] {
+        override def compare(wp1: WordPair, wp2: WordPair): Int = Math.signum(wp1.divergence - wp2.divergence).toInt
+    }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val modelFile = new File(args.modelFileName)
         val modelTextFile = new File(modelFile.getCanonicalPath + ".ssv")
         val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
+        val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs")
 
-        writeTopWordsToTextFile(res, args, modelTextFile)
-        conceptCategorization(res, args, purityTextFile)
+//        writeTopWordsToTextFile(res, args, modelTextFile)
+//        conceptCategorization(res, args, purityTextFile)
+        val topicProbs = writeTopicProbsToFile(res, topicProbsFile)
+
+
+        val wordPairComparator = new WordPairComparator
+        val priorityQueue = MinMaxPriorityQueue.orderedBy(wordPairComparator)
+            .maximumSize(100)
+            .create[WordPair]()
+
+        val wordCount = topicProbs.length
+        val topicCount = res.model.numTopics
+        for (i <- 0 until wordCount) {
+            println(s"${100.0 * i / wordCount} %")
+            for (j <- 0 until i) {
+                val m = new Array[Double](topicCount)
+                val p = topicProbs(i)
+                val q = topicProbs(j)
+                for (k <- 0 until topicCount)
+                    m(k) = 0.5 * (p(k) + q(k))
+                val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
+                priorityQueue.add(WordPair(i, j, divergence))
+            }
+        }
+
+        println("Most similar words:")
+        priorityQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+            val word1 = res.dataAlphabet.lookupObject(wordPair.word1Idx)
+            val word2 = res.dataAlphabet.lookupObject(wordPair.word2Idx)
+            println(f"${wordPair.divergence}%.9f $word1 - $word2")
+            println(s"${topicProbs(wordPair.word1Idx).deep}")
+            println(s"${topicProbs(wordPair.word2Idx).deep}")
+        }
 
 //        res.showTopWordsPerTopics()
+
+        /*
+         * WHAT TO DO:
+         * Find variance of words with highest and lowest variance
+         * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
+         */
+
+
+
+
+
+//        for (it <- res.dataAlphabet.iterator())
+//            println(it)
+    }
+
+    def writeTopicProbsToFile(res: TopicModelResult, topicProbsFile: File): Array[Array[Double]] = {
+        val m = res.model.getTopicWords(true, true)
+        println(s"Topics: ${m.size}")
+        println(s"Tokens: ${res.dataAlphabet.iterator().size}")
+        println(s"Tokens: ${res.dataAlphabet.size}")
+
+        val out = new StringBuilder
+        val a = new Array[Array[Double]](res.dataAlphabet.size())
+        out.append(s"word,${(0 to res.model.numTopics).mkString(",")},mean,stddev\n")
+        res.dataAlphabet.iterator().foreach { word =>
+            val idx = res.dataAlphabet.lookupIndex(word)
+            val topicProbs = new Array[Double](res.model.numTopics)
+            for (i <- 0 until res.model.numTopics)
+                topicProbs(i) = m(i)(idx)
+            a(idx) = topicProbs
+
+            out.append(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
+        }
+
+        val pw = new PrintWriter(topicProbsFile)
+        pw.write(out.toString())
+        pw.close()
+        a
     }
 
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args, modelTextFile: File): Unit = {
