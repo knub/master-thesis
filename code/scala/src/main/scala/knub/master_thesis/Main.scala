@@ -120,7 +120,7 @@ object Main {
         }
 
         println("Most similar words:")
-        priorityQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+        priorityQueue.toList.sortBy(_.divergence).take(1000).foreach { wordPair =>
             val word1 = res.dataAlphabet.lookupObject(wordPair.word1Idx)
             val word2 = res.dataAlphabet.lookupObject(wordPair.word2Idx)
             println(f"${wordPair.divergence}%.9f $word1 - $word2")
@@ -145,20 +145,16 @@ object Main {
     }
 
     def writeTopicProbsToFile(res: TopicModelResult, topicProbsFile: File): Array[Array[Double]] = {
-        val m = res.model.getTopicWords(true, true)
-        println(s"Topics: ${m.size}")
+        val m = res.getWordTopics
+        println(s"Topics: ${m(0).length}")
         println(s"Tokens: ${res.dataAlphabet.iterator().size}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
         val out = new StringBuilder
-        val a = new Array[Array[Double]](res.dataAlphabet.size())
         out.append(s"word,${(0 to res.model.numTopics).mkString(",")},mean,stddev\n")
         res.dataAlphabet.iterator().foreach { word =>
             val idx = res.dataAlphabet.lookupIndex(word)
-            val topicProbs = new Array[Double](res.model.numTopics)
-            for (i <- 0 until res.model.numTopics)
-                topicProbs(i) = m(i)(idx)
-            a(idx) = topicProbs
+            val topicProbs = m(idx)
 
             out.append(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
         }
@@ -166,7 +162,7 @@ object Main {
         val pw = new PrintWriter(topicProbsFile)
         pw.write(out.toString())
         pw.close()
-        a
+        m
     }
 
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args, modelTextFile: File): Unit = {

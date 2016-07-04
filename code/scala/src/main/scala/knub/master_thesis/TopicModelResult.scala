@@ -27,6 +27,33 @@ class TopicModelResult(val model: ParallelTopicModel) {
         println()
     }
 
+    def getWordTopics: Array[Array[Double]] = {
+        val result = Array.ofDim[Double](model.numTypes, model.numTopics)
+        for (wordType <- 0 until model.numTypes) {
+            val topicCounts = model.typeTopicCounts(wordType)
+            var index = 0
+            while (index < topicCounts.length && topicCounts(index) > 0) {
+                val topic = topicCounts(index) & model.topicMask
+                val count = topicCounts(index) >> model.topicBits
+                result(wordType)(topic) += count
+                index += 1
+            }
+        }
+        for (wordType <- 0 until model.numTypes) {
+            for (topic <- 0 until model.numTopics) {
+                result(wordType)(topic) += model.beta
+            }
+        }
+        val topicNormalizers = Array.ofDim[Double](model.numTopics)
+        for (topic <- 0 until model.numTopics) {
+            topicNormalizers(topic) = 1.0 / (model.tokensPerTopic(topic) + model.numTypes * model.beta)
+        }
+        for (topic <- 0 until model.numTopics; wordType <- 0 until model.numTypes) {
+            result(wordType)(topic) *= topicNormalizers(topic)
+        }
+        result
+    }
+
     def showTopWordsPerTopics(): Unit = {
 //        val stdout = new PrintWriter(System.out)
 //        model.printDocumentTopics(stdout)
