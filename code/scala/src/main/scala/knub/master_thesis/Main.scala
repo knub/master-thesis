@@ -10,7 +10,7 @@ import scala.io.Source
 
 case class Args(
     mode: String = "",
-    modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.256-1000.model",
+    modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     createNewModel: Boolean = false,
     stopWordsFileName: String = "../resources/stopwords.txt",

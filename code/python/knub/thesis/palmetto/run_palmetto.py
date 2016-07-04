@@ -9,8 +9,9 @@ def parse_topic_coherence(stdout):
 
     for line in stdout.splitlines():
         m = re.search("[01]\.\d{5}", line)
-        tc = float(m.group(0))
-        topic_coherences.append(tc)
+        if m:
+            tc = float(m.group(0))
+            topic_coherences.append(tc)
 
     assert len(topic_coherences) in {2 ** i for i in range(1, 10)}, str(
         len(topic_coherences)) + " is not a power of two"
