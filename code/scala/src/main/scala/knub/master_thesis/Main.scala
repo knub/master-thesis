@@ -150,17 +150,15 @@ object Main {
         println(s"Tokens: ${res.dataAlphabet.iterator().size}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
-        val out = new StringBuilder
-        out.append(s"word,${(0 to res.model.numTopics).mkString(",")},mean,stddev\n")
+        val pw = new PrintWriter(topicProbsFile)
+        pw.write(s"word,${(0 to res.model.numTopics).mkString(",")},mean,stddev\n")
         res.dataAlphabet.iterator().foreach { word =>
             val idx = res.dataAlphabet.lookupIndex(word)
             val topicProbs = m(idx)
 
-            out.append(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
+            pw.write(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
         }
 
-        val pw = new PrintWriter(topicProbsFile)
-        pw.write(out.toString())
         pw.close()
         m
     }
