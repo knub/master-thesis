@@ -1,12 +1,13 @@
 import argparse
 import logging
+import sys
 from collections import namedtuple
 
 import mkl
 from gensim.models.word2vec import Word2Vec
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-mkl.set_num_threads(2)
+mkl.set_num_threads(3)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
@@ -26,14 +27,19 @@ if __name__ == "__main__":
         for l in f:
             if not l.startswith(":"):
                 split = l.split(" ")
-                analogy_tasks.append(AnalogyTask(split[1].lower(), split[0].lower(),
-                                                 split[2].lower(), split[3].rstrip().lower()))
+                if "GoogleNews" in model:
+                    analogy_tasks.append(AnalogyTask(split[1], split[0],
+                                                     split[2], split[3].rstrip()))
+                else:
+                    analogy_tasks.append(AnalogyTask(split[1].lower(), split[0].lower(),
+                                                     split[2].lower(), split[3].rstrip().lower()))
 
         correct_count = 0
         task_count = 0
         for task in analogy_tasks:
             if task_count % 1000 == 0:
                 print task_count,
+                sys.stdout.flush()
 
             # s = "%s - %s + %s = %s" % (task.plus1, task.minus1, task.plus2, task.answer)
 
@@ -45,4 +51,5 @@ if __name__ == "__main__":
             if most_similar[0] == task.answer:
                 correct_count += 1
 
-        print correct_count * 100.0 / task_count
+        print
+        print float(correct_count) / task_count
