@@ -13,7 +13,7 @@ class TopicModel(args: Args) {
         // alpha = 1 / 100, 1 / 10
         // beta - dependend on vocabulary size
         // longer documents? not all documents
-        val model = new ParallelTopicModel(numTopics, 1.0, 1.0 / args.numTopics)
+        val model = new ParallelTopicModel(numTopics, 256.0 / 100.0, 1.0 / args.numTopics)
         model.setOptimizeInterval(10)
         model.setBurninPeriod(100)
         model.addInstances(instances)
