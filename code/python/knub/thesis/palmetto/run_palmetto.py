@@ -18,7 +18,8 @@ def parse_topic_coherence(stdout):
 
 
 def main():
-    ssv_files = [file for file in os.listdir("/data/wikipedia/2016-06-21/topic-models") if file.endswith(".ssv")]
+    TOPIC_MODELS_DIR = "/data/wikipedia/2016-06-21/topic-models/"
+    ssv_files = [TOPIC_MODELS_DIR + file for file in os.listdir(TOPIC_MODELS_DIR) if file.endswith(".ssv")]
 
     for ssv_file in ssv_files:
         print ssv_file
@@ -27,6 +28,7 @@ def main():
              "-jar",
              "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar",
              "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd",
+             "C_V",
              ssv_file],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
