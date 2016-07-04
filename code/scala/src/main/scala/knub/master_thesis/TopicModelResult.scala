@@ -44,7 +44,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
 
             while (iterator.hasNext && word < numWords) {
                 val info = iterator.next()
-                out.append(dataAlphabet.lookupObject(info.getID) + ",")
+                out.append(dataAlphabet.lookupObject(info.getID) + " ")
                 word += 1
             }
             out.append("\n")

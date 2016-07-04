@@ -10,7 +10,7 @@ import scala.io.Source
 
 case class Args(
     mode: String = "",
-    modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
+    modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.256-1000.model",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     createNewModel: Boolean = false,
     stopWordsFileName: String = "../resources/stopwords.txt",
@@ -73,7 +73,7 @@ object Main {
     case class WordConcept(word: String, concept: String)
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val modelFile = new File(args.modelFileName)
-        val modelTextFile = new File(modelFile.getCanonicalPath + ".csv")
+        val modelTextFile = new File(modelFile.getCanonicalPath + ".ssv")
         val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
 
         writeTopWordsToTextFile(res, args, modelTextFile)
