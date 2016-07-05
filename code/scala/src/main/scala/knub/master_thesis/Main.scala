@@ -96,11 +96,14 @@ object Main {
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
+        println("Write top words")
         writeTopWordsToTextFile(res, args)
+        println("Concept categorization")
         conceptCategorization(res, args)
+        println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
-        findWordPairs(res, topicProbs)
-
+        println("Find word pairs")
+        findWordPairs(res, args, topicProbs)
 
         /*
          * WHAT TO DO:
@@ -109,17 +112,18 @@ object Main {
          */
     }
 
-    def findWordPairs(res: TopicModelResult, topicProbs: Array[Array[Double]]): Unit = {
+    def findWordPairs(res: TopicModelResult, args: Args, topicProbs: Array[Array[Double]]): Unit = {
+        val NR_WORDS = 10000
         val topQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator)
-            .maximumSize(100)
+            .maximumSize(NR_WORDS)
             .create[WordPair]()
         val bottomQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator(-1))
-            .maximumSize(100)
+            .maximumSize(NR_WORDS)
             .create[WordPair]()
 
         var time = System.currentTimeMillis()
 
-        val topWords = res.getTopWords(30).filter { word =>
+        val topWords = res.getTopWords(50).filter { word =>
             res.dataAlphabet.lookupIndex(word, false) >= 0
         }.toArray
 
@@ -154,17 +158,19 @@ object Main {
             }
         }
 
-        println("Most similar words:")
+
+        val modelFile = new File(args.modelFileName)
+        val similarsFile = new File(modelFile.getCanonicalPath + ".similars")
+        val pw = new PrintWriter(similarsFile)
         topQueue.toList.sortBy(_.divergence).foreach { wordPair =>
             val word1 = wordPair.word1
             val word2 = wordPair.word2
-            println(f"${wordPair.divergence}%.9f $word1 - $word2")
+            pw.println(f"${wordPair.divergence}%.9f\tSIM\t$word1\t$word2")
         }
-        println("Most dissimilar words:")
         bottomQueue.toList.sortBy(-_.divergence).foreach { wordPair =>
             val word1 = wordPair.word1
             val word2 = wordPair.word2
-            println(f"${wordPair.divergence}%.9f $word1 - $word2")
+            pw.println(f"${wordPair.divergence}%.9f\tDISSIM\t$word1\t$word2")
         }
     }
 
@@ -213,7 +219,7 @@ object Main {
         val modelFile = new File(args.modelFileName)
         val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
 
-        val out = new StringBuilder()
+        val pw = new PrintWriter(purityTextFile)
         val conceptCategorizationFile =
             args.conceptCategorizationFileName
         val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
@@ -224,7 +230,7 @@ object Main {
         val purities = Array(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         concepts.foreach { case (concept, wordConcepts) =>
             val words = wordConcepts.map(_.word)
-            out.append(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}\n")
+            pw.println(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}")
             for (n <- 1 to 5) {
                 val wordTopics = words.map { word =>
                     (word, res.findBestTopicsForWord(word, nrTopics = n))
@@ -239,22 +245,19 @@ object Main {
                 val conceptPurity = topics.maxMultiplicity * 100.0 / words.length
                 purities(n) += conceptPurity * words.size
 
-                out.append(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords\n")
+                pw.println(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords")
             }
         }
-        out.append("#" * 100 + "\n")
+        pw.println("#" * 100)
         for (n <- 1 to 5) {
             purities(n) = purities(n) / concepts.values.map(_.size).sum
         }
         for (n <- 1 to 5) {
-            out.append(f"$n-purity: ${purities(n)}%.1f %%\n")
+            pw.println(f"$n-purity: ${purities(n)}%.1f %%")
         }
-        out.append("#" * 100 + "\n")
-        out.append(purities(1))
+        pw.println("#" * 100)
+        pw.println(purities(1))
 
-
-        val pw = new PrintWriter(purityTextFile)
-        pw.write(out.toString())
         pw.close()
     }
 
