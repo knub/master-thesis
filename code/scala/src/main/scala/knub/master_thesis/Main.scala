@@ -4,7 +4,6 @@ import java.io._
 import java.util.Comparator
 
 import cc.mallet.topics.ParallelTopicModel
-import cc.mallet.util.Maths
 import com.google.common.collect.MinMaxPriorityQueue
 
 import scala.collection.JavaConversions._
@@ -84,14 +83,14 @@ object Main {
 
     case class WordConcept(word: String, concept: String)
     case class WordPair(word1: String, word2: String, divergence: Double)
-    class WordPairComparator extends Comparator[WordPair] {
+    class WordPairComparator(ascending: Int = 1) extends Comparator[WordPair] {
         override def compare(wp1: WordPair, wp2: WordPair): Int = {
             if (wp1.divergence == wp2.divergence)
                 0
             else if (wp1.divergence < wp2.divergence)
-                -1
+                -1 * ascending
             else
-                +1
+                +1 * ascending
         }
     }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
@@ -111,8 +110,10 @@ object Main {
     }
 
     def findWordPairs(res: TopicModelResult, topicProbs: Array[Array[Double]]): Unit = {
-        val wordPairComparator = new WordPairComparator
-        val priorityQueue = MinMaxPriorityQueue.orderedBy(wordPairComparator)
+        val topQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator)
+            .maximumSize(100)
+            .create[WordPair]()
+        val bottomQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator(-1))
             .maximumSize(100)
             .create[WordPair]()
 
@@ -148,12 +149,19 @@ object Main {
                 val wordJ = topWords(j)
                 val idxJ = alphabetMapping(wordJ)
                 val divergence: Double = jensenShannonDivergence(topicProbs(idxI), topicProbs(idxJ))
-                priorityQueue.add(WordPair(wordI, wordJ, divergence))
+                topQueue.add(WordPair(wordI, wordJ, divergence))
+                bottomQueue.add(WordPair(wordI, wordJ, divergence))
             }
         }
 
         println("Most similar words:")
-        priorityQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+        topQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+            val word1 = wordPair.word1
+            val word2 = wordPair.word2
+            println(f"${wordPair.divergence}%.9f $word1 - $word2")
+        }
+        println("Most dissimilar words:")
+        bottomQueue.toList.sortBy(-_.divergence).foreach { wordPair =>
             val word1 = wordPair.word1
             val word2 = wordPair.word2
             println(f"${wordPair.divergence}%.9f $word1 - $word2")
