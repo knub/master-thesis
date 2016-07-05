@@ -4,6 +4,7 @@ import java.io._
 import java.util.Comparator
 
 import cc.mallet.topics.ParallelTopicModel
+import cc.mallet.util.Maths
 import com.google.common.collect.MinMaxPriorityQueue
 
 import scala.collection.JavaConversions._
@@ -84,7 +85,14 @@ object Main {
     case class WordConcept(word: String, concept: String)
     case class WordPair(word1: String, word2: String, divergence: Double)
     class WordPairComparator extends Comparator[WordPair] {
-        override def compare(wp1: WordPair, wp2: WordPair): Int = Math.signum(wp1.divergence - wp2.divergence).toInt
+        override def compare(wp1: WordPair, wp2: WordPair): Int = {
+            if (wp1.divergence == wp2.divergence)
+                0
+            else if (wp1.divergence < wp2.divergence)
+                -1
+            else
+                +1
+        }
     }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
@@ -92,7 +100,7 @@ object Main {
         writeTopWordsToTextFile(res, args)
         conceptCategorization(res, args)
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
-        findWordPairs(res, frequentWords, topicProbs)
+        findWordPairs(res, topicProbs)
 
 
         /*
@@ -102,35 +110,45 @@ object Main {
          */
     }
 
-    def findWordPairs(res: TopicModelResult, frequentWords: Array[String], topicProbs: Array[Array[Double]]): Unit = {
+    def findWordPairs(res: TopicModelResult, topicProbs: Array[Array[Double]]): Unit = {
         val wordPairComparator = new WordPairComparator
         val priorityQueue = MinMaxPriorityQueue.orderedBy(wordPairComparator)
             .maximumSize(100)
             .create[WordPair]()
 
-        val wordCount = 50000
-//        val wordCount = frequentWords.length
-        val topicCount = res.model.numTopics
-        for (i <- 0 until wordCount) {
-            if (i % 1000 == 0)
-                println(s"${100.0 * i / wordCount} %")
-            val wordI = frequentWords(i)
-            val idxI = res.dataAlphabet.lookupIndex(wordI, false)
-            if (idxI != -1) {
-                for (j <- 0 until i) {
-                    val wordJ = frequentWords(j)
-                    val idxJ = res.dataAlphabet.lookupIndex(wordJ, false)
-                    if (idxJ != -1) {
-                        val m = new Array[Double](topicCount)
-                        val p = topicProbs(idxI)
-                        val q = topicProbs(idxJ)
-                        for (k <- 0 until topicCount)
-                            m(k) = 0.5 * (p(k) + q(k))
+        var time = System.currentTimeMillis()
 
-                        val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
-                        priorityQueue.add(WordPair(wordI, wordJ, divergence))
-                    }
+        val topWords = res.getTopWords(30).filter { word =>
+            res.dataAlphabet.lookupIndex(word, false) >= 0
+        }.toArray
+
+        println(s"Top-words: ${topWords.length}")
+
+        // precompute alphabet mapping for performance (lookupIndex uses locks)
+        val alphabetMapping = mutable.Map[String, Int]()
+        topWords.foreach { word =>
+            alphabetMapping += word -> res.dataAlphabet.lookupIndex(word, false)
+        }
+
+        val wordCount = topWords.length
+        val totalNrPairs = wordCount.toLong * (wordCount - 1) / 2 // all combinations of size 2
+
+        var c = 0
+        for (i <- 0 until wordCount) {
+            val wordI = topWords(i)
+            val idxI = alphabetMapping(wordI)
+            for (j <- 0 until i) {
+                if (c % (totalNrPairs / 1000) == 0) {
+                    val secondsSinceLast = Math.round((System.currentTimeMillis() - time) / 1000.0)
+                    time = System.currentTimeMillis()
+                    println(f"${100.0 * c / totalNrPairs}%.1f %% ($secondsSinceLast secs)")
                 }
+                c += 1
+
+                val wordJ = topWords(j)
+                val idxJ = alphabetMapping(wordJ)
+                val divergence: Double = jensenShannonDivergence(topicProbs(idxI), topicProbs(idxJ))
+                priorityQueue.add(WordPair(wordI, wordJ, divergence))
             }
         }
 
@@ -139,9 +157,17 @@ object Main {
             val word1 = wordPair.word1
             val word2 = wordPair.word2
             println(f"${wordPair.divergence}%.9f $word1 - $word2")
-            println(s"${topicProbs(res.dataAlphabet.lookupIndex(word1)).deep}")
-            println(s"${topicProbs(res.dataAlphabet.lookupIndex(word2)).deep}")
         }
+    }
+
+    def jensenShannonDivergence(p: Array[Double], q: Array[Double]): Double = {
+        val m = new Array[Double](p.length)
+        for (k <- p.indices)
+            m(k) = 0.5 * (p(k) + q(k))
+
+        val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
+        //                        val divergence = Maths.jensenShannonDivergence(p, q)
+        divergence
     }
 
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
@@ -150,7 +176,6 @@ object Main {
 
         val m = res.getWordTopics
         println(s"Topics: ${m(0).length}")
-        println(s"Tokens: ${res.dataAlphabet.iterator().size}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
         val pw = new PrintWriter(topicProbsFile)

@@ -4,7 +4,9 @@ import java.io.{File, PrintWriter}
 
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{FeatureSequence, Instance, InstanceList}
+
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 class TopicModelResult(val model: ParallelTopicModel) {
     def save(fileName: String): Unit = {
@@ -79,6 +81,28 @@ class TopicModelResult(val model: ParallelTopicModel) {
             out.append("\n")
         }
         out.toString
+    }
+
+    /**
+      * Returns the set of the best words from all topics
+      * @param numWords How many words for each topic
+      * @return Set of the highest scoring words from all topics
+      */
+    def getTopWords(numWords: Int): mutable.Set[String] = {
+        val s = mutable.Set[String]()
+        val topicSortedWords = model.getSortedWords
+        for (topic <- 0 until model.numTopics) {
+            val sortedWords = topicSortedWords.get(topic)
+            var word = 0
+            val iterator = sortedWords.iterator()
+
+            while (iterator.hasNext && word < numWords) {
+                val info = iterator.next()
+                s += dataAlphabet.lookupObject(info.getID).asInstanceOf[String]
+                word += 1
+            }
+        }
+        s
     }
 
     def findBestTopicsForWord(word: String, nrTopics: Int = 3): Array[Int] = {
