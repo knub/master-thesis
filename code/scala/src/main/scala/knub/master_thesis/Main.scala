@@ -109,6 +109,7 @@ object Main {
          * WHAT TO DO:
          * Find variance of words with highest and lowest variance
          * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
+         * For each word, find similars and dissimilars
          */
     }
 
