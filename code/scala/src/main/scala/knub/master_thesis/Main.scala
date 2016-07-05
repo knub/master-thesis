@@ -92,7 +92,7 @@ object Main {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
         writeTopWordsToTextFile(res, args)
         conceptCategorization(res, args)
-        val topicProbs = writeTopicProbsToFile(res, args)
+        val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
 
         val wordPairComparator = new WordPairComparator
         val priorityQueue = MinMaxPriorityQueue.orderedBy(wordPairComparator)
@@ -146,7 +146,7 @@ object Main {
 //            println(it)
     }
 
-    def writeTopicProbsToFile(res: TopicModelResult, args: Args): Array[Array[Double]] = {
+    def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
         val modelFile = new File(args.modelFileName)
         val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs")
 
@@ -158,10 +158,12 @@ object Main {
         val pw = new PrintWriter(topicProbsFile)
         pw.write(s"word,${(0 to res.model.numTopics).mkString(",")},mean,stddev\n")
         res.dataAlphabet.iterator().foreach { word =>
-            val idx = res.dataAlphabet.lookupIndex(word)
-            val topicProbs = m(idx)
+            if (frequentWords.contains(word)) {
+                val idx = res.dataAlphabet.lookupIndex(word)
+                val topicProbs = m(idx)
 
-            pw.write(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
+                pw.write(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
+            }
         }
 
         pw.close()
