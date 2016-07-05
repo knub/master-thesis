@@ -99,24 +99,28 @@ object Main {
             .maximumSize(100)
             .create[WordPair]()
 
-        val wordCount = frequentWords.length
+        val wordCount = 50000
+//        val wordCount = frequentWords.length
         val topicCount = res.model.numTopics
         for (i <- 0 until wordCount) {
-            println(s"${100.0 * i / wordCount} %")
-            for (j <- 0 until i) {
-                val wordI = frequentWords(i)
-                val wordJ = frequentWords(j)
-                val idxI = res.dataAlphabet.lookupIndex(wordI, false)
-                val idxJ = res.dataAlphabet.lookupIndex(wordJ, false)
-                if (idxI != -1 && idxJ != -1) {
-                    val m = new Array[Double](topicCount)
-                    val p = topicProbs(idxI)
-                    val q = topicProbs(idxJ)
-                    for (k <- 0 until topicCount)
-                        m(k) = 0.5 * (p(k) + q(k))
+            if (i % 1000 == 0)
+                println(s"${100.0 * i / wordCount} %")
+            val wordI = frequentWords(i)
+            val idxI = res.dataAlphabet.lookupIndex(wordI, false)
+            if (idxI != -1) {
+                for (j <- 0 until i) {
+                    val wordJ = frequentWords(j)
+                    val idxJ = res.dataAlphabet.lookupIndex(wordJ, false)
+                    if (idxJ != -1) {
+                        val m = new Array[Double](topicCount)
+                        val p = topicProbs(idxI)
+                        val q = topicProbs(idxJ)
+                        for (k <- 0 until topicCount)
+                            m(k) = 0.5 * (p(k) + q(k))
 
-                    val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
-                    priorityQueue.add(WordPair(wordI, wordJ, divergence))
+                        val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
+                        priorityQueue.add(WordPair(wordI, wordJ, divergence))
+                    }
                 }
             }
         }
@@ -156,13 +160,13 @@ object Main {
         println(s"Tokens: ${res.dataAlphabet.size}")
 
         val pw = new PrintWriter(topicProbsFile)
-        pw.write(s"word,${(0 to res.model.numTopics).mkString(",")},mean,stddev\n")
+        pw.write(s"word,${(0 until res.model.numTopics).mkString(",")}\n")
         res.dataAlphabet.iterator().foreach { word =>
             if (frequentWords.contains(word)) {
                 val idx = res.dataAlphabet.lookupIndex(word)
                 val topicProbs = m(idx)
 
-                pw.write(s"$word,${topicProbs.mkString(",")},${mean(topicProbs)},${stddev(topicProbs)}\n")
+                pw.write(s"$word,${topicProbs.mkString(",")}\n")
             }
         }
 
