@@ -3,9 +3,7 @@ package knub.master_thesis
 import java.io._
 import java.util.Comparator
 
-import breeze.linalg.DenseMatrix
 import cc.mallet.topics.ParallelTopicModel
-import breeze.stats._
 import com.google.common.collect.MinMaxPriorityQueue
 
 import scala.collection.JavaConversions._
@@ -90,10 +88,21 @@ object Main {
     }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
+
         writeTopWordsToTextFile(res, args)
         conceptCategorization(res, args)
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
+        findWordPairs(res, frequentWords, topicProbs)
 
+
+        /*
+         * WHAT TO DO:
+         * Find variance of words with highest and lowest variance
+         * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
+         */
+    }
+
+    def findWordPairs(res: TopicModelResult, frequentWords: Array[String], topicProbs: Array[Array[Double]]): Unit = {
         val wordPairComparator = new WordPairComparator
         val priorityQueue = MinMaxPriorityQueue.orderedBy(wordPairComparator)
             .maximumSize(100)
@@ -133,21 +142,6 @@ object Main {
             println(s"${topicProbs(res.dataAlphabet.lookupIndex(word1)).deep}")
             println(s"${topicProbs(res.dataAlphabet.lookupIndex(word2)).deep}")
         }
-
-//        res.showTopWordsPerTopics()
-
-        /*
-         * WHAT TO DO:
-         * Find variance of words with highest and lowest variance
-         * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
-         */
-
-
-
-
-
-//        for (it <- res.dataAlphabet.iterator())
-//            println(it)
     }
 
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
