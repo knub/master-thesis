@@ -5,12 +5,15 @@ import java.util.regex.Pattern
 
 import cc.mallet.pipe.{Pipe, SerialPipes}
 import cc.mallet.pipe._
+import knub.master_thesis.preprocessing.UseFixedVocabulary
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.io.Source
 
 object PreprocessingPipe {
     def pipeList(stopWordsFileName: String): mutable.ArrayBuffer[Pipe] = {
+        val vocabulary = Source.fromFile("/san2/data/wikipedia/2016-06-21/vocab.txt").getLines().toSet
 
         mutable.ArrayBuffer[Pipe](
             new CharSequenceLowercase(),
@@ -20,6 +23,7 @@ object PreprocessingPipe {
 //            new UseOnlyFirstNWordsOfDocument(1000),
             new TokenSequenceRemoveStopwords(
                 new File(stopWordsFileName), "UTF-8", false, false, false),
+            new UseFixedVocabulary(vocabulary),
             new TokenSequence2FeatureSequence()
         )
     }
