@@ -1,6 +1,5 @@
 import subprocess
 
-
 def concept_categorization(num_topics, num_iterations):
     p = subprocess.Popen(
         ["java",

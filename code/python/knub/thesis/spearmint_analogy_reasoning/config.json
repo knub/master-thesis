@@ -1,0 +1,40 @@
+{
+    "language"        : "PYTHON",
+    "main-file"       : "analogy_reasoning.py",
+    "experiment-name" : "analogy_reasoning",
+    "likelihood"      : "GAUSSIAN",
+    "resources": {
+        "my-machine": {
+            "max-concurrent": 1,
+            "max-finished-jobs": 50
+        }
+    },
+    "polling-time": 1,
+    "variables" : {
+        "size" : {
+            "type" : "INT",
+            "size" : 1,
+            "min"  : 50,
+            "max"  : 600
+        },
+        "window" : {
+            "type" : "INT",
+            "size" : 1,
+            "min"  : 3,
+            "max"  : 8
+        },
+        "negative" : {
+            "type" : "INT",
+            "size" : 1,
+            "min"  : 5,
+            "max"  : 20
+        },
+        "sample" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 0.01
+        }
+    }
+}
+
