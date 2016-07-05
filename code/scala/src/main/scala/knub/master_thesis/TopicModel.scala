@@ -1,5 +1,6 @@
 package knub.master_thesis
 
+import cc.mallet.pipe.InstanceListTrimFeaturesByCount
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.InstanceList
 

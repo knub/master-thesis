@@ -89,31 +89,23 @@ object Main {
         override def compare(wp1: WordPair, wp2: WordPair): Int = Math.signum(wp1.divergence - wp2.divergence).toInt
     }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
-        val modelFile = new File(args.modelFileName)
-        val modelTextFile = new File(modelFile.getCanonicalPath + ".ssv")
-        val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
-        val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs")
-
-
-//        writeTopWordsToTextFile(res, args, modelTextFile)
-//        conceptCategorization(res, args, purityTextFile)
-        val topicProbs = writeTopicProbsToFile(res, topicProbsFile)
-
-        val words = Source.fromFile("/home/knub/Repositories/master-thesis/data/vocab.txt").getLines().toList
-
+        val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
+        writeTopWordsToTextFile(res, args)
+        conceptCategorization(res, args)
+        val topicProbs = writeTopicProbsToFile(res, args)
 
         val wordPairComparator = new WordPairComparator
         val priorityQueue = MinMaxPriorityQueue.orderedBy(wordPairComparator)
             .maximumSize(100)
             .create[WordPair]()
 
-        val wordCount = words.length
+        val wordCount = frequentWords.length
         val topicCount = res.model.numTopics
         for (i <- 0 until wordCount) {
             println(s"${100.0 * i / wordCount} %")
             for (j <- 0 until i) {
-                val wordI = words(i)
-                val wordJ = words(j)
+                val wordI = frequentWords(i)
+                val wordJ = frequentWords(j)
                 val idxI = res.dataAlphabet.lookupIndex(wordI, false)
                 val idxJ = res.dataAlphabet.lookupIndex(wordJ, false)
                 if (idxI != -1 && idxJ != -1) {
@@ -154,7 +146,10 @@ object Main {
 //            println(it)
     }
 
-    def writeTopicProbsToFile(res: TopicModelResult, topicProbsFile: File): Array[Array[Double]] = {
+    def writeTopicProbsToFile(res: TopicModelResult, args: Args): Array[Array[Double]] = {
+        val modelFile = new File(args.modelFileName)
+        val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs")
+
         val m = res.getWordTopics
         println(s"Topics: ${m(0).length}")
         println(s"Tokens: ${res.dataAlphabet.iterator().size}")
@@ -173,13 +168,18 @@ object Main {
         m
     }
 
-    def writeTopWordsToTextFile(res: TopicModelResult, args: Args, modelTextFile: File): Unit = {
+    def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
+        val modelFile = new File(args.modelFileName)
+        val modelTextFile = new File(modelFile.getCanonicalPath + ".ssv")
         val pw = new PrintWriter(modelTextFile)
         pw.write(res.displayTopWords(10))
         pw.close()
     }
 
-    def conceptCategorization(res: TopicModelResult, args: Args, purityTextFile: File): Unit = {
+    def conceptCategorization(res: TopicModelResult, args: Args): Unit = {
+        val modelFile = new File(args.modelFileName)
+        val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
+
         val out = new StringBuilder()
         val conceptCategorizationFile =
             args.conceptCategorizationFileName

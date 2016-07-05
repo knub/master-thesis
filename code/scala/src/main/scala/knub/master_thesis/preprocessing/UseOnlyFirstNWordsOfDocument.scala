@@ -1,4 +1,4 @@
-package knub.master_thesis
+package knub.master_thesis.preprocessing
 
 import cc.mallet.pipe.Pipe
 import cc.mallet.types.{Instance, TokenSequence}
