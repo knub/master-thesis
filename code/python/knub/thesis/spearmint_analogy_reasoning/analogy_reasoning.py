@@ -21,6 +21,7 @@ def analogy_reasoning(size, window, negative, sample, job_id):
 
 
 def main(job_id, params):
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     print "params: ", params, " job_id: ", job_id
     mkl.set_num_threads(3)
     return analogy_reasoning(params["size"][0],
