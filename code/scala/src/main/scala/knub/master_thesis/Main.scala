@@ -84,7 +84,7 @@ object Main {
     }
 
     case class WordConcept(word: String, concept: String)
-    case class WordPair(word1Idx: Int, word2Idx: Int, divergence: Double)
+    case class WordPair(word1: String, word2: String, divergence: Double)
     class WordPairComparator extends Comparator[WordPair] {
         override def compare(wp1: WordPair, wp2: WordPair): Int = Math.signum(wp1.divergence - wp2.divergence).toInt
     }
@@ -94,9 +94,12 @@ object Main {
         val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
         val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs")
 
+
 //        writeTopWordsToTextFile(res, args, modelTextFile)
 //        conceptCategorization(res, args, purityTextFile)
         val topicProbs = writeTopicProbsToFile(res, topicProbsFile)
+
+        val words = Source.fromFile("/home/knub/Repositories/master-thesis/data/vocab.txt").getLines().toList
 
 
         val wordPairComparator = new WordPairComparator
@@ -104,28 +107,35 @@ object Main {
             .maximumSize(100)
             .create[WordPair]()
 
-        val wordCount = topicProbs.length
+        val wordCount = words.length
         val topicCount = res.model.numTopics
         for (i <- 0 until wordCount) {
             println(s"${100.0 * i / wordCount} %")
             for (j <- 0 until i) {
-                val m = new Array[Double](topicCount)
-                val p = topicProbs(i)
-                val q = topicProbs(j)
-                for (k <- 0 until topicCount)
-                    m(k) = 0.5 * (p(k) + q(k))
-                val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
-                priorityQueue.add(WordPair(i, j, divergence))
+                val wordI = words(i)
+                val wordJ = words(j)
+                val idxI = res.dataAlphabet.lookupIndex(wordI, false)
+                val idxJ = res.dataAlphabet.lookupIndex(wordJ, false)
+                if (idxI != -1 && idxJ != -1) {
+                    val m = new Array[Double](topicCount)
+                    val p = topicProbs(idxI)
+                    val q = topicProbs(idxJ)
+                    for (k <- 0 until topicCount)
+                        m(k) = 0.5 * (p(k) + q(k))
+
+                    val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
+                    priorityQueue.add(WordPair(wordI, wordJ, divergence))
+                }
             }
         }
 
         println("Most similar words:")
-        priorityQueue.toList.sortBy(_.divergence).take(1000).foreach { wordPair =>
-            val word1 = res.dataAlphabet.lookupObject(wordPair.word1Idx)
-            val word2 = res.dataAlphabet.lookupObject(wordPair.word2Idx)
+        priorityQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+            val word1 = wordPair.word1
+            val word2 = wordPair.word2
             println(f"${wordPair.divergence}%.9f $word1 - $word2")
-            println(s"${topicProbs(wordPair.word1Idx).deep}")
-            println(s"${topicProbs(wordPair.word2Idx).deep}")
+            println(s"${topicProbs(res.dataAlphabet.lookupIndex(word1)).deep}")
+            println(s"${topicProbs(res.dataAlphabet.lookupIndex(word2)).deep}")
         }
 
 //        res.showTopWordsPerTopics()
