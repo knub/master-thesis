@@ -96,10 +96,10 @@ object Main {
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
-        println("Write top words")
-        writeTopWordsToTextFile(res, args)
-        println("Concept categorization")
-        conceptCategorization(res, args)
+//        println("Write top words")
+//        writeTopWordsToTextFile(res, args)
+//        println("Concept categorization")
+//        conceptCategorization(res, args)
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         println("Find word pairs")
@@ -113,49 +113,39 @@ object Main {
          */
     }
 
-    def findWordPairs(res: TopicModelResult, args: Args, frequentWords: Array[String], topicProbs: Array[Array[Double]]): Unit = {
-        var time = System.currentTimeMillis()
+    def findWordPairs(res: TopicModelResult, args: Args, frequentWordsRaw: Array[String], topicProbs: Array[Array[Double]]): Unit = {
+        val topWordsRaw = res.getTopWords(40)
 
-        val topWords = res.getTopWords(50).filter { word =>
-            res.dataAlphabet.lookupIndex(word, false) >= 0
-        }
+        val topWordsAlphabet = mutable.Map[String, Int]()
+        topWordsRaw.foreach { word => topWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
+        val frequentWordsAlphabet = mutable.Map[String, Int]()
+        frequentWordsRaw.foreach { word => frequentWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
 
-        println(s"Top-words: ${topWords.length}")
+        val topWords = topWordsRaw.filter { word => topWordsAlphabet(word) >= 0}
+        val frequentWords = frequentWordsRaw.filter { word => frequentWordsAlphabet(word) >= 0}
 
-        // precompute alphabet mapping for performance (lookupIndex uses locks)
-        val alphabetMapping = mutable.Map[String, Int]()
-        topWords.foreach { word =>
-            alphabetMapping += word -> res.dataAlphabet.lookupIndex(word, false)
-        }
+        val topWordsCount = topWords.length
+        val frequentWordsCount = frequentWords.length
+        println(s"Top-words: $topWordsCount")
+        println(s"Frequent-words: $frequentWordsCount")
 
-        val wordCount = topWords.length
-        val frequentWordCount = frequentWords.length
-        val totalNrPairs = wordCount.toLong * frequentWordCount.toLong
+        val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong)
+        val pw: PrintWriter = createFileWithExtension(args, ".similars")
 
-
-        val modelFile = new File(args.modelFileName)
-        val similarsFile = new File(modelFile.getCanonicalPath + ".similars")
-        val pw = new PrintWriter(similarsFile)
-        var c = 0L
-        for (i <- 0 until wordCount) {
+        for (i <- 0 until topWordsCount) {
             val wordI = topWords(i)
-            val idxI = alphabetMapping(wordI)
+            val idxI = topWordsAlphabet(wordI)
             val probsI = topicProbs(idxI)
             val topQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator)
                 .maximumSize(10)
                 .create[WordPair]()
 
-            for (j <- 0 until frequentWordCount) {
-                if (c % (totalNrPairs / 10) == 0) {
-                    val secondsSinceLast = Math.round((System.currentTimeMillis() - time) / 1000.0)
-                    time = System.currentTimeMillis()
-                    println(f"${100.0 * c / totalNrPairs}%.0f %% ($secondsSinceLast secs)")
-                }
-                c += 1
+            for (j <- 0 until frequentWordsCount) {
+                progress.report_progress()
 
                 val wordJ = frequentWords(j)
-                val idxJ = alphabetMapping.getOrElse(wordJ, -1)
-                if (idxJ != -1) {
+                if (wordI != wordJ) {
+                    val idxJ = frequentWordsAlphabet(wordJ)
                     val probsJ = topicProbs(idxJ)
                     val divergence: Double = jensenShannonDivergence(probsI, probsJ)
                     topQueue.add(WordPair(wordI, wordJ, divergence))
@@ -168,6 +158,13 @@ object Main {
             }
         }
         pw.close()
+    }
+
+    def createFileWithExtension(args: Args, extension: String): PrintWriter = {
+        val modelFile = new File(args.modelFileName)
+        val similarsFile = new File(modelFile.getCanonicalPath + extension)
+        val pw = new PrintWriter(similarsFile)
+        pw
     }
 
     def jensenShannonDivergence(p: Array[Double], q: Array[Double]): Double = {
