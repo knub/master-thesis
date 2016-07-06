@@ -118,7 +118,7 @@ object Main {
 
         val topWords = res.getTopWords(50).filter { word =>
             res.dataAlphabet.lookupIndex(word, false) >= 0
-        }.toArray
+        }
 
         println(s"Top-words: ${topWords.length}")
 

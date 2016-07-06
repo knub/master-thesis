@@ -88,8 +88,8 @@ class TopicModelResult(val model: ParallelTopicModel) {
       * @param numWords How many words for each topic
       * @return Set of the highest scoring words from all topics
       */
-    def getTopWords(numWords: Int): mutable.Set[String] = {
-        val s = mutable.Set[String]()
+    def getTopWords(numWords: Int): Array[String] = {
+        val s = mutable.ArrayBuffer[String]()
         val topicSortedWords = model.getSortedWords
         for (topic <- 0 until model.numTopics) {
             val sortedWords = topicSortedWords.get(topic)
@@ -102,7 +102,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
                 word += 1
             }
         }
-        s
+        s.toArray
     }
 
     def findBestTopicsForWord(word: String, nrTopics: Int = 3): Array[Int] = {
