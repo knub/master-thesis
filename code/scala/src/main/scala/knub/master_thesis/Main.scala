@@ -156,7 +156,7 @@ object Main {
                 c += 1
 
                 val wordJ = frequentWords(j)
-                val idxJ = alphabetMapping(wordJ)
+                val idxJ = alphabetMapping.getOrElse(wordJ, -1)
                 if (idxJ != -1) {
                     val probsJ = topicProbs(idxJ)
                     val divergence: Double = jensenShannonDivergence(probsI, probsJ)
