@@ -69,7 +69,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
 
         val out = new StringBuilder()
         val topicSortedWords = model.getSortedWords
-        out.append(s"topic topic-count ${(0 until 10).map(_.toString).mkString(" ")}")
+        out.append(s"topic topic-count ${(0 until 10).map(_.toString).mkString(" ")}\n")
 //        for (topic <- 0 until model.numTopics) {
         for ((tokenCount, topic) <- orderedTopicIndices) {
             val sortedWords = topicSortedWords.get(topic)
