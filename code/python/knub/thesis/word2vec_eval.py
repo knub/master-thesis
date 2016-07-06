@@ -29,13 +29,16 @@ def eval_word2vec(word2vec, model=""):
 
         # s = "%s - %s + %s = %s" % (task.plus1, task.minus1, task.plus2, task.answer)
 
-        most_similars = word2vec.most_similar(positive=[task.plus1, task.plus2], negative=[task.minus1], topn=4)
-        ignore_words = {task.plus1, task.plus2, task.minus1}
-        most_similar = next((word, prob) for word, prob in most_similars if word not in ignore_words)
+        try:
+            most_similars = word2vec.most_similar(positive=[task.plus1, task.plus2], negative=[task.minus1], topn=4)
+            ignore_words = {task.plus1, task.plus2, task.minus1}
+            most_similar = next((word, prob) for word, prob in most_similars if word not in ignore_words)
 
-        task_count += 1
-        if most_similar[0] == task.answer:
-            correct_count += 1
+            task_count += 1
+            if most_similar[0] == task.answer:
+                correct_count += 1
+        except KeyError:
+            pass
     return float(correct_count) / task_count
 
 
