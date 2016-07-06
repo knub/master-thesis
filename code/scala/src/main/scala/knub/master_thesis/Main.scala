@@ -146,10 +146,10 @@ object Main {
                 .create[WordPair]()
 
             for (j <- 0 until frequentWordCount) {
-                if (c % (totalNrPairs / 1000) == 0) {
+                if (c % (totalNrPairs / 10) == 0) {
                     val secondsSinceLast = Math.round((System.currentTimeMillis() - time) / 1000.0)
                     time = System.currentTimeMillis()
-                    println(f"${100.0 * c / totalNrPairs}%.1f %% ($secondsSinceLast secs)")
+                    println(f"${100.0 * c / totalNrPairs}%.0f %% ($secondsSinceLast secs)")
                 }
                 c += 1
 
