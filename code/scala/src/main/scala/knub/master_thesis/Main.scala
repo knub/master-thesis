@@ -114,8 +114,6 @@ object Main {
     }
 
     def findWordPairs(res: TopicModelResult, args: Args, frequentWords: Array[String], topicProbs: Array[Array[Double]]): Unit = {
-        val NR_WORDS = 10000
-
         var time = System.currentTimeMillis()
 
         val topWords = res.getTopWords(50).filter { word =>
