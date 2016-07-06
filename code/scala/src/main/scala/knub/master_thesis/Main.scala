@@ -103,7 +103,7 @@ object Main {
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         println("Find word pairs")
-        findWordPairs(res, args, topicProbs)
+        findWordPairs(res, args, frequentWords, topicProbs)
 
         /*
          * WHAT TO DO:
@@ -113,14 +113,8 @@ object Main {
          */
     }
 
-    def findWordPairs(res: TopicModelResult, args: Args, topicProbs: Array[Array[Double]]): Unit = {
+    def findWordPairs(res: TopicModelResult, args: Args, frequentWords: Array[String], topicProbs: Array[Array[Double]]): Unit = {
         val NR_WORDS = 10000
-        val topQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator)
-            .maximumSize(NR_WORDS)
-            .create[WordPair]()
-        val bottomQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator(-1))
-            .maximumSize(NR_WORDS)
-            .create[WordPair]()
 
         var time = System.currentTimeMillis()
 
@@ -137,13 +131,23 @@ object Main {
         }
 
         val wordCount = topWords.length
-        val totalNrPairs = wordCount.toLong * (wordCount - 1) / 2 // all combinations of size 2
+        val frequentWordCount = frequentWords.length
+        val totalNrPairs = wordCount.toLong * frequentWordCount
 
+
+        val modelFile = new File(args.modelFileName)
+        val similarsFile = new File(modelFile.getCanonicalPath + ".similars")
+        val pw = new PrintWriter(similarsFile)
         var c = 0
         for (i <- 0 until wordCount) {
             val wordI = topWords(i)
             val idxI = alphabetMapping(wordI)
-            for (j <- 0 until i) {
+            val probsI = topicProbs(idxI)
+            val topQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator)
+                .maximumSize(10)
+                .create[WordPair]()
+
+            for (j <- 0 until frequentWordCount) {
                 if (c % (totalNrPairs / 1000) == 0) {
                     val secondsSinceLast = Math.round((System.currentTimeMillis() - time) / 1000.0)
                     time = System.currentTimeMillis()
@@ -151,28 +155,21 @@ object Main {
                 }
                 c += 1
 
-                val wordJ = topWords(j)
+                val wordJ = frequentWords(j)
                 val idxJ = alphabetMapping(wordJ)
-                val divergence: Double = jensenShannonDivergence(topicProbs(idxI), topicProbs(idxJ))
-                topQueue.add(WordPair(wordI, wordJ, divergence))
-                bottomQueue.add(WordPair(wordI, wordJ, divergence))
+                if (idxJ != -1) {
+                    val probsJ = topicProbs(idxJ)
+                    val divergence: Double = jensenShannonDivergence(probsI, probsJ)
+                    topQueue.add(WordPair(wordI, wordJ, divergence))
+                }
+            }
+            topQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+                val word1 = wordPair.word1
+                val word2 = wordPair.word2
+                pw.println(f"${wordPair.divergence}%.9f\tSIM\t$word1\t$word2")
             }
         }
-
-
-        val modelFile = new File(args.modelFileName)
-        val similarsFile = new File(modelFile.getCanonicalPath + ".similars")
-        val pw = new PrintWriter(similarsFile)
-        topQueue.toList.sortBy(_.divergence).foreach { wordPair =>
-            val word1 = wordPair.word1
-            val word2 = wordPair.word2
-            pw.println(f"${wordPair.divergence}%.9f\tSIM\t$word1\t$word2")
-        }
-        bottomQueue.toList.sortBy(-_.divergence).foreach { wordPair =>
-            val word1 = wordPair.word1
-            val word2 = wordPair.word2
-            pw.println(f"${wordPair.divergence}%.9f\tDISSIM\t$word1\t$word2")
-        }
+        pw.close()
     }
 
     def jensenShannonDivergence(p: Array[Double], q: Array[Double]): Double = {
