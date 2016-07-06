@@ -9,6 +9,7 @@ import com.google.common.collect.MinMaxPriorityQueue
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.io.Source
+import scala.util.Random
 
 case class Args(
     mode: String = "",
@@ -114,48 +115,37 @@ object Main {
     }
 
     def findWordPairs(res: TopicModelResult, args: Args, frequentWordsRaw: Array[String], topicProbs: Array[Array[Double]]): Unit = {
-        val topWordsRaw = res.getTopWords(10)
-
-        val topWordsAlphabet = mutable.Map[String, Int]()
-        topWordsRaw.foreach { word => topWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
         val frequentWordsAlphabet = mutable.Map[String, Int]()
         frequentWordsRaw.foreach { word => frequentWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
 
-        val topWords = topWordsRaw.filter { word => topWordsAlphabet(word) >= 0}
-        val frequentWords = frequentWordsRaw.filter { word => frequentWordsAlphabet(word) >= 0}.take(150000)
+        val frequentWords = frequentWordsRaw.filter { word => frequentWordsAlphabet(word) >= 0 }.take(150000)
 
-        val topWordsCount = topWords.length
         val frequentWordsCount = frequentWords.length
-        println(s"Top-words: $topWordsCount")
         println(s"Frequent-words: $frequentWordsCount")
 
-        val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong, -1)
-        val pw: PrintWriter = createFileWithExtension(args, ".similars")
 
-        for (i <- 0 until topWordsCount) {
-            val wordI = topWords(i)
-            val idxI = topWordsAlphabet(wordI)
+        val SAMPLE_SIZE = 1000000
+
+        val samples = new Array[(Int, Int)](SAMPLE_SIZE)
+        val r = new Random(21011991)
+        for (i <- 0 until SAMPLE_SIZE) {
+            samples(i) = (r.nextInt(frequentWordsCount), r.nextInt(frequentWordsCount))
+        }
+
+        val progress = new util.Progress(SAMPLE_SIZE, -1)
+        val pw: PrintWriter = createFileWithExtension(args, ".similars-sample")
+        for ((i, j) <- samples if i != j) {
+            progress.report_progress()
+            val wordI = frequentWords(i)
+            val idxI = frequentWordsAlphabet(wordI)
             val probsI = topicProbs(idxI)
-            val topQueue = MinMaxPriorityQueue.orderedBy(new WordPairComparator)
-                .maximumSize(10)
-                .create[WordPair]()
 
-            for (j <- 0 until frequentWordsCount) {
-                progress.report_progress()
+            val wordJ = frequentWords(j)
+            val idxJ = frequentWordsAlphabet(wordJ)
+            val probsJ = topicProbs(idxJ)
 
-                val wordJ = frequentWords(j)
-                if (wordI != wordJ) {
-                    val idxJ = frequentWordsAlphabet(wordJ)
-                    val probsJ = topicProbs(idxJ)
-                    val divergence: Double = jensenShannonDivergence(probsI, probsJ)
-                    topQueue.add(WordPair(wordI, wordJ, divergence))
-                }
-            }
-            topQueue.toList.sortBy(_.divergence).foreach { wordPair =>
-                val word1 = wordPair.word1
-                val word2 = wordPair.word2
-                pw.println(f"${wordPair.divergence}%.9f\tSIM\t$word1\t$word2")
-            }
+            val divergence: Double = jensenShannonDivergence(probsI, probsJ)
+            pw.println(f"$divergence%.9f\tSIM\t$wordI\t$wordJ")
         }
         pw.close()
     }
