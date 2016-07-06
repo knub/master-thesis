@@ -114,7 +114,7 @@ object Main {
     }
 
     def findWordPairs(res: TopicModelResult, args: Args, frequentWordsRaw: Array[String], topicProbs: Array[Array[Double]]): Unit = {
-        val topWordsRaw = res.getTopWords(30)
+        val topWordsRaw = res.getTopWords(10)
 
         val topWordsAlphabet = mutable.Map[String, Int]()
         topWordsRaw.foreach { word => topWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
@@ -122,7 +122,7 @@ object Main {
         frequentWordsRaw.foreach { word => frequentWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
 
         val topWords = topWordsRaw.filter { word => topWordsAlphabet(word) >= 0}
-        val frequentWords = frequentWordsRaw.filter { word => frequentWordsAlphabet(word) >= 0}
+        val frequentWords = frequentWordsRaw.filter { word => frequentWordsAlphabet(word) >= 0}.take(150000)
 
         val topWordsCount = topWords.length
         val frequentWordsCount = frequentWords.length
