@@ -7,7 +7,7 @@ import mkl
 from gensim.models.word2vec import Word2Vec
 
 
-def eval_word2vec(word2vec):
+def eval_word2vec(word2vec, model=""):
     f = open("/home/stefan.bunk/master-thesis/data/analogy-reasoning/questions-words.txt")
     AnalogyTask = namedtuple("AnalogyTask", "plus1 minus1 plus2 answer")
     analogy_tasks = []
@@ -50,6 +50,6 @@ if __name__ == "__main__":
     for model in args.model:
         print model
         word2vec = Word2Vec.load_word2vec_format(model, binary=True)
-        res = eval_word2vec(word2vec)
+        res = eval_word2vec(word2vec, model)
         print
         print res
