@@ -130,13 +130,13 @@ object Main {
 
         val wordCount = topWords.length
         val frequentWordCount = frequentWords.length
-        val totalNrPairs = wordCount.toLong * frequentWordCount
+        val totalNrPairs = wordCount.toLong * frequentWordCount.toLong
 
 
         val modelFile = new File(args.modelFileName)
         val similarsFile = new File(modelFile.getCanonicalPath + ".similars")
         val pw = new PrintWriter(similarsFile)
-        var c = 0
+        var c = 0L
         for (i <- 0 until wordCount) {
             val wordI = topWords(i)
             val idxI = alphabetMapping(wordI)
