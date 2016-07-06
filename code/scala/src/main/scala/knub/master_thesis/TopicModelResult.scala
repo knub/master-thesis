@@ -66,10 +66,6 @@ class TopicModelResult(val model: ParallelTopicModel) {
     def displayTopWords(numWords: Int = 10): String = {
 
         val orderedTopicIndices = model.tokensPerTopic.zipWithIndex.sortBy(-_._1)
-        println(model.tokensPerTopic.deep)
-        println(orderedTopicIndices.deep)
-
-
 
         val out = new StringBuilder()
         val topicSortedWords = model.getSortedWords
