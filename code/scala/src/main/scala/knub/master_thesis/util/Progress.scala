@@ -2,7 +2,7 @@ package knub.master_thesis.util
 
 class Progress(totalNr: Long, granularity: Int = 0) {
     var c = 0L
-    val outputEvery = totalNr / 100 * Math.pow(10, granularity).toInt
+    val outputEvery = (totalNr / 100 * Math.pow(10, granularity)).toLong
 
     var time = System.currentTimeMillis()
     def report_progress(): Unit = {
@@ -15,7 +15,7 @@ class Progress(totalNr: Long, granularity: Int = 0) {
     }
 
     private def report(percentage: Double, secondsSinceLast: Long): Unit = {
-        val s = s"%.${granularity}f %% (%d secs)".format(percentage, secondsSinceLast)
+        val s = s"%.${Math.max(-granularity, 0)}f %% (%d secs)".format(percentage, secondsSinceLast)
         println(s)
     }
 }

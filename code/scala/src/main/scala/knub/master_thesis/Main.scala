@@ -114,7 +114,7 @@ object Main {
     }
 
     def findWordPairs(res: TopicModelResult, args: Args, frequentWordsRaw: Array[String], topicProbs: Array[Array[Double]]): Unit = {
-        val topWordsRaw = res.getTopWords(40)
+        val topWordsRaw = res.getTopWords(30)
 
         val topWordsAlphabet = mutable.Map[String, Int]()
         topWordsRaw.foreach { word => topWordsAlphabet += word -> res.dataAlphabet.lookupIndex(word, false) }
@@ -129,7 +129,7 @@ object Main {
         println(s"Top-words: $topWordsCount")
         println(s"Frequent-words: $frequentWordsCount")
 
-        val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong)
+        val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong, -1)
         val pw: PrintWriter = createFileWithExtension(args, ".similars")
 
         for (i <- 0 until topWordsCount) {
