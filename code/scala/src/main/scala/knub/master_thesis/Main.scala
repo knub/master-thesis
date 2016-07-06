@@ -96,10 +96,10 @@ object Main {
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
-        println("Write top words")
-        writeTopWordsToTextFile(res, args)
-        println("Concept categorization")
-        conceptCategorization(res, args)
+//        println("Write top words")
+//        writeTopWordsToTextFile(res, args)
+//        println("Concept categorization")
+//        conceptCategorization(res, args)
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         println("Find word pairs")
