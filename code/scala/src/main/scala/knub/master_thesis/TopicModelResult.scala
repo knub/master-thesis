@@ -64,15 +64,23 @@ class TopicModelResult(val model: ParallelTopicModel) {
     }
 
     def displayTopWords(numWords: Int = 10): String = {
+
+        val orderedTopicIndices = model.tokensPerTopic.zipWithIndex.sortBy(-_._1)
+        println(model.tokensPerTopic.deep)
+        println(orderedTopicIndices.deep)
+
+
+
         val out = new StringBuilder()
         val topicSortedWords = model.getSortedWords
-        for (topic <- 0 until model.numTopics) {
+        out.append(s"topic topic-count ${(0 until 10).map(_.toString).mkString(" ")}")
+//        for (topic <- 0 until model.numTopics) {
+        for ((tokenCount, topic) <- orderedTopicIndices) {
             val sortedWords = topicSortedWords.get(topic)
             var word = 0
             val iterator = sortedWords.iterator()
 
-            out.append(dataAlphabet.lookupObject(iterator.next().getID))
-            word += 1
+            out.append(s"$topic $tokenCount")
             while (iterator.hasNext && word < numWords) {
                 val info = iterator.next()
                 out.append(" " + dataAlphabet.lookupObject(info.getID))
