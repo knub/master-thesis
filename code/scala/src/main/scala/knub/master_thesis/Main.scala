@@ -179,7 +179,7 @@ object Main {
 
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
         val modelFile = new File(args.modelFileName)
-        val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs")
+        val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs-normalized")
 
         val m = res.getWordTopics
         println(s"Topics: ${m(0).length}")

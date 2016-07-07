@@ -53,7 +53,18 @@ class TopicModelResult(val model: ParallelTopicModel) {
         for (topic <- 0 until model.numTopics; wordType <- 0 until model.numTypes) {
             result(wordType)(topic) *= topicNormalizers(topic)
         }
+        for (i <- result.indices) {
+            result(i) = normalized(result(i))
+        }
         result
+    }
+
+    private def normalized(a: Array[Double]): Array[Double] = {
+        val s = a.sum
+        for (i <- a.indices) {
+            a(i) = a(i) / s
+        }
+        a
     }
 
     def showTopWordsPerTopics(): Unit = {
