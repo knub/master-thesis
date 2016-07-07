@@ -1,20 +1,19 @@
 package knub.master_thesis
 
-import cc.mallet.pipe.InstanceListTrimFeaturesByCount
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.InstanceList
 
-class TopicModel(args: Args) {
+class TopicModel(args: Args, alpha: Double, beta: Double) {
 
     def run(dataFolderName: String, stopWordsFileName: String): TopicModelResult = {
         val instances = new InstanceList(PreprocessingPipe.pipe(stopWordsFileName))
-        instances.addThruPipe(new WikiPlainTextIterator(dataFolderName))
+        instances.addThruPipe(OnlyNormalPagesIterator.normalPagesIterator(new WikiPlainTextIterator(dataFolderName)))
 
         val numTopics = args.numTopics
         // alpha = 1 / 100, 1 / 10
         // beta - dependend on vocabulary size
         // longer documents? not all documents
-        val model = new ParallelTopicModel(numTopics, 256.0 / 100.0, 1.0 / args.numTopics)
+        val model = new ParallelTopicModel(numTopics, numTopics * alpha, beta)
         model.setOptimizeInterval(10)
         model.setBurninPeriod(100)
         model.addInstances(instances)
