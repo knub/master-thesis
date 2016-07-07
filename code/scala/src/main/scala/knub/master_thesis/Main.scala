@@ -176,7 +176,7 @@ object Main {
 
         val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
         //                        val divergence = Maths.jensenShannonDivergence(p, q)
-        divergence
+        0.5 * divergence
     }
 
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
