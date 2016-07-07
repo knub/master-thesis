@@ -6,6 +6,17 @@ import cc.mallet.types.Instance
 
 import scala.collection.JavaConverters._
 
+object OnlyNormalPagesIterator {
+    def normalPagesIterator(wikiPlainTextIterator: WikiPlainTextIterator): java.util.Iterator[Instance] = {
+        wikiPlainTextIterator.asScala.filter { inst =>
+            val title = inst.getName.asInstanceOf[String]
+            title.contains("Lists of") ||
+                title.contains("List of") ||
+                title.contains("isambiguation")
+        }.asJava
+    }
+}
+
 class WikiPlainTextIterator(dataFolderName: String) extends java.util.Iterator[Instance] {
 
     val p = Paths.get(dataFolderName)

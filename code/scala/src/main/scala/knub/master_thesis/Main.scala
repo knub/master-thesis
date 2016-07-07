@@ -280,7 +280,7 @@ object Main {
     }
 
     def writeArticlesTextFile(args: Args): Unit = {
-        val wpti = new WikiPlainTextIterator(args.dataFolderName)
+        val wpti = OnlyNormalPagesIterator.normalPagesIterator(new WikiPlainTextIterator(args.dataFolderName))
         val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
         wpti.foreach { article =>
             writer.write(article.getData.asInstanceOf[String])
