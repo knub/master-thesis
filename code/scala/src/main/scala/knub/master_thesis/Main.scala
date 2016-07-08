@@ -96,7 +96,7 @@ object Main {
     }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         println(res.model.modelFilename)
-        val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
+//        val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
         println("Write top words")
         writeTopWordsToTextFile(res, args)
