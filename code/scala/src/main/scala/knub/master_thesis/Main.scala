@@ -60,14 +60,23 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model" =>
-                val results =
-                    if (args.createNewModel)
-                        trainAndSaveNewModel(args)
-                    else
-                        loadExistingModel(args.modelFileName)
-
-                for (res <- results)
+                if (args.createNewModel) {
+                    for (alpha <- List(1.0 / 10.0,
+                        1.0 / 100.0,
+                        1.0 / 500.0)) {
+                        for (beta <- List(1.0 / 10.0,
+                            1.0 / 100.0,
+                            1.0 / 500.0)) {
+                            val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
+                            val res = trainAndSaveNewModel(args, alpha, beta)
+                            analyzeResult(res, args.copy(modelFileName = f))
+                        }
+                    }
+                }
+                else {
+                    val res = loadExistingModel(args.modelFileName)
                     analyzeResult(res, args)
+                }
             case "text-preprocessing" =>
                 writeArticlesTextFile(args)
         }
@@ -256,27 +265,16 @@ object Main {
         pw.close()
     }
 
-    def trainAndSaveNewModel(args: Args): mutable.ArrayBuffer[TopicModelResult] = {
-        val results = mutable.ArrayBuffer[TopicModelResult]()
-        for (alpha <- List(1.0 / 10.0,
-                           1.0 / 100.0,
-                           1.0 / 500.0)) {
-            for (beta <- List(1.0 / 10.0,
-                              1.0 / 100.0,
-                              1.0 / 500.0)) {
-                val tp = new TopicModel(args, alpha, beta)
-                val res = tp.run(args.dataFolderName, args.stopWordsFileName)
-                res.save(s"${args.modelFileName}.$alpha.$beta")
-                results += res
-            }
-        }
-        results
+    def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
+        val tp = new TopicModel(args, alpha, beta)
+        val res = tp.run(args.dataFolderName, args.stopWordsFileName)
+        val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
+        res.save(f)
+        res
     }
 
-    def loadExistingModel(modelFileName: String): mutable.ArrayBuffer[TopicModelResult] = {
-        mutable.ArrayBuffer(
-            new TopicModelResult(ParallelTopicModel.read(new File(modelFileName)))
-        )
+    def loadExistingModel(modelFileName: String): TopicModelResult = {
+        new TopicModelResult(ParallelTopicModel.read(new File(modelFileName)))
     }
 
     def writeArticlesTextFile(args: Args): Unit = {
