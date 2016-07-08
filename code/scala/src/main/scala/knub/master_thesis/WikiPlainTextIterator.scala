@@ -10,9 +10,9 @@ object OnlyNormalPagesIterator {
     def normalPagesIterator(wikiPlainTextIterator: WikiPlainTextIterator): java.util.Iterator[Instance] = {
         wikiPlainTextIterator.asScala.filter { inst =>
             val title = inst.getName.asInstanceOf[String]
-            title.contains("Lists of") ||
+            !(title.contains("Lists of") ||
                 title.contains("List of") ||
-                title.contains("isambiguation")
+                title.contains("isambiguation"))
         }.asJava
     }
 }
