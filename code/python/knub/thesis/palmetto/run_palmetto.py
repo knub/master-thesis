@@ -44,9 +44,10 @@ def main():
             return RuntimeError("Could not compute topics")
         else:
             topic_coherences = parse_topic_coherence(stdout)
-            print "Mean:", np.mean(topic_coherences)
-            print "Variance:", np.var(topic_coherences)
-            print "Raw:", topic_coherences
+            print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.var(topic_coherences))
+            # print "Mean:", np.mean(topic_coherences)
+            # print "Variance:", np.var(topic_coherences)
+            # print "Raw:", topic_coherences
 
 
 if __name__ == "__main__":
