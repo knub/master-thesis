@@ -1,3 +1,4 @@
+import argparse
 import numpy as np
 import re
 import subprocess
@@ -19,18 +20,19 @@ def parse_topic_coherence(stdout):
 
 
 def main():
-    TOPIC_MODELS_DIR = "/data/wikipedia/2016-06-21/topic-models/"
-    ssv_files = [TOPIC_MODELS_DIR + file for file in os.listdir(TOPIC_MODELS_DIR) if file.endswith(".ssv")]
+    parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
+    parser.add_argument("topic_files", type=str, nargs="+")
+    args = parser.parse_args()
 
-    for ssv_file in ssv_files:
-        print ssv_file
+    for topic_file in args.topic_files:
+        print topic_file
         p = subprocess.Popen(
             ["java",
              "-jar",
              "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar",
              "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd",
              "C_V",
-             ssv_file],
+             topic_file],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         stdout, stderr = p.communicate()
