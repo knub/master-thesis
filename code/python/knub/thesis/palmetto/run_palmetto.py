@@ -27,7 +27,7 @@ def create_palmetto_file(topic_file):
                 split = line.split(" ")
                 if "topic-count" not in line: # skip first line
                     new_line = " ".join(split[-10:])
-                    output.write(new_line + "\n")
+                    output.write(new_line)
     return palmetto_file
 
 def main():
