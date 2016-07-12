@@ -26,4 +26,5 @@ if __name__ == "__main__":
                     best_topic_word = split[2] # first is topic, second is topic count, third is first word
                     most_similars = word2vec.most_similar([best_topic_word])
                     most_similars = map(lambda t: t[0], most_similars)
+                    most_similars = map(lambda s: s.encode('utf8'), most_similars)
                     output.write("%s\n" % " ".join(most_similars))
