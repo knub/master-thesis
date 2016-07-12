@@ -4,9 +4,11 @@ import java.io.{File, PrintWriter}
 
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{FeatureSequence, Instance, InstanceList}
+import knub.master_thesis.Main.WordConcept
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.io.Source
 
 class TopicModelResult(val model: ParallelTopicModel) {
     def save(fileName: String): Unit = {
@@ -29,7 +31,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
         println()
     }
 
-    def getWordTopics: Array[Array[Double]] = {
+    def getNormalizedWordTopics: Array[Array[Double]] = {
         val result = Array.ofDim[Double](model.numTypes, model.numTopics)
         for (wordType <- 0 until model.numTypes) {
             val topicCounts = model.typeTopicCounts(wordType)
@@ -179,6 +181,51 @@ class TopicModelResult(val model: ParallelTopicModel) {
 //        val inferencer = model.getInferencer
 //        val testProbabilities = inferencer.getSampledDistribution(testing.get(0), 10, 1, 5)
 //        System.out.println("0\t" + testProbabilities(0))
+    }
+    def conceptCategorization(args: Args): Unit = {
+        val modelFile = new File(args.modelFileName)
+        val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
+
+        val pw = new PrintWriter(purityTextFile)
+        val conceptCategorizationFile =
+            args.conceptCategorizationFileName
+        val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
+            val split = line.split("\t")
+            WordConcept(split(0), split(1))
+        }.toList.groupBy(_.concept)
+
+        val purities = Array(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        concepts.foreach { case (concept, wordConcepts) =>
+            val words = wordConcepts.map(_.word)
+            pw.println(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}")
+            for (n <- 1 to 5) {
+                val wordTopics = words.map { word =>
+                    (word, findBestTopicsForWord(word, nrTopics = n))
+                }
+                val topics = mutable.Bag[Int]()
+                topics ++= wordTopics.flatMap(_._2)
+
+                val topicWithMaxMultiplicity = topics.multiplicities.maxBy(_._2)._1
+                val missingWords = wordTopics
+                    .filter { case (word, currentWordTopics) => !currentWordTopics.contains(topicWithMaxMultiplicity) }
+                    .map(_._1)
+                val conceptPurity = topics.maxMultiplicity * 100.0 / words.length
+                purities(n) += conceptPurity * words.size
+
+                pw.println(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords")
+            }
+        }
+        pw.println("#" * 100)
+        for (n <- 1 to 5) {
+            purities(n) = purities(n) / concepts.values.map(_.size).sum
+        }
+        for (n <- 1 to 5) {
+            pw.println(f"$n-purity: ${purities(n)}%.1f %%")
+        }
+        pw.println("#" * 100)
+        pw.println(purities(1))
+
+        pw.close()
     }
 
 }

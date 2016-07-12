@@ -5,6 +5,7 @@ import java.util.Comparator
 
 import cc.mallet.topics.ParallelTopicModel
 import com.google.common.collect.MinMaxPriorityQueue
+import knub.master_thesis.probabilistic.Divergence.jensenShannonDivergence
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -79,16 +80,9 @@ object Main {
                 }
             case "text-preprocessing" =>
                 writeArticlesTextFile(args)
+            case "word-similarity" =>
+                println("word-similarity")
         }
-    }
-
-    def kullbackLeibler(p: Array[Double], q: Array[Double]): Double = {
-        var sum = 0.0
-        for (i <- p.indices) {
-            if (p(i) != 0.0 && q(i) != 0.0)
-                sum += p(i) * Math.log(p(i) / q(i))
-        }
-        sum
     }
 
     case class WordConcept(word: String, concept: String)
@@ -104,13 +98,10 @@ object Main {
         }
     }
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
-        println(res.model.modelFilename)
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
         println("Write top words")
         writeTopWordsToTextFile(res, args)
-//        println("Concept categorization")
-//        conceptCategorization(res, args)
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         println("Find word pairs")
@@ -121,6 +112,7 @@ object Main {
          * Find variance of words with highest and lowest variance
          * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
          * For each word, find similars and dissimilars
+         * Sample similarity
          */
     }
 
@@ -178,21 +170,11 @@ object Main {
         pw
     }
 
-    def jensenShannonDivergence(p: Array[Double], q: Array[Double]): Double = {
-        val m = new Array[Double](p.length)
-        for (k <- p.indices)
-            m(k) = 0.5 * (p(k) + q(k))
-
-        val divergence = kullbackLeibler(p, m) + kullbackLeibler(q, m)
-        //                        val divergence = Maths.jensenShannonDivergence(p, q)
-        0.5 * divergence
-    }
-
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
         val modelFile = new File(args.modelFileName)
         val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs-normalized")
 
-        val m = res.getWordTopics
+        val m = res.getNormalizedWordTopics
         println(s"Topics: ${m(0).length}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
@@ -219,51 +201,6 @@ object Main {
         pw.close()
     }
 
-    def conceptCategorization(res: TopicModelResult, args: Args): Unit = {
-        val modelFile = new File(args.modelFileName)
-        val purityTextFile = new File(modelFile.getCanonicalPath + ".purity")
-
-        val pw = new PrintWriter(purityTextFile)
-        val conceptCategorizationFile =
-            args.conceptCategorizationFileName
-        val concepts = Source.fromFile(conceptCategorizationFile).getLines().map { line =>
-            val split = line.split("\t")
-            WordConcept(split(0), split(1))
-        }.toList.groupBy(_.concept)
-
-        val purities = Array(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        concepts.foreach { case (concept, wordConcepts) =>
-            val words = wordConcepts.map(_.word)
-            pw.println(s"Concept: $concept (${words.size} words): ${words.mkString(" ")}")
-            for (n <- 1 to 5) {
-                val wordTopics = words.map { word =>
-                    (word, res.findBestTopicsForWord(word, nrTopics = n))
-                }
-                val topics = mutable.Bag[Int]()
-                topics ++= wordTopics.flatMap(_._2)
-
-                val topicWithMaxMultiplicity = topics.multiplicities.maxBy(_._2)._1
-                val missingWords = wordTopics
-                    .filter { case (word, currentWordTopics) => !currentWordTopics.contains(topicWithMaxMultiplicity) }
-                    .map(_._1)
-                val conceptPurity = topics.maxMultiplicity * 100.0 / words.length
-                purities(n) += conceptPurity * words.size
-
-                pw.println(f"$n-purity: $conceptPurity%.1f %% -- missing words: $missingWords")
-            }
-        }
-        pw.println("#" * 100)
-        for (n <- 1 to 5) {
-            purities(n) = purities(n) / concepts.values.map(_.size).sum
-        }
-        for (n <- 1 to 5) {
-            pw.println(f"$n-purity: ${purities(n)}%.1f %%")
-        }
-        pw.println("#" * 100)
-        pw.println(purities(1))
-
-        pw.close()
-    }
 
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
         val tp = new TopicModel(args, alpha, beta)
