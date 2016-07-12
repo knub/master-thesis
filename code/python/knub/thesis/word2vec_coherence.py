@@ -17,7 +17,7 @@ if __name__ == "__main__":
     assert "ssv" in args.topic_model, "need .ssv file for topic model"
     assert "embedding" in args.embedding_model, "'%s' not an embedding model" % args.embedding_model
 
-    word2vec = Word2Vec.load_word2vec_format(args.model, binary=True)
+    word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
 
     with open(args.topic_model, "r") as input:
         with open(args.embedding_model + ".ssv", "w") as output:
