@@ -109,33 +109,36 @@ object Main {
 
     case class WordSimilarity(word1: String, word2: String, humanSim: Double, topicSim: Double = -1.0)
     def calculateWordSimilarity(args: Args, res: TopicModelResult): Unit = {
-        println("Word similarity")
-        val lines = Source.fromFile("../../data/word-similarity/wordsim353_sim_rel/wordsim_similarity_goldstandard.txt").getLines()
-        val sims = lines.map { line =>
-            val split = line.split("\t")
-            WordSimilarity(split(0), split(1), split(2).toDouble)
-        }
-        val topicProbs = res.getNormalizedWordTopics
-        val topicSims = sims.flatMap { sim =>
-            val idx1 = res.dataAlphabet.lookupIndex(sim.word1.toLowerCase(), false)
-            val idx2 = res.dataAlphabet.lookupIndex(sim.word2.toLowerCase(), false)
-            if (idx1 != -1 && idx2 != -1) {
-                val divergence = jensenShannonDivergence(topicProbs(idx1), topicProbs(idx2))
-                List(sim.copy(topicSim = 1 - divergence))
-            } else {
-                if (idx1 == -1)
-                    println(sim.word1)
-                if (idx2 == -1)
-                    println(sim.word2)
-                None
+        for (simType <- List("similarity", "relatedness")) {
+            println(s"Word $simType")
+            val lines = Source.fromFile(
+                s"../../data/word-similarity/wordsim353_sim_rel/wordsim_${simType}_goldstandard.txt").getLines()
+            val sims = lines.map { line =>
+                val split = line.split("\t")
+                WordSimilarity(split(0), split(1), split(2).toDouble)
             }
+            val topicProbs = res.getNormalizedWordTopics
+            val topicSims = sims.flatMap { sim =>
+                val idx1 = res.dataAlphabet.lookupIndex(sim.word1.toLowerCase(), false)
+                val idx2 = res.dataAlphabet.lookupIndex(sim.word2.toLowerCase(), false)
+                if (idx1 != -1 && idx2 != -1) {
+                    val divergence = jensenShannonDivergence(topicProbs(idx1), topicProbs(idx2))
+                    List(sim.copy(topicSim = 1 - divergence))
+                } else {
+                    if (idx1 == -1)
+                        println(sim.word1)
+                    if (idx2 == -1)
+                        println(sim.word2)
+                    None
+                }
+            }
+            val pw = args.getPrintWriterFor(s".wordsim353-$simType")
+            pw.println(List("word1", "word2", "human-sim", "topic-sim").mkString("\t"))
+            topicSims.foreach { topicSim =>
+                pw.println(f"${topicSim.word1}\t${topicSim.word2}\t${topicSim.humanSim}\t${topicSim.topicSim * 10}%.2f")
+            }
+            pw.close()
         }
-        val pw = args.getPrintWriterFor(".wordsim353")
-        pw.println(List("word1", "word2", "human-sim", "topic-sim").mkString("\t"))
-        topicSims.foreach { topicSim =>
-            pw.println(f"${topicSim.word1}\t${topicSim.word2}\t${topicSim.humanSim}\t${topicSim.topicSim * 10}%.2f")
-        }
-        pw.close()
     }
 
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
