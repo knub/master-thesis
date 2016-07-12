@@ -20,17 +20,24 @@ case class Args(
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
     numThreads: Int = 2,
     numTopics: Int = 256,
-    numIterations: Int = 50)
+    numIterations: Int = 50) {
+
+    def getPrintWriterFor(extension: String): PrintWriter = {
+        val modelFile = new File(modelFileName)
+        val modelTextFile = new File(modelFile.getCanonicalPath + extension)
+        val pw = new PrintWriter(modelTextFile)
+        pw
+    }
+}
 
 object Main {
-
-    implicit val m1 = mutable.Bag.configuration.compact[Int]
 
     val parser = new scopt.OptionParser[Args]("topic-models") {
         head("topic-models", "0.0.1")
 
         cmd("topic-model").action { (_, c) => c.copy(mode = "topic-model") }
         cmd("text-preprocessing").action { (_, c) => c.copy(mode = "text-preprocessing") }
+        cmd("word-similarity").action { (_, c) => c.copy(mode = "word-similarity") }
 
         opt[String]('m', "model-file-name").action { (x, c) =>
             c.copy(modelFileName = x) }
@@ -62,17 +69,19 @@ object Main {
         args.mode match {
             case "topic-model" =>
                 if (args.createNewModel) {
-                    for (alpha <- List(1.0 / 10.0,
-                        1.0 / 100.0,
-                        1.0 / 500.0)) {
-                        for (beta <- List(1.0 / 10.0,
-                            1.0 / 100.0,
-                            1.0 / 500.0)) {
-                            val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
-                            val res = trainAndSaveNewModel(args, alpha, beta)
-                            analyzeResult(res, args.copy(modelFileName = f))
-                        }
-                    }
+//                    for (alpha <- List(1.0 / 10.0,
+//                        1.0 / 100.0,
+//                        1.0 / 500.0)) {
+//                        for (beta <- List(1.0 / 10.0,
+//                            1.0 / 100.0,
+//                            1.0 / 500.0)) {
+//                            val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
+//                            val res = trainAndSaveNewModel(args, alpha, beta)
+//                            analyzeResult(res, args.copy(modelFileName = f))
+//                        }
+//                    }
+//                    val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
+                    val res = trainAndSaveNewModel(args, 1.0 / 256.0, 1.0 / 256.0)
                 }
                 else {
                     val res = loadExistingModel(args.modelFileName)
@@ -81,11 +90,11 @@ object Main {
             case "text-preprocessing" =>
                 writeArticlesTextFile(args)
             case "word-similarity" =>
-                println("word-similarity")
+                val res = loadExistingModel(args.modelFileName)
+                calculateWordSimilarity(args, res)
         }
     }
 
-    case class WordConcept(word: String, concept: String)
     case class WordPair(word1: String, word2: String, divergence: Double)
     class WordPairComparator(ascending: Int = 1) extends Comparator[WordPair] {
         override def compare(wp1: WordPair, wp2: WordPair): Int = {
@@ -97,6 +106,38 @@ object Main {
                 +1 * ascending
         }
     }
+
+    case class WordSimilarity(word1: String, word2: String, humanSim: Double, topicSim: Double = -1.0)
+    def calculateWordSimilarity(args: Args, res: TopicModelResult): Unit = {
+        println("Word similarity")
+        val lines = Source.fromFile("../../data/word-similarity/wordsim353_sim_rel/wordsim_similarity_goldstandard.txt").getLines()
+        val sims = lines.map { line =>
+            val split = line.split("\t")
+            WordSimilarity(split(0), split(1), split(2).toDouble)
+        }
+        val topicProbs = res.getNormalizedWordTopics
+        val topicSims = sims.flatMap { sim =>
+            val idx1 = res.dataAlphabet.lookupIndex(sim.word1.toLowerCase(), false)
+            val idx2 = res.dataAlphabet.lookupIndex(sim.word2.toLowerCase(), false)
+            if (idx1 != -1 && idx2 != -1) {
+                val divergence = jensenShannonDivergence(topicProbs(idx1), topicProbs(idx2))
+                List(sim.copy(topicSim = 1 - divergence))
+            } else {
+                if (idx1 == -1)
+                    println(sim.word1)
+                if (idx2 == -1)
+                    println(sim.word2)
+                None
+            }
+        }
+        val pw = args.getPrintWriterFor(".wordsim353")
+        pw.println(List("word1", "word2", "human-sim", "topic-sim").mkString("\t"))
+        topicSims.foreach { topicSim =>
+            pw.println(f"${topicSim.word1}\t${topicSim.word2}\t${topicSim.humanSim}\t${topicSim.topicSim * 10}%.2f")
+        }
+        pw.close()
+    }
+
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
@@ -133,7 +174,7 @@ object Main {
         println(s"Frequent-words: $frequentWordsCount")
 
         val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong, -1)
-        val pw: PrintWriter = createFileWithExtension(args, ".similars")
+        val pw = args.getPrintWriterFor(".similars")
 
         for (i <- 0 until topWordsCount) {
             val wordI = topWords(i)
@@ -163,22 +204,13 @@ object Main {
         pw.close()
     }
 
-    def createFileWithExtension(args: Args, extension: String): PrintWriter = {
-        val modelFile = new File(args.modelFileName)
-        val similarsFile = new File(modelFile.getCanonicalPath + extension)
-        val pw = new PrintWriter(similarsFile)
-        pw
-    }
-
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
-        val modelFile = new File(args.modelFileName)
-        val topicProbsFile = new File(modelFile.getCanonicalPath + ".topic-probs-normalized")
+        val pw = args.getPrintWriterFor(".topic-probs-normalized")
 
         val m = res.getNormalizedWordTopics
         println(s"Topics: ${m(0).length}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
-        val pw = new PrintWriter(topicProbsFile)
         pw.write(s"word,${(0 until res.model.numTopics).mkString(",")}\n")
         res.dataAlphabet.iterator().foreach { word =>
             if (frequentWords.contains(word)) {
@@ -194,9 +226,7 @@ object Main {
     }
 
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
-        val modelFile = new File(args.modelFileName)
-        val modelTextFile = new File(modelFile.getCanonicalPath + ".ssv")
-        val pw = new PrintWriter(modelTextFile)
+        val pw = args.getPrintWriterFor(".ssv")
         pw.write(res.displayTopWords(10))
         pw.close()
     }
@@ -205,7 +235,7 @@ object Main {
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
         val tp = new TopicModel(args, alpha, beta)
         val res = tp.run(args.dataFolderName, args.stopWordsFileName)
-        val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
+        val f = args.modelFileName//.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
         res.save(f)
         res
     }

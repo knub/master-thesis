@@ -3,14 +3,18 @@ package knub.master_thesis
 import java.io.{File, PrintWriter}
 
 import cc.mallet.topics.ParallelTopicModel
-import cc.mallet.types.{FeatureSequence, Instance, InstanceList}
-import knub.master_thesis.Main.WordConcept
+import cc.mallet.types.FeatureSequence
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.io.Source
 
+case class WordConcept(word: String, concept: String)
+
+
 class TopicModelResult(val model: ParallelTopicModel) {
+    // for using bags
+    implicit val m1 = mutable.Bag.configuration.compact[Int]
+
     def save(fileName: String): Unit = {
         model.write(new File(fileName))
     }

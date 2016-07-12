@@ -13,8 +13,6 @@ import scala.io.Source
 
 object PreprocessingPipe {
     def pipeList(stopWordsFileName: String): mutable.ArrayBuffer[Pipe] = {
-        val vocabulary = Source.fromFile("/san2/data/wikipedia/2016-06-21/vocab.txt").getLines().toSet
-
         mutable.ArrayBuffer[Pipe](
             new CharSequenceLowercase(),
             // Regex explanation: lowercase [lowercase punctuation]+ lowercase  --- at least three characters,
@@ -23,7 +21,9 @@ object PreprocessingPipe {
             new UseOnlyFirstNWordsOfDocument(2000),
             new TokenSequenceRemoveStopwords(
                 new File(stopWordsFileName), "UTF-8", false, false, false),
-//            new UseFixedVocabulary(vocabulary),
+//            new UseFixedVocabulary(
+//                Source.fromFile("/san2/data/wikipedia/2016-06-21/vocab.txt").getLines().toSet
+//            ),
             new TokenSequence2FeatureSequence()
         )
     }
