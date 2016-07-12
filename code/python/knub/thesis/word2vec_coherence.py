@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 
 import mkl
 from gensim.models.word2vec import Word2Vec
@@ -22,7 +21,9 @@ if __name__ == "__main__":
     with open(args.topic_model, "r") as input:
         with open(args.embedding_model + ".ssv", "w") as output:
             for line in input:
-                split = line.split(" ")
-                best_topic_word = split[2] # first is topic, second is topic count, third is first word
-                most_similars = word2vec.most_similar([best_topic_word])
-                output.write("%s\n" % " ".join(most_similars))
+                if "topic-count" not in line: # skip first header line
+                    split = line.split(" ")
+                    best_topic_word = split[2] # first is topic, second is topic count, third is first word
+                    most_similars = word2vec.most_similar([best_topic_word])
+                    most_similars = map(lambda t: t[0], most_similars)
+                    output.write("%s\n" % " ".join(most_similars))
