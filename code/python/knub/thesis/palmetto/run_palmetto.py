@@ -19,12 +19,24 @@ def parse_topic_coherence(stdout):
     return topic_coherences
 
 
+def create_palmetto_file(topic_file):
+    palmetto_file = topic_file + ".palmetto"
+    with open(topic_file, "r") as input:
+        with open(palmetto_file, "w") as output:
+            for line in input:
+                split = line.split(" ")
+                if "topic-count" not in line: # skip first line
+                    new_line = " ".join(split[-10:])
+                    output.write(new_line + "\n")
+    return palmetto_file
+
 def main():
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
     parser.add_argument("topic_files", type=str, nargs="+")
     args = parser.parse_args()
 
     for topic_file in args.topic_files:
+        palmetto_file = create_palmetto_file(topic_file)
         print topic_file
         p = subprocess.Popen(
             ["java",
@@ -32,7 +44,7 @@ def main():
              "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar",
              "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd",
              "C_V",
-             topic_file],
+             palmetto_file],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         stdout, stderr = p.communicate()
@@ -45,10 +57,8 @@ def main():
         else:
             topic_coherences = parse_topic_coherence(stdout)
             print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.var(topic_coherences))
-            # print "Mean:", np.mean(topic_coherences)
-            # print "Variance:", np.var(topic_coherences)
-            # print "Raw:", topic_coherences
 
+        os.remove(palmetto_file)
 
 if __name__ == "__main__":
     main()
