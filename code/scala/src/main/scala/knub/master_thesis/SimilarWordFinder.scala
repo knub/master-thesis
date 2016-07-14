@@ -9,14 +9,14 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 case class WordPair(word1: String, word2: String, divergence: Double)
-class WordPairComparator(ascending: Int = 1) extends Comparator[WordPair] {
+class WordPairComparator extends Comparator[WordPair] {
     override def compare(wp1: WordPair, wp2: WordPair): Int = {
         if (wp1.divergence == wp2.divergence)
             0
         else if (wp1.divergence < wp2.divergence)
-            -1 * ascending
+            +1
         else
-            +1 * ascending
+            -1
     }
 }
 case class SimFunction(name: String, sim: (Array[Double], Array[Double]) => Double)
@@ -70,7 +70,8 @@ class SimilarWordFinder(res: TopicModelResult, args: Args, frequentWordsRaw: Arr
                     val idxJ = frequentWordsAlphabet(wordJ)
                     val probsJ = topicProbs(idxJ)
                     val divergence: Double = sim.sim(probsI, probsJ)
-                    topQueue.add(WordPair(wordI, wordJ, divergence))
+                    val simScore = 1 - divergence
+                    topQueue.add(WordPair(wordI, wordJ, simScore))
                 }
             }
             topQueue.toList.sortBy(_.divergence).foreach { wordPair =>

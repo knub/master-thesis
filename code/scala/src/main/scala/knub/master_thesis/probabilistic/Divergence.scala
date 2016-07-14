@@ -6,6 +6,7 @@ object Divergence {
 
     /**
       * The smaller, the more similar. Zero means exact
+      * [0, 1]
       */
     def jensenShannonDivergence(p: Array[Double], q: Array[Double]): Double = {
         Maths.jensenShannonDivergence(p, q)
@@ -13,6 +14,7 @@ object Divergence {
 
     /**
       * The smaller, the more similar. Zero means exact
+      * [0, 1]
       */
     def maxDistance(p: Array[Double], q: Array[Double]): Double = {
         var max = 0.0
@@ -27,6 +29,7 @@ object Divergence {
     }
     /**
       * The smaller, the more similar. Zero means exact
+      * [0, 1]
       */
     def sumDistance(p: Array[Double], q: Array[Double]): Double = {
         var sum = 0.0
@@ -48,12 +51,16 @@ object Divergence {
             sum += Math.sqrt(p(i) * q(i))
             i += 1
         }
-        - Math.log(sum)
+        // avoiding the log, so we stay in [0, 1]
+        // 1 -, so we get a divergence value
+        1 - sum
+//        - Math.log(sum)
     }
 
     val sqrt2Rez = 1.0 / Math.sqrt(2)
     /**
       * The smaller, the more similar. Zero means exact
+      * [0, 1]
       */
     def hellingerDistance(p: Array[Double], q: Array[Double]): Double = {
         var sum = 0.0
