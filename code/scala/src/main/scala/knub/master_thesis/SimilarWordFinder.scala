@@ -5,6 +5,7 @@ import java.util.Comparator
 
 import com.google.common.collect.MinMaxPriorityQueue
 import knub.master_thesis.probabilistic.Divergence
+import knub.master_thesis.probabilistic.Divergence._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -41,11 +42,11 @@ class SimilarWordFinder(res: TopicModelResult, args: Args, frequentWordsRaw: Arr
 
     def run(): Unit = {
         List(
-            SimFunction("max", Divergence.maxDistance),
-            SimFunction("sum", Divergence.sumDistance),
-            SimFunction("bhattacharyya", Divergence.bhattacharyyaDistance),
-            SimFunction("hellinger", Divergence.hellingerDistance),
-            SimFunction("jensen-shannon", Divergence.jensenShannonDivergence)
+            simMax,
+            simSum,
+            simBhattacharyya,
+            simHelling,
+            simJensenShannon
         ).foreach { sim =>
             println(s"Find word pairs ${sim.name}")
             findMostSimilarWordPairs(sim)

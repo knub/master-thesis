@@ -1,8 +1,15 @@
 package knub.master_thesis.probabilistic
 
 import cc.mallet.util.Maths
+import knub.master_thesis.SimFunction
 
 object Divergence {
+
+    val simMax = SimFunction("max", Divergence.maxDistance)
+    val simSum = SimFunction("sum", Divergence.sumDistance)
+    val simBhattacharyya = SimFunction("bhattacharyya", Divergence.bhattacharyyaDistance)
+    val simHelling = SimFunction("hellinger", Divergence.hellingerDistance)
+    val simJensenShannon = SimFunction("jensen-shannon", Divergence.jensenShannonDivergence)
 
     /**
       * The smaller, the more similar. Zero means exact
@@ -27,6 +34,7 @@ object Divergence {
         }
         max
     }
+
     /**
       * The smaller, the more similar. Zero means exact
       * [0, 1]
@@ -54,10 +62,11 @@ object Divergence {
         // avoiding the log, so we stay in [0, 1]
         // 1 -, so we get a divergence value
         1 - sum
-//        - Math.log(sum)
+        //        - Math.log(sum)
     }
 
     val sqrt2Rez = 1.0 / Math.sqrt(2)
+
     /**
       * The smaller, the more similar. Zero means exact
       * [0, 1]

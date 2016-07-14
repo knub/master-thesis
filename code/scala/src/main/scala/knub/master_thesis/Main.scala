@@ -3,7 +3,7 @@ package knub.master_thesis
 import java.io._
 
 import cc.mallet.topics.ParallelTopicModel
-import knub.master_thesis.probabilistic.Divergence.jensenShannonDivergence
+import knub.master_thesis.probabilistic.Divergence._
 
 import scala.collection.JavaConversions._
 import scala.io.Source
@@ -112,31 +112,37 @@ object Main {
         val topicProbs = res.getNormalizedWordTopics
         for (simObject <- List(scws, wordsim353All, wordsim353Sim, wordsim353Rel)) {
             println(simObject.simFile)
+
             val lines = Source.fromFile(s"../../data/word-similarity/${simObject.simFile}").getLines().toList
             val sims = lines.map { line =>
                 val split = line.split("\t")
                 simObject.extractor(split)
             }
-            val topicSims = sims.flatMap { sim =>
-                val idx1 = res.dataAlphabet.lookupIndex(sim.word1, false)
-                val idx2 = res.dataAlphabet.lookupIndex(sim.word2, false)
-                if (idx1 != -1 && idx2 != -1) {
-                    val divergence = jensenShannonDivergence(topicProbs(idx1), topicProbs(idx2))
-                    List(sim.copy(topicSim = 1 - divergence))
-                } else {
-                    if (idx1 == -1)
-                        println(sim.word1)
-                    if (idx2 == -1)
-                        println(sim.word2)
-                    None
+
+            for (simFunction <- List(simSum, simBhattacharyya, simHelling, simJensenShannon)) {
+                println(simFunction.name)
+                val topicSims = sims.flatMap { sim =>
+                    val idx1 = res.dataAlphabet.lookupIndex(sim.word1, false)
+                    val idx2 = res.dataAlphabet.lookupIndex(sim.word2, false)
+                    if (idx1 != -1 && idx2 != -1) {
+                        val divergence = simFunction.sim(topicProbs(idx1), topicProbs(idx2))
+                        val similarity = 1 - divergence
+                        List(sim.copy(topicSim = similarity))
+                    } else {
+                        if (idx1 == -1)
+                            println(sim.word1)
+                        if (idx2 == -1)
+                            println(sim.word2)
+                        None
+                    }
                 }
+                val pw = args.getPrintWriterFor(s"${simObject.fileEnding}-${simFunction.name}")
+                pw.println(List("word1", "word2", "human-sim", s"topic-sim-${simFunction.name}").mkString("\t"))
+                topicSims.foreach { topicSim =>
+                    pw.println(f"${topicSim.word1}\t${topicSim.word2}\t${topicSim.humanSim}\t${topicSim.topicSim * 10}%.2f")
+                }
+                pw.close()
             }
-            val pw = args.getPrintWriterFor(simObject.fileEnding)
-            pw.println(List("word1", "word2", "human-sim", "topic-sim").mkString("\t"))
-            topicSims.foreach { topicSim =>
-                pw.println(f"${topicSim.word1}\t${topicSim.word2}\t${topicSim.humanSim}\t${topicSim.topicSim * 10}%.2f")
-            }
-            pw.close()
         }
     }
 
