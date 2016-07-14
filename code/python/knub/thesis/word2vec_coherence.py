@@ -1,6 +1,6 @@
 import argparse
 import logging
-import numpy as np
+import random
 
 import mkl
 from gensim.models.word2vec import Word2Vec
@@ -42,17 +42,14 @@ if __name__ == "__main__":
 
     frequent_words = [line.rstrip('\n') for line in open("/data/wikipedia/2016-06-21/vocab.txt")]
     frequent_words = frequent_words[10000:-40000]
-    frequent_words = list(enumerate(frequent_words))
-    print len(frequent_words)
-    random_sample = np.random.choice(frequent_words, 100000, replace=False)
-    random_sample = sorted(frequent_words, key=lambda i, _: i)
-
+    print "%d frequent words" % len(frequent_words)
+    random_sample = [frequent_words[i] for i in sorted(random.sample(xrange(len(frequent_words)), 100000))]
 
     with open(args.embedding_model + ".similars", "w") as output:
-        for _, word in random_sample:
+        for word in random_sample:
             try:
                 similars = word2vec.most_similar([word], topn=3)
-                for word, prob in similars:
-                    output.write("%s\t%s" % (word, prob))
+                for similar, prob in similars:
+                    output.write("%s\t%s\t%s\n" % (word, similar, prob))
             except:
                 pass
