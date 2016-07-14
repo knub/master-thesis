@@ -76,10 +76,10 @@ class SimilarWordFinder(res: TopicModelResult, args: Args, frequentWordsRaw: Arr
                     topQueue.add(WordPair(wordI, wordJ, simScore))
                 }
             }
-            topQueue.toList.sortBy(_.divergence).foreach { wordPair =>
+            topQueue.toList.foreach { wordPair =>
                 val word1 = wordPair.word1
                 val word2 = wordPair.word2
-                pw.println(f"${wordPair.divergence}%.9f\tSIM\t$word1\t$word2")
+                pw.println(f"${wordPair.divergence}%.9f\t$word1\t$word2")
             }
         }
         pw.close()
