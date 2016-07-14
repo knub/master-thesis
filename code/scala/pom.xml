@@ -96,6 +96,7 @@
                             <jvmArgs>
                                 <jvmArg>-Xms40g</jvmArg>
                                 <jvmArg>-Xmx40g</jvmArg>
+                                <jvmArg>-XX:ParallelGCThreads=8</jvmArg>
                             </jvmArgs>
                         </launcher>
                     </launchers>
