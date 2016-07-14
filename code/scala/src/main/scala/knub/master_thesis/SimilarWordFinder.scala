@@ -1,5 +1,6 @@
 package knub.master_thesis
 
+import java.io.PrintWriter
 import java.util.Comparator
 
 import com.google.common.collect.MinMaxPriorityQueue
@@ -7,6 +8,7 @@ import knub.master_thesis.probabilistic.Divergence
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.util.Random
 
 case class WordPair(word1: String, word2: String, divergence: Double)
 class WordPairComparator extends Comparator[WordPair] {
@@ -79,6 +81,35 @@ class SimilarWordFinder(res: TopicModelResult, args: Args, frequentWordsRaw: Arr
                 val word2 = wordPair.word2
                 pw.println(f"${wordPair.divergence}%.9f\tSIM\t$word1\t$word2")
             }
+        }
+        pw.close()
+    }
+
+
+    def sampleWordSimilarityPairs(): Unit = {
+        val SAMPLE_SIZE = 1000000
+
+        val samples = new Array[(Int, Int)](SAMPLE_SIZE)
+        val r = new Random(21011991)
+        for (i <- 0 until SAMPLE_SIZE) {
+            samples(i) = (r.nextInt(frequentWordsCount), r.nextInt(frequentWordsCount))
+        }
+
+        val progress = new util.Progress(SAMPLE_SIZE, -1)
+        val pw = args.getPrintWriterFor(".similars-sample")
+        for ((i, j) <- samples if i != j) {
+            progress.report_progress()
+            val wordI = frequentWords(i)
+            val idxI = frequentWordsAlphabet(wordI)
+            val probsI = topicProbs(idxI)
+
+            val wordJ = frequentWords(j)
+            val idxJ = frequentWordsAlphabet(wordJ)
+            val probsJ = topicProbs(idxJ)
+
+            val divergence = Divergence.jensenShannonDivergence(probsI, probsJ)
+            val similarity = 1 - divergence
+            pw.println(f"$similarity%.9f\tSIM\t$wordI\t$wordJ")
         }
         pw.close()
     }
