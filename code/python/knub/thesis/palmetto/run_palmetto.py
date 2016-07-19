@@ -56,7 +56,7 @@ def main():
             return RuntimeError("Could not compute topics")
         else:
             topic_coherences = parse_topic_coherence(stdout)
-            print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.var(topic_coherences))
+            print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.std(topic_coherences))
 
         os.remove(palmetto_file)
 
