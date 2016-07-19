@@ -213,7 +213,7 @@ object Main {
             writer.write(article.getData.asInstanceOf[String])
             writer.write("\n")
         }
-
+        writer.close()
     }
 
 }
