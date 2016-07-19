@@ -35,6 +35,7 @@ object Main {
         cmd("topic-model").action { (_, c) => c.copy(mode = "topic-model") }
         cmd("text-preprocessing").action { (_, c) => c.copy(mode = "text-preprocessing") }
         cmd("word-similarity").action { (_, c) => c.copy(mode = "word-similarity") }
+        cmd("supply-tm-similarity").action { (_, c) => c.copy(mode = "supply-tm-similarity") }
 
         opt[String]('m', "model-file-name").action { (x, c) =>
             c.copy(modelFileName = x) }
@@ -60,6 +61,34 @@ object Main {
                 run(config)
             case None =>
         }
+    }
+
+
+    def supplyTopicModelSimilarity(args: Args, res: TopicModelResult): Unit = {
+        val (topicProbs, _) = res.getNormalizedWordTopics
+        val simFunction = simBhattacharyya
+        println(simFunction.name)
+
+        val fileWithTmSims = new File(args.dataFolderName + ".with-tm")
+        val pw = new PrintWriter(fileWithTmSims)
+
+        Source.fromFile(args.dataFolderName).getLines().foreach { line =>
+            val Array(word1, word2, embeddingProb) = line.split("\t")
+            val idx1 = res.dataAlphabet.lookupIndex(word1, false)
+            val idx2 = res.dataAlphabet.lookupIndex(word2, false)
+            if (idx1 != -1 && idx2 != -1) {
+                val divergence = simFunction.sim(topicProbs(idx1), topicProbs(idx2))
+                val topicSimilarity = 1 - divergence
+                pw.println(s"$word1\t$word2\t$embeddingProb\t$topicSimilarity")
+            } else {
+                if (idx1 == -1)
+                    println(word1)
+                if (idx2 == -1)
+                    println(word2)
+                None
+            }
+        }
+        pw.close()
     }
 
     def run(args: Args): Unit = {
@@ -89,6 +118,9 @@ object Main {
             case "word-similarity" =>
                 val res = loadExistingModel(args.modelFileName)
                 calculateWordSimilarity(args, res)
+            case "supply-tm-similarity" =>
+                val res = loadExistingModel(args.modelFileName)
+                supplyTopicModelSimilarity(args, res)
         }
     }
 
