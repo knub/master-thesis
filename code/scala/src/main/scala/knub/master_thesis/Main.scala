@@ -109,7 +109,7 @@ object Main {
             SimilarityObject("wordsim353_sim_rel/wordsim_relatedness_goldstandard.txt", ".wordsim353-rel",
                 { x => WordSimilarity(x(0).toLowerCase(), x(1).toLowerCase(), x(2).toDouble) } )
 
-        val topicProbs = res.getNormalizedWordTopics
+        val (topicProbs, _) = res.getNormalizedWordTopics
         for (simObject <- List(scws, wordsim353All, wordsim353Sim, wordsim353Rel)) {
             println(simObject.simFile)
 
@@ -170,7 +170,7 @@ object Main {
         val pw = args.getPrintWriterFor(".topic-probs-normalized")
 
         // last value is absolute word probability
-        val m = res.getNormalizedWordTopics
+        val (m, wordProbs) = res.getNormalizedWordTopics
         println(s"Topics: ${m(0).length}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
@@ -180,7 +180,7 @@ object Main {
                 val idx = res.dataAlphabet.lookupIndex(word)
                 val topicProbs = m(idx)
 
-                pw.write(s"$word,${topicProbs.mkString(",")}\n")
+                pw.write(s"$word,${topicProbs.mkString(",")},${wordProbs(idx)}\n")
             }
         }
 

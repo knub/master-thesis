@@ -47,14 +47,14 @@ class SimilarWordFinder(res: TopicModelResult, args: Args, frequentWordsRaw: Arr
             simBhattacharyya,
             simHelling,
             simJensenShannon
-        ).foreach { sim =>
+        ).par.foreach { sim =>
             println(s"Find word pairs ${sim.name}")
             findMostSimilarWordPairs(sim)
         }
     }
 
     def findMostSimilarWordPairs(sim: SimFunction): Unit = {
-        val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong, -1)
+        val progress = new util.Progress(topWordsCount.toLong * frequentWordsCount.toLong, 0)
         val pw = args.getPrintWriterFor(s".similars-${sim.name}")
 
         for (i <- 0 until topWordsCount) {

@@ -35,9 +35,9 @@ class TopicModelResult(val model: ParallelTopicModel) {
         println()
     }
 
-    def getNormalizedWordTopics: Array[Array[Double]] = {
+    def getNormalizedWordTopics: (Array[Array[Double]], Array[Double]) = {
         // last value is absolute word probability
-        val result = Array.ofDim[Double](model.numTypes, model.numTopics + 1)
+        val result = Array.ofDim[Double](model.numTypes, model.numTopics)
         val wordCounts = Array.ofDim[Long](model.numTypes)
         for (wordType <- 0 until model.numTypes) {
             val topicCounts = model.typeTopicCounts(wordType)
@@ -66,10 +66,12 @@ class TopicModelResult(val model: ParallelTopicModel) {
         for (i <- result.indices) {
             result(i) = normalized(result(i))
         }
+
+        val wordProbs = new Array[Double](model.numTypes)
         val wordsInCorpus = wordCounts.sum
         for (wordType <- 0 until model.numTypes)
-            result(wordType)(model.numTopics) = wordCounts(wordType).toDouble / wordsInCorpus
-        result
+            wordProbs(wordType) = wordCounts(wordType).toDouble / wordsInCorpus
+        (result, wordProbs)
     }
 
     private def normalized(a: Array[Double]): Array[Double] = {
