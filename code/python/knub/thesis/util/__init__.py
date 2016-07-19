@@ -39,7 +39,7 @@ class TopicModelLoader:
 
     def load_topic_probs(self):
         df_probs = pnd.read_csv(self.model + ".topic-probs-normalized")
-        self.prob_columns = map(str, list(range(len(df_probs.columns) - 1)))
+        self.prob_columns = map(str, list(range(len(df_probs.columns) - 2))) # - "word" and "word-prob"
         return df_probs
 
     def load_topics(self):
