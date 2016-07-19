@@ -19,7 +19,7 @@ assert "sentences.txt" in sentences_file.name
 for line in codecs.open(articles_file_name, 'r', encoding='utf-8'):
     for remove_char in [",", ";", "(", ")", "[", "]", "{", "}", ":", "="]:
         line = line.replace(remove_char, "")
-    sentences = sent_tokenize(line.lower())
+    sentences = sent_tokenize(line)
     for sentence in sentences:
         words = word_tokenize(sentence)
         for word in words:
