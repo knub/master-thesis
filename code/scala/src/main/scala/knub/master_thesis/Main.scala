@@ -169,11 +169,12 @@ object Main {
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
         val pw = args.getPrintWriterFor(".topic-probs-normalized")
 
+        // last value is absolute word probability
         val m = res.getNormalizedWordTopics
         println(s"Topics: ${m(0).length}")
         println(s"Tokens: ${res.dataAlphabet.size}")
 
-        pw.write(s"word,${(0 until res.model.numTopics).mkString(",")}\n")
+        pw.write(s"word,${(0 until res.model.numTopics).mkString(",")},word-prob\n")
         res.dataAlphabet.iterator().foreach { word =>
             if (frequentWords.contains(word)) {
                 val idx = res.dataAlphabet.lookupIndex(word)
