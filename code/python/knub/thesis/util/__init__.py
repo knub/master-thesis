@@ -67,7 +67,7 @@ class TopicModelLoader:
         df_similars = pnd.read_csv(self.model + ".similars-%s" % type, sep="\t", header=None, encoding="utf-8")
         df_similars["tm_sim"] = df_similars[0]
         del df_similars[0] # delete original similarity column
-        del df_similars[1] # delete "SIM" column
+        # del df_similars[1] # delete "SIM" column
         df_similars.columns = ["word", "similar_word", "tm_sim_%s" % type]
         return df_similars
 
