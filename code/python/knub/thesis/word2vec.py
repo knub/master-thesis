@@ -17,8 +17,9 @@ if __name__ == "__main__":
     logging.info("Training word2vec")
     sentences = LineSentence(args.sentences)
     bigram_model = Phrases(sentences, 20, 40)
-    trigram_model = Phrases(bigram_model[sentences], 5, 10)
-    model = Word2Vec(trigram_model[bigram_model[sentences]], size=256, window=5, min_count=50, workers=args.threads, sg=True, hs=0, negative=10, sample=0.001)
+    sentences = bigram_model[sentences]
+    trigram_model = Phrases(sentences, 5, 10)
+    model = Word2Vec(trigram_model[sentences], size=256, window=5, min_count=50, workers=args.threads, sg=True, hs=0, negative=10, sample=0.001)
     model.save_word2vec_format(args.model, binary=True)
     logging.info("Finished training word2vec")
 
