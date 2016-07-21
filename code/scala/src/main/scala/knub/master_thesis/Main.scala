@@ -6,6 +6,7 @@ import cc.mallet.topics.ParallelTopicModel
 import knub.master_thesis.probabilistic.Divergence._
 
 import scala.collection.JavaConversions._
+import scala.collection.parallel.ForkJoinTaskSupport
 import scala.io.Source
 
 case class Args(
@@ -207,9 +208,11 @@ object Main {
         println(s"Tokens: ${res.dataAlphabet.size}")
 
         pw.write(s"word,${(0 until res.model.numTopics).mkString(",")},word-prob\n")
-        res.dataAlphabet.iterator().foreach { word =>
+        val par = res.dataAlphabet.iterator().toList.par
+        par.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
+        par.foreach { word =>
             if (frequentWords.contains(word)) {
-                val idx = res.dataAlphabet.lookupIndex(word)
+                val idx = res.dataAlphabet.lookupIndex(word, false)
                 val topicProbs = m(idx)
 
                 pw.write(s"$word,${topicProbs.mkString(",")},${wordProbs(idx)}\n")
