@@ -48,27 +48,23 @@ class TopicModelLoader:
         return df_topics
 
     def load_all_topic_similars(self):
-        df = pnd.DataFrame()
+        dfs = dict()
         for sim_function in self.sim_functions:
             df_sim = self.load_topic_similars(sim_function)
-            if 'word' not in df.columns:
-                df["word"] = df_sim["word"]
-                df["similar_word"] = df_sim["similar_word"]
-            sim_column = "tm_sim_%s" % sim_function
-            df[sim_column] = df_sim[sim_column]
+            df_sim["we_sim"] = df_sim[["word", "similar_word"]].apply(
+                lambda x: self.get_similarity(x["word"], x["similar_word"], self.vectors), axis=1)
+            df_sim = df_sim[df_sim["we_sim"] != -1]
 
-        df["we_sim"] = df[["word", "similar_word"]].apply(
-            lambda x: self.get_similarity(x["word"], x["similar_word"], self.vectors), axis=1)
-        df = df[df["we_sim"] != -1]
+            dfs[sim_function] = df_sim
 
-        return df
+        return dfs
 
     def load_topic_similars(self, type):
         df_similars = pnd.read_csv(self.model + ".similars-%s" % type, sep="\t", header=None, encoding="utf-8")
         df_similars["tm_sim"] = df_similars[0]
         del df_similars[0] # delete original similarity column
         # del df_similars[1] # delete "SIM" column
-        df_similars.columns = ["word", "similar_word", "tm_sim_%s" % type]
+        df_similars.columns = ["word", "similar_word", "tm_sim"]
         return df_similars
 
     def get_similarity(self, word1, word2, v):
