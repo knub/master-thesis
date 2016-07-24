@@ -8,6 +8,23 @@ from gensim.models.word2vec import LineSentence
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
+def bigrams():
+    sentences = LineSentence(args.sentences)
+    bigram_model = Phrases(sentences, 20, 40)
+
+    with codecs.open(args.sentences + ".bigram", "w", encoding="utf-8") as f:
+        for tokens in bigram_model[sentences]:
+            f.write(" ".join(tokens) + "\n")
+
+def trigrams():
+    sentences = LineSentence(args.sentences + ".bigram")
+    bigram_model = Phrases(sentences, 20, 40)
+
+    with codecs.open(args.sentences + ".trigram", "w", encoding="utf-8") as f:
+        for tokens in bigram_model[sentences]:
+            f.write(" ".join(tokens) + "\n")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Training word2vec with gensim")
     parser.add_argument("sentences", type=str)
@@ -16,12 +33,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.info("Training word2vec")
-    sentences = LineSentence(args.sentences)
-    bigram_model = Phrases(sentences, 20, 40)
-
-    with codecs.open(args.sentences + ".bigram", "w", encoding="utf-8") as f:
-        for tokens in bigram_model[sentences]:
-            f.write(" ".join(tokens) + "\n")
+    trigrams()
 
     # sentences = bigram_model[sentences]
     # trigram_model = Phrases(sentences, 5, 10)
