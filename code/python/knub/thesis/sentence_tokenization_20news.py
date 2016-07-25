@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser("Training word2vec with gensim")
 parser.add_argument("twentynews_folder", type=str)
 args = parser.parse_args()
 
+
 def get_filenames():
     files = []
     for dirpath, _, filenames in os.walk(args.twentynews_folder):
@@ -22,10 +23,11 @@ def get_filenames():
 
 filenames = get_filenames()
 
-sentences_file = codecs.open(args.twentynews_folder + "/sentences.txt", "w", encoding="iso-8859-1")
-articles_file = codecs.open(args.twentynews_folder + "/articles.txt", "w", encoding="iso-8859-1")
+sentences_file = codecs.open(args.twentynews_folder + "/sentences.txt", "w", encoding="utf-8")
+articles_file = codecs.open(args.twentynews_folder + "/articles.txt", "w", encoding="utf-8")
 
 for filename in filenames:
+    # print filename
     with codecs.open(filename, "r", encoding="iso-8859-1") as f:
         content = f.readlines()
         body = dropwhile(lambda x: x != "\n", content)
@@ -34,6 +36,8 @@ for filename in filenames:
         for sentence in sentences:
             words = word_tokenize(sentence)
             for word in words:
+                # word = word.decode('iso-8859-1').encode('utf-8')
+                # print repr(word)
                 is_punctuation = all([s in string.punctuation for s in word])
                 if not is_punctuation:
                     articles_file.write(word)
