@@ -18,7 +18,7 @@ object PreprocessingPipe {
             // Regex explanation: lowercase [lowercase punctuation]+ lowercase  --- at least three characters,
             // no punctuation at the end
             new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")),
-            new UseOnlyFirstNWordsOfDocument(2000),
+//            new UseOnlyFirstNWordsOfDocument(2000),
             new TokenSequenceRemoveStopwords(
                 new File(stopWordsFileName), "UTF-8", false, false, false),
 //            new UseFixedVocabulary(
