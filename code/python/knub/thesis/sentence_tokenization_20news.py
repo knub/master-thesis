@@ -15,8 +15,10 @@ args = parser.parse_args()
 def get_filenames():
     files = []
     for dirpath, _, filenames in os.walk(args.twentynews_folder):
-        for filename in filenames:
-            files.append(dirpath + "/" + filename)
+        if dirpath == args.twentynews_folder:
+            continue
+        for fname in filenames:
+            files.append(dirpath + "/" + fname)
     shuffle(files)
     return files
 
@@ -27,17 +29,15 @@ sentences_file = codecs.open(args.twentynews_folder + "/sentences.txt", "w", enc
 articles_file = codecs.open(args.twentynews_folder + "/articles.txt", "w", encoding="utf-8")
 
 for filename in filenames:
-    # print filename
     with codecs.open(filename, "r", encoding="iso-8859-1") as f:
-        content = f.readlines()
-        body = dropwhile(lambda x: x != "\n", content)
+        content = list(f.readlines())
+        body = list(dropwhile(lambda x: x != "\n", content))
+        # print "dropped %d lines" % (len(content) - len(body))
         body = " ".join(body)
         sentences = sent_tokenize(body)
         for sentence in sentences:
             words = word_tokenize(sentence)
             for word in words:
-                # word = word.decode('iso-8859-1').encode('utf-8')
-                # print repr(word)
                 is_punctuation = all([s in string.punctuation for s in word])
                 if not is_punctuation:
                     articles_file.write(word)
