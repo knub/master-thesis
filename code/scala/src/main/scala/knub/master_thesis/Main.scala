@@ -21,8 +21,9 @@ case class Args(
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
     numThreads: Int = 2,
     numTopics: Int = 256,
-    numIterations: Int = 50) {
-
+    numIterations: Int = 50,
+    alpha: Double = 0.01,
+    beta: Double = 0.01) {
     def getPrintWriterFor(extension: String): PrintWriter = {
         val modelFile = new File(modelFileName)
         val modelTextFile = new File(modelFile.getCanonicalPath + extension)
@@ -38,7 +39,7 @@ object Main {
 
         List("topic-model-create", "topic-model-load",
             "text-preprocessing", "word-similarity",
-            "supply-tm-similarity"
+            "supply-tm-similarity", "embedding-lda"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
@@ -57,6 +58,10 @@ object Main {
             c.copy(numTopics = x) }
         opt[Int]("num-iterations").action { (x, c) =>
             c.copy(numIterations = x) }
+        opt[Double]("alpha").action { (x, c) =>
+            c.copy(alpha = x) }
+        opt[Double]("beta").action { (x, c) =>
+            c.copy(beta = x) }
     }
 
     def main(args: Array[String]): Unit = {
@@ -70,7 +75,7 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
-                val res = trainAndSaveNewModel(args, 1.0 / 256.0, 1.0 / 256.0)
+                val res = trainAndSaveNewModel(args, args.alpha, args.beta)
                 println(res.displayTopWords(10))
             case "topic-model-load" =>
                 val res = loadExistingModel(args.modelFileName)
@@ -83,6 +88,8 @@ object Main {
             case "supply-tm-similarity" =>
                 val res = loadExistingModel(args.modelFileName)
                 supplyTopicModelSimilarity(args, res)
+            case "embedding-lda" =>
+                val embeddingLDA = new WordEmbeddingLDA
         }
     }
 
