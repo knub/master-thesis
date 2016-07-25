@@ -14,7 +14,7 @@ import scala.io.Source
 object PreprocessingPipe {
     def pipeList(stopWordsFileName: String): mutable.ArrayBuffer[Pipe] = {
         mutable.ArrayBuffer[Pipe](
-            new CharSequenceLowercase(),
+//            new CharSequenceLowercase(),
             // Regex explanation: lowercase [lowercase punctuation]+ lowercase  --- at least three characters,
             // no punctuation at the end
             new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")),
