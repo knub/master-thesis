@@ -13,7 +13,6 @@ case class Args(
     mode: String = "",
     modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
-    createNewModel: Boolean = false,
     stopWordsFileName: String = "../resources/stopwords.txt",
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
     numThreads: Int = 2,
@@ -33,14 +32,16 @@ object Main {
     val parser = new scopt.OptionParser[Args]("topic-models") {
         head("topic-models", "0.0.1")
 
-        cmd("topic-model").action { (_, c) => c.copy(mode = "topic-model") }
-        cmd("text-preprocessing").action { (_, c) => c.copy(mode = "text-preprocessing") }
-        cmd("word-similarity").action { (_, c) => c.copy(mode = "word-similarity") }
-        cmd("supply-tm-similarity").action { (_, c) => c.copy(mode = "supply-tm-similarity") }
+        List("topic-model-create", "topic-model-load",
+            "text-preprocessing", "word-similarity",
+            "supply-tm-similarity"
+        ).foreach { mode =>
+            cmd(mode).action { (_, c) => c.copy(mode = mode) }
+        }
 
         opt[String]('m', "model-file-name").action { (x, c) =>
             c.copy(modelFileName = x) }
-        opt[String]('d', "data-folder-name").action { (x, c) =>
+        opt[String]('d', "data-folder-name").required().action { (x, c) =>
             c.copy(dataFolderName = x) }
         opt[String]("stop-words").action { (x, c) =>
             c.copy(stopWordsFileName = x) }
@@ -52,8 +53,6 @@ object Main {
             c.copy(numTopics = x) }
         opt[Int]("num-iterations").action { (x, c) =>
             c.copy(numIterations = x) }
-        opt[Unit]("create-new-model").action { (_, c) =>
-            c.copy(createNewModel = true) }
     }
 
     def main(args: Array[String]): Unit = {
@@ -64,6 +63,24 @@ object Main {
         }
     }
 
+    def run(args: Args): Unit = {
+        args.mode match {
+            case "topic-model-create" =>
+                val res = trainAndSaveNewModel(args, 1.0 / 256.0, 1.0 / 256.0)
+                println(res.displayTopWords(10))
+            case "topic-model-load" =>
+                val res = loadExistingModel(args.modelFileName)
+                analyzeResult(res, args)
+            case "text-preprocessing" =>
+                writeArticlesTextFile(args)
+            case "word-similarity" =>
+                val res = loadExistingModel(args.modelFileName)
+                calculateWordSimilarity(args, res)
+            case "supply-tm-similarity" =>
+                val res = loadExistingModel(args.modelFileName)
+                supplyTopicModelSimilarity(args, res)
+        }
+    }
 
     def supplyTopicModelSimilarity(args: Args, res: TopicModelResult): Unit = {
         val (topicProbs, _) = res.getNormalizedWordTopics
@@ -90,39 +107,6 @@ object Main {
             }
         }
         pw.close()
-    }
-
-    def run(args: Args): Unit = {
-        args.mode match {
-            case "topic-model" =>
-                if (args.createNewModel) {
-//                    for (alpha <- List(1.0 / 10.0,
-//                        1.0 / 100.0,
-//                        1.0 / 500.0)) {
-//                        for (beta <- List(1.0 / 10.0,
-//                            1.0 / 100.0,
-//                            1.0 / 500.0)) {
-//                            val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
-//                            val res = trainAndSaveNewModel(args, alpha, beta)
-//                            analyzeResult(res, args.copy(modelFileName = f))
-//                        }
-//                    }
-//                    val f = args.modelFileName.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
-                    val res = trainAndSaveNewModel(args, 1.0 / 256.0, 1.0 / 256.0)
-                }
-                else {
-                    val res = loadExistingModel(args.modelFileName)
-                    analyzeResult(res, args)
-                }
-            case "text-preprocessing" =>
-                writeArticlesTextFile(args)
-            case "word-similarity" =>
-                val res = loadExistingModel(args.modelFileName)
-                calculateWordSimilarity(args, res)
-            case "supply-tm-similarity" =>
-                val res = loadExistingModel(args.modelFileName)
-                supplyTopicModelSimilarity(args, res)
-        }
     }
 
     case class WordSimilarity(word1: String, word2: String, humanSim: Double, topicSim: Double = -1.0)
@@ -182,8 +166,8 @@ object Main {
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
-//        println("Write top words")
-//        writeTopWordsToTextFile(res, args)
+        println("Write top words")
+        writeTopWordsToTextFile(res, args)
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
@@ -231,9 +215,20 @@ object Main {
 
 
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
-        val tp = new TopicModel(args, alpha, beta)
+        val instancesIterator = if (args.dataFolderName.contains("plain-text")) {
+            DataIterators.wikipedia(args.dataFolderName)
+        } else if (args.dataFolderName.contains("20newsgroups")) {
+            DataIterators.twentyNews(args.dataFolderName)
+        } else {
+            throw new Exception("No data iterator found for given data folder name.")
+        }
+
+//        instancesIterator.take(1).foreach { instance =>
+//            println(instance.getData)
+//        }
+        val tp = new TopicModel(args, alpha, beta, instancesIterator)
         val res = tp.run(args.dataFolderName, args.stopWordsFileName)
-        val f = args.modelFileName//.replace(".model", s".alpha-${alpha.toString.replace(".", "0")}.beta-${beta.toString.replace(".", "0")}.model")
+        val f = args.modelFileName
         res.save(f)
         res
     }
@@ -243,7 +238,7 @@ object Main {
     }
 
     def writeArticlesTextFile(args: Args): Unit = {
-        val wpti = OnlyNormalPagesIterator.normalPagesIterator(new WikiPlainTextIterator(args.dataFolderName))
+        val wpti = DataIterators.wikipedia(args.dataFolderName)
         val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
         wpti.foreach { article =>
             writer.write(article.getData.asInstanceOf[String])
