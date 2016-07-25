@@ -6,6 +6,7 @@ import java.util.regex.Pattern
 import cc.mallet.pipe.CharSequence2TokenSequence
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{Instance, TokenSequence}
+import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
 
 import scala.collection.JavaConversions._

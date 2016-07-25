@@ -1,4 +1,4 @@
-package knub.master_thesis
+package knub.master_thesis.preprocessing
 
 import java.nio.file.{Files, Path, Paths}
 
