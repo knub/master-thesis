@@ -1,7 +1,6 @@
 package knub.master_thesis
 
 import java.io._
-import java.util
 import java.util.regex.Pattern
 
 import cc.mallet.pipe.CharSequence2TokenSequence

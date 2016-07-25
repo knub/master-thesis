@@ -38,24 +38,13 @@ object OnlyNormalPagesIterator {
 }
 class TwentyNewsIterator(dataFolderName: String) {
 
-    val p = Paths.get(dataFolderName)
-    val pathIterator = java.nio.file.Files.walk(p).iterator().asScala.filter(Files.isRegularFile(_))
-
-    val documentBodies = pathIterator.map {  p =>
-        val source = scala.io.Source.fromFile(p.toFile, "ISO-8859-1")
-        val fileContent = source.getLines()
-        val body  = fileContent.dropWhile { l => l.nonEmpty }
-
-        val pathCount = p.getNameCount
-        val instance = new Instance(body.mkString(" "), null, p.getName(pathCount - 1).toString, null)
-        source.close()
-        instance
-    }.toBuffer
-
-    val shuffled = scala.util.Random.shuffle(documentBodies)
-
     def iterator(): java.util.Iterator[Instance] = {
-        shuffled.iterator.asJava
+        val articlesPath = Paths.get(dataFolderName + "/articles.txt").toFile
+        val articles = scala.io.Source.fromFile(articlesPath, "ISO-8859-1").getLines().toBuffer
+        val articlesShuffled = scala.util.Random.shuffle(articles)
+        articlesShuffled.map { text =>
+            new Instance(text, null, null, null)
+        }.iterator.asJava
     }
 
 }
