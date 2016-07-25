@@ -7,6 +7,16 @@ import cc.mallet.types.Instance
 import scala.collection.JavaConverters._
 
 object DataIterators {
+    def getIteratorForDataFolderName(dataFolderName: String): java.util.Iterator[Instance] = {
+        if (dataFolderName.contains("plain-text")) {
+            wikipedia(dataFolderName)
+        } else if (dataFolderName.contains("20newsgroups")) {
+            twentyNews(dataFolderName)
+        } else {
+            throw new Exception("No data iterator found for given data folder name.")
+        }
+    }
+
     def wikipedia(dataFolderName: String) = {
         OnlyNormalPagesIterator.normalPagesIterator(new WikiPlainTextIterator(dataFolderName))
     }
@@ -37,7 +47,7 @@ class TwentyNewsIterator(dataFolderName: String) {
         val body  = fileContent.dropWhile { l => l.nonEmpty }
 
         val pathCount = p.getNameCount
-        val instance = new Instance(body.mkString("\n"), null, p.getName(pathCount - 1).toString, null)
+        val instance = new Instance(body.mkString(" "), null, p.getName(pathCount - 1).toString, null)
         source.close()
         instance
     }.toBuffer

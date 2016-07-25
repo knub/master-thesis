@@ -1,8 +1,12 @@
 package knub.master_thesis
 
 import java.io._
+import java.util
+import java.util.regex.Pattern
 
+import cc.mallet.pipe.CharSequence2TokenSequence
 import cc.mallet.topics.ParallelTopicModel
+import cc.mallet.types.{Instance, TokenSequence}
 import knub.master_thesis.probabilistic.Divergence._
 
 import scala.collection.JavaConversions._
@@ -215,17 +219,7 @@ object Main {
 
 
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
-        val instancesIterator = if (args.dataFolderName.contains("plain-text")) {
-            DataIterators.wikipedia(args.dataFolderName)
-        } else if (args.dataFolderName.contains("20newsgroups")) {
-            DataIterators.twentyNews(args.dataFolderName)
-        } else {
-            throw new Exception("No data iterator found for given data folder name.")
-        }
-
-//        instancesIterator.take(1).foreach { instance =>
-//            println(instance.getData)
-//        }
+        val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val tp = new TopicModel(args, alpha, beta, instancesIterator)
         val res = tp.run(args.dataFolderName, args.stopWordsFileName)
         val f = args.modelFileName
@@ -238,9 +232,17 @@ object Main {
     }
 
     def writeArticlesTextFile(args: Args): Unit = {
-        val wpti = DataIterators.wikipedia(args.dataFolderName)
+        val iterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val converter = new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}"))
+
+
         val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
-        wpti.foreach { article =>
+        iterator.foreach { article =>
+            val convertedInstance = converter.pipe(article)
+            convertedInstance.getData.asInstanceOf[TokenSequence].foreach { token =>
+                writer.write(article.getData.asInstanceOf[String])
+                writer.write("\n")
+            }
             writer.write(article.getData.asInstanceOf[String])
             writer.write("\n")
         }
