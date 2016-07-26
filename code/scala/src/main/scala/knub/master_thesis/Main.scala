@@ -117,6 +117,8 @@ object Main {
 
         println("Write top words")
         writeTopWordsToTextFile(res, args)
+        println("Write vocabulary")
+        writeVocabulary(res, args)
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
@@ -130,9 +132,18 @@ object Main {
          * Sample similarity
          */
     }
+
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
         val pw = args.getPrintWriterFor(".ssv")
         pw.write(res.displayTopWords(10))
+        pw.close()
+    }
+
+    def writeVocabulary(res: TopicModelResult, args: Args) = {
+        val pw = args.getPrintWriterFor(".vocab")
+        res.dataAlphabet.toArray.foreach { word =>
+            pw.println(word)
+        }
         pw.close()
     }
 
