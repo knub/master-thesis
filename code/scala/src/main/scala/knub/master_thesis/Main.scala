@@ -46,7 +46,7 @@ object Main {
 
         opt[String]('m', "model-file-name").action { (x, c) =>
             c.copy(modelFileName = x) }
-        opt[String]('d', "data-folder-name").required().action { (x, c) =>
+        opt[String]('d', "data-folder-name").action { (x, c) =>
             c.copy(dataFolderName = x) }
         opt[String]("stop-words").action { (x, c) =>
             c.copy(stopWordsFileName = x) }
