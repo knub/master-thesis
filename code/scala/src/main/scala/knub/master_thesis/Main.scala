@@ -112,10 +112,10 @@ object Main {
 
         println("Write top words")
         writeTopWordsToTextFile(res, args)
-        //        println("Write topic probs")
-        //        val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
-        //        val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
-        //        simFinder.run()
+        println("Write topic probs")
+        val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
+        val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
+        simFinder.run()
 
         /*
          * WHAT TO DO:
