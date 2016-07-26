@@ -76,6 +76,8 @@ object Main {
         args.mode match {
             case "topic-model-create" =>
                 val res = trainAndSaveNewModel(args, args.alpha, args.beta)
+                println("Top words")
+                writeTopWordsToTextFile(res, args)
                 println(res.displayTopWords(10))
             case "topic-model-load" =>
                 val res = loadExistingModel(args.modelFileName)
@@ -93,35 +95,89 @@ object Main {
         }
     }
 
-    def supplyTopicModelSimilarity(args: Args, res: TopicModelResult): Unit = {
-        val (topicProbs, _) = res.getNormalizedWordTopics
-        val simFunction = simBhattacharyya
-        println(simFunction.name)
+    def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
+        val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val tp = new TopicModel(args, alpha, beta, instancesIterator)
+        val res = tp.run(args.dataFolderName, args.stopWordsFileName)
+        val f = args.modelFileName
+        res.save(f)
+        res
+    }
 
-        val fileWithTmSims = new File(args.dataFolderName + ".with-tm")
-        val pw = new PrintWriter(fileWithTmSims)
+    def loadExistingModel(modelFileName: String): TopicModelResult = {
+        new TopicModelResult(ParallelTopicModel.read(new File(modelFileName)))
+    }
+    def analyzeResult(res: TopicModelResult, args: Args): Unit = {
+        val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
-        Source.fromFile(args.dataFolderName).getLines().foreach { line =>
-            val Array(word1, word2, embeddingProb) = line.split("\t")
-            val idx1 = res.dataAlphabet.lookupIndex(word1, false)
-            val idx2 = res.dataAlphabet.lookupIndex(word2, false)
-            if (idx1 != -1 && idx2 != -1) {
-                val divergence = simFunction.sim(topicProbs(idx1), topicProbs(idx2))
-                val topicSimilarity = 1 - divergence
-                pw.println(s"$word1\t$word2\t$embeddingProb\t$topicSimilarity")
-            } else {
-                if (idx1 == -1)
-                    println(word1)
-                if (idx2 == -1)
-                    println(word2)
-                None
-            }
-        }
+        println("Write top words")
+        writeTopWordsToTextFile(res, args)
+        //        println("Write topic probs")
+        //        val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
+        //        val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
+        //        simFinder.run()
+
+        /*
+         * WHAT TO DO:
+         * Find variance of words with highest and lowest variance
+         * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
+         * For each word, find similars and dissimilars
+         * Sample similarity
+         */
+    }
+
+    def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
+        val pw = args.getPrintWriterFor(".ssv")
+        pw.write(res.displayTopWords(10))
         pw.close()
     }
 
-    case class WordSimilarity(word1: String, word2: String, humanSim: Double, topicSim: Double = -1.0)
+
+    def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
+        val pw = args.getPrintWriterFor(".topic-probs-normalized")
+
+        // last value is absolute word probability
+        val (m, wordProbs) = res.getNormalizedWordTopics
+        println(s"Topics: ${m(0).length}")
+        println(s"Tokens: ${res.dataAlphabet.size}")
+
+        pw.write(s"word,${(0 until res.model.numTopics).mkString(",")},word-prob\n")
+        val par = res.dataAlphabet.iterator().toList.par
+        par.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
+        par.foreach { word =>
+            if (frequentWords.contains(word)) {
+                val idx = res.dataAlphabet.lookupIndex(word, false)
+                val topicProbs = m(idx)
+
+                pw.write(s"$word,${topicProbs.mkString(",")},${wordProbs(idx)}\n")
+            }
+        }
+
+        pw.close()
+        m
+    }
+
+
+    def writeArticlesTextFile(args: Args): Unit = {
+        val iterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val converter = new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}"))
+
+
+        val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
+        iterator.foreach { article =>
+            val convertedInstance = converter.pipe(article)
+            convertedInstance.getData.asInstanceOf[TokenSequence].foreach { token =>
+                writer.write(article.getData.asInstanceOf[String])
+                writer.write("\n")
+            }
+            writer.write(article.getData.asInstanceOf[String])
+            writer.write("\n")
+        }
+        writer.close()
+    }
+
     def calculateWordSimilarity(args: Args, res: TopicModelResult): Unit = {
+        case class WordSimilarity(word1: String, word2: String, humanSim: Double, topicSim: Double = -1.0)
         case class SimilarityObject(simFile: String, fileEnding: String, extractor: Array[String] => WordSimilarity)
         val scws =
             SimilarityObject("SCWS/ratings.txt", ".scws", { x =>
@@ -174,86 +230,31 @@ object Main {
         }
     }
 
-    def analyzeResult(res: TopicModelResult, args: Args): Unit = {
-        val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
+    def supplyTopicModelSimilarity(args: Args, res: TopicModelResult): Unit = {
+        val (topicProbs, _) = res.getNormalizedWordTopics
+        val simFunction = simBhattacharyya
+        println(simFunction.name)
 
-        println("Write top words")
-        writeTopWordsToTextFile(res, args)
-        println("Write topic probs")
-        val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
-        val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
-        simFinder.run()
+        val fileWithTmSims = new File(args.dataFolderName + ".with-tm")
+        val pw = new PrintWriter(fileWithTmSims)
 
-        /*
-         * WHAT TO DO:
-         * Find variance of words with highest and lowest variance
-         * Find word pairs, that have high sim in topic space (kl divergence) but large diff in WE
-         * For each word, find similars and dissimilars
-         * Sample similarity
-         */
-    }
-
-
-    def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
-        val pw = args.getPrintWriterFor(".topic-probs-normalized")
-
-        // last value is absolute word probability
-        val (m, wordProbs) = res.getNormalizedWordTopics
-        println(s"Topics: ${m(0).length}")
-        println(s"Tokens: ${res.dataAlphabet.size}")
-
-        pw.write(s"word,${(0 until res.model.numTopics).mkString(",")},word-prob\n")
-        val par = res.dataAlphabet.iterator().toList.par
-        par.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(10))
-        par.foreach { word =>
-            if (frequentWords.contains(word)) {
-                val idx = res.dataAlphabet.lookupIndex(word, false)
-                val topicProbs = m(idx)
-
-                pw.write(s"$word,${topicProbs.mkString(",")},${wordProbs(idx)}\n")
+        Source.fromFile(args.dataFolderName).getLines().foreach { line =>
+            val Array(word1, word2, embeddingProb) = line.split("\t")
+            val idx1 = res.dataAlphabet.lookupIndex(word1, false)
+            val idx2 = res.dataAlphabet.lookupIndex(word2, false)
+            if (idx1 != -1 && idx2 != -1) {
+                val divergence = simFunction.sim(topicProbs(idx1), topicProbs(idx2))
+                val topicSimilarity = 1 - divergence
+                pw.println(s"$word1\t$word2\t$embeddingProb\t$topicSimilarity")
+            } else {
+                if (idx1 == -1)
+                    println(word1)
+                if (idx2 == -1)
+                    println(word2)
+                None
             }
         }
-
         pw.close()
-        m
-    }
-
-    def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
-        val pw = args.getPrintWriterFor(".ssv")
-        pw.write(res.displayTopWords(10))
-        pw.close()
-    }
-
-
-    def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
-        val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
-        val tp = new TopicModel(args, alpha, beta, instancesIterator)
-        val res = tp.run(args.dataFolderName, args.stopWordsFileName)
-        val f = args.modelFileName
-        res.save(f)
-        res
-    }
-
-    def loadExistingModel(modelFileName: String): TopicModelResult = {
-        new TopicModelResult(ParallelTopicModel.read(new File(modelFileName)))
-    }
-
-    def writeArticlesTextFile(args: Args): Unit = {
-        val iterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
-        val converter = new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}"))
-
-
-        val writer = new OutputStreamWriter(new FileOutputStream(args.modelFileName), "UTF-8")
-        iterator.foreach { article =>
-            val convertedInstance = converter.pipe(article)
-            convertedInstance.getData.asInstanceOf[TokenSequence].foreach { token =>
-                writer.write(article.getData.asInstanceOf[String])
-                writer.write("\n")
-            }
-            writer.write(article.getData.asInstanceOf[String])
-            writer.write("\n")
-        }
-        writer.close()
     }
 
 }
