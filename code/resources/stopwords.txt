@@ -26,6 +26,7 @@ but
 by
 can
 can't
+could
 couldn't
 did
 didn't
@@ -76,11 +77,13 @@ must
 mustn't
 my
 myself
+need
 needn't
 no
 nor
 not
 now
+n't
 o
 of
 off
