@@ -1,11 +1,12 @@
 package knub.master_thesis
 
 import java.io._
+import java.nio.file.Paths
 import java.util.regex.Pattern
 
 import cc.mallet.pipe.CharSequence2TokenSequence
 import cc.mallet.topics.ParallelTopicModel
-import cc.mallet.types.{Instance, TokenSequence}
+import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
 
@@ -39,7 +40,8 @@ object Main {
 
         List("topic-model-create", "topic-model-load",
             "text-preprocessing", "word-similarity",
-            "supply-tm-similarity", "embedding-lda"
+            "supply-tm-similarity", "embedding-lda",
+            "inspect-topic-evolution"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
@@ -92,6 +94,8 @@ object Main {
                 supplyTopicModelSimilarity(args, res)
             case "embedding-lda" =>
                 val embeddingLDA = new WordEmbeddingLDA
+            case "inspect-topic-evolution" =>
+                inspectTopicEvolution(args)
         }
     }
 
@@ -107,6 +111,7 @@ object Main {
     def loadExistingModel(modelFileName: String): TopicModelResult = {
         new TopicModelResult(ParallelTopicModel.read(new File(modelFileName)))
     }
+
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile("../../data/vocab.txt").getLines().toArray
 
@@ -125,13 +130,11 @@ object Main {
          * Sample similarity
          */
     }
-
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
         val pw = args.getPrintWriterFor(".ssv")
         pw.write(res.displayTopWords(10))
         pw.close()
     }
-
 
     def writeTopicProbsToFile(res: TopicModelResult, args: Args, frequentWords: Set[String]): Array[Array[Double]] = {
         val pw = args.getPrintWriterFor(".topic-probs-normalized")
@@ -175,6 +178,7 @@ object Main {
         }
         writer.close()
     }
+
 
     def calculateWordSimilarity(args: Args, res: TopicModelResult): Unit = {
         case class WordSimilarity(word1: String, word2: String, humanSim: Double, topicSim: Double = -1.0)
@@ -257,4 +261,55 @@ object Main {
         pw.close()
     }
 
+
+    val START_STRIKETHROUGH = "\u001B[09m"
+    val STOP_STRIKETHROUGH = "\u001B[29m"
+    val START_BOLD = "\u001B[01m"
+    val STOP_BOLD = "\u001B[22m"
+    case class Topic(id: Int, words: scala.collection.mutable.Buffer[String])
+    def inspectTopicEvolution(args: Args): Unit = {
+        val topicEvolutionFiles = new File(new File(args.modelFileName).getParent).listFiles().filter { file =>
+            file.getAbsolutePath.startsWith(args.modelFileName) && file.getAbsolutePath.contains("lflda-")
+        }.sorted
+        val source = Source.fromFile(args.modelFileName + ".ssv").getLines.drop(1)
+        val topics = source.toBuffer[String].map { line =>
+            val split = line.split(" ")
+            Topic(split(0).toInt, split.drop(2).toBuffer)
+        }.sortBy(_.id).toArray
+
+        val numTopics = topics.length
+
+        val changedTopicsPerEvolution = topicEvolutionFiles.map { topicFile =>
+            readTopicsFromLFLDA(topicFile.getAbsolutePath)
+        }
+
+        for (i <- 0 until numTopics) {
+            val originalWords = topics(i).words
+            for (j <- changedTopicsPerEvolution.indices) {
+                val changedWords = changedTopicsPerEvolution(j)(i).words
+                // hacky way to parse the iteration number from the file name
+                val fileName = Paths.get(topicEvolutionFiles(j).getAbsolutePath).getFileName.toString.split('.').dropRight(1).last.replace("lflda-", "")
+                print(f"${i + 1}%2d $fileName ")
+                for (word <- originalWords) {
+                    if (changedWords.contains(word)) {
+                        print(word)
+                    } else {
+                        print(s"$START_STRIKETHROUGH$word$STOP_STRIKETHROUGH")
+                    }
+                    print(" ")
+                }
+                changedWords.filter { word => !originalWords.contains(word) }.foreach { word =>
+                    print(s"$START_BOLD$word$STOP_BOLD ")
+                }
+                println()
+            }
+        }
+    }
+
+    def readTopicsFromLFLDA(fileName: String): Array[Topic] = {
+        Source.fromFile(fileName).getLines().map { line =>
+            val words = line.split(" ").toBuffer
+            Topic(-1, words)
+        }.toArray
+    }
 }
