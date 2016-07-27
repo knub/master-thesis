@@ -97,7 +97,7 @@ class WordEmbeddingLDA(val p: Args) {
         println("Sampling completed!")
         writer.writeParameters()
         System.out.println("Writing output from the last sample ...")
-        writer.write("final")
+        writer.write(p.numIterations.toString)
     }
 
     def sampleSingleIteration() {

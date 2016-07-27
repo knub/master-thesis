@@ -289,7 +289,9 @@ object Main {
     def inspectTopicEvolution(args: Args): Unit = {
         val fileSuffix = s"${args.inspectFileSuffix}-"
         val topicEvolutionFiles = new File(new File(args.modelFileName).getParent).listFiles().filter { file =>
-            file.getAbsolutePath.startsWith(args.modelFileName) && file.getAbsolutePath.contains(fileSuffix)
+            file.getAbsolutePath.startsWith(args.modelFileName) &&
+                file.getAbsolutePath.contains(fileSuffix) &&
+                file.getAbsolutePath.endsWith(".topics")
         }.sorted
         val source = Source.fromFile(args.modelFileName + ".ssv").getLines.drop(1)
         val topics = source.toBuffer[String].map { line =>
@@ -298,6 +300,8 @@ object Main {
         }.sortBy(_.id).toArray
 
         val numTopics = topics.length
+
+        println(topicEvolutionFiles.deep)
 
         val changedTopicsPerEvolution = topicEvolutionFiles.map { topicFile =>
             readTopicsFromLFLDA(topicFile.getAbsolutePath)

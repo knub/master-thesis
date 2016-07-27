@@ -83,7 +83,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
 
     def write(name: String) {
         writeTopTopicalWords(name)
-        if (name == "final") {
+        if (name == model.p.numIterations.toString) {
             writeDocTopicPros(name)
             writeTopicAssignments(name)
             writeTopicWordPros(name)
