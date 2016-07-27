@@ -1,14 +1,7 @@
 package knub.master_thesis.util
 
-import java.io.BufferedWriter
-import java.io.FileWriter
-import java.io.IOException
-import java.util
-import java.util.Map
-import java.util.Set
-import java.util.TreeMap
+import java.io.{BufferedWriter, FileWriter}
 
-import scala.collection.JavaConverters._
 import knub.master_thesis.WordEmbeddingLDA
 
 import scala.collection.mutable
@@ -41,11 +34,11 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
         writer.close()
     }
 
-    def writeTopTopicalWords(name: String) {
+    def writeTopTopicalWords(name: String): Unit = {
         val writer = new BufferedWriter(new FileWriter(params.modelFileName + ".welda-" + name + ".topics"))
         for (tIndex <- 0 until params.numTopics) {
             writer.write(String.valueOf(tIndex))
-            var topicWordProbs = mutable.Map[Integer, Double]()
+            val topicWordProbs = mutable.Map[Int, Double]()
             for (wIndex <- 0 until model.vocabularySize) {
                 val pro = (model.topicWordCountLDA(tIndex)(wIndex) + params.beta) /
                         (model.sumTopicWordCountLDA(tIndex) + model.betaSum)
@@ -55,10 +48,8 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
             val mostLikelyWords = topicWordProbs.toSeq.sortBy(-_._2).take(TOP_WORDS)
 //            topicWordProbs = FuncUtils.sortByValueDescending(topicWordProbs)
 //            val mostLikelyWords = topicWordProbs.keySet
-            var count = 0
             for (wordId <- mostLikelyWords) {
                 writer.write(" " + model.id2WordVocabulary(wordId._1))
-                count += 1
             }
             writer.write("\n")
         }

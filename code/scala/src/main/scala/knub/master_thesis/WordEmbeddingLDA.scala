@@ -13,7 +13,7 @@ case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int)
 
 class WordEmbeddingLDA(val p: Args) {
 
-   val writer = new TopicModelWriter(this)
+    val writer = new TopicModelWriter(this)
 
     val TopicModelInfo(wordAlphabet, vocabularySize) = loadTopicModelInfo()
     val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
@@ -29,18 +29,18 @@ class WordEmbeddingLDA(val p: Args) {
     val corpusWords = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
     val corpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
 
+    var word2IdVocabulary: mutable.Map[String, Int] = null
+    var id2WordVocabulary: mutable.Map[Int, String] = null
     readCorpus(p.modelFileName)
 
     System.out.println("Memory: " + FreeMemory.get(true, 5) + " MB")
-
-    var word2IdVocabulary: mutable.Map[String, Int] = null
-    var id2WordVocabulary: mutable.Map[Int, String] = null
 
     private def readCorpus(pathToTopicModel: String) {
         println("Reading corpus")
         var docId = 0
         val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".lflda.alphabet"))
         word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
+        brAlphabet.close()
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
         val brDocument = new BufferedReader(new FileReader(pathToTopicModel + ".lflda"))
         var lineNr = 0
@@ -54,7 +54,7 @@ class WordEmbeddingLDA(val p: Args) {
                     corpusTopics += documentTopics
                     documentWords = new IntArrayList()
                     documentTopics = new IntArrayList()
-                    if (docId % 100 == 0) {
+                    if (docId % 5000 == 0) {
                         println(docId)
                     }
                     docId += 1
@@ -87,8 +87,6 @@ class WordEmbeddingLDA(val p: Args) {
 
         for (iter <- 0 until p.numIterations) {
             println("\tLFLDA sampling iteration: " + iter)
-            if (iter % 10 == 0)
-                println(iter)
             sampleSingleIteration()
 
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
@@ -105,10 +103,10 @@ class WordEmbeddingLDA(val p: Args) {
     def sampleSingleIteration() {
         println("\t\tRunning iteration ...")
         for (docIdx <- 0 until p.numDocuments) {
-            if (docIdx % 100000 == 0) {
-                System.out.print(docIdx + " ")
-                System.out.flush()
-            }
+//            if (docIdx % 100000 == 0) {
+//                System.out.print(docIdx + " ")
+//                System.out.flush()
+//            }
             val docSize = corpusWords(docIdx).size
             for (wIndex <- 0 until docSize) {
                 val wordId = corpusWords(docIdx).get(wIndex)
