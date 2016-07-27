@@ -1,39 +1,172 @@
 package knub.master_thesis
 
+import java.io.{BufferedReader, File, FileReader}
+
+import cc.mallet.topics.ParallelTopicModel
+import cc.mallet.types.Alphabet
 import com.carrotsearch.hppc.IntArrayList
-import knub.master_thesis.util.FreeMemory
+import knub.master_thesis.util.{FreeMemory, Sampler}
 
 import scala.collection.mutable
 
-class WordEmbeddingLDA {
+case class WordEmbeddingLDAParams(
+    modelFileName: String,
+    numTopics: Int,
+    alpha: Double,
+    beta: Double,
+    numDocuments: Int,
+    numIterations: Int)
 
-}
+case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int)
 
-private object MemoryTests {
+class WordEmbeddingLDA(p: WordEmbeddingLDAParams) {
 
-    val N = 100000000
-    println(s"${FreeMemory.get(false, 0)} RAM")
+//   val writer: LFLDATopicModelWriter
 
-    // Simple array
-    //    val a = new Array[Int](N)
+    val TopicModelInfo(wordAlphabet, vocabularySize) = loadTopicModelInfo()
+    val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
+    val sumDocTopicCount = new Array[Int](p.numDocuments)
+    val topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
+    val sumTopicWordCountLDA = new Array[Int](p.numTopics)
 
-    // ArrayBuffer
-    //    val ab = new mutable.ArrayBuffer[Int](N)
-    //    for (i <- 0 until N) {
-    //        if (i % 1000000 == 0)
-    //            println(i)
-    //        ab.append(i)
-    //    }
+    val multiPros = new Array[Double](p.numTopics)
 
-    // HPPC
-    val a = new IntArrayList(N)
-    for (i <- 0 until N) {
-        if (i % 1000000 == 0)
-            println(i)
-        a.add(i)
+    val alphaSum = p.numTopics * p.alpha
+    val betaSum = vocabularySize * p.beta
+
+    val corpusWords = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
+    val corpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
+
+    readCorpus(p.modelFileName)
+
+    System.out.println("Memory: " + FreeMemory.get(true, 5) + " MB")
+
+    private def readCorpus(pathToTopicModel: String) {
+        var docId = 0
+//        val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".lflda.alphabet"))
+//        word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
+//        id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
+        val brDocument = new BufferedReader(new FileReader(pathToTopicModel + ".lflda"))
+        var lineNr = 0
+        var documentWords = new IntArrayList()
+        var documentTopics = new IntArrayList()
+        var line: String = brDocument.readLine()
+        while (line != null) {
+            if (line == "##") {
+                if (documentWords.size > 0) {
+                    corpusWords += documentWords
+                    corpusTopics += documentTopics
+                    documentWords = new IntArrayList()
+                    documentTopics = new IntArrayList()
+                    docId += 1
+                    if (docId % 100000 == 0) {
+                        println(docId)
+                    }
+                }
+            } else {
+                try {
+                    val wordId = java.lang.Integer.parseInt(line.substring(0, 6))
+                    val topicId = java.lang.Integer.parseInt(line.substring(7, 13))
+                    topicWordCountLDA(topicId)(wordId) += 1
+                    sumTopicWordCountLDA(topicId) += 1
+                    docTopicCount(docId)(topicId) += 1
+                    sumDocTopicCount(docId) += 1
+                    documentWords.add(wordId)
+                    documentTopics.add(topicId)
+                } catch {
+                    case e: Exception =>
+                        println(line)
+                        println("lineNr = " + lineNr)
+                        println("line = <" + line + ">")
+                        throw e
+                }
+                lineNr += 1
+                line = brDocument.readLine()
+            }
+        }
     }
-    println(s"${FreeMemory.get(true, 15)} RAM")
+
+    def inference(): Unit = {
+        println("Running Gibbs sampling inference: ")
+
+        for (iter <- 0 until p.numIterations) {
+            println("\tLFLDA sampling iteration: " + iter)
+            sampleSingleIteration()
+
+//            if (savestep > 0 && iter % savestep == 0 && iter < numIterations) {
+//                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
+//                writer.write(String.valueOf(iter))
+//            }
+        }
+        println("Sampling completed!")
+//        writer.writeParameters();
+//        System.out.println("Writing output from the last sample ...");
+//        writer.write("final");
+    }
+
+    def sampleSingleIteration() {
+        println("\t\tRunning iteration ...")
+        for (docIdx <- 0 until p.numDocuments) {
+            if (docIdx % 100000 == 0) {
+                System.out.print(docIdx + " ")
+                System.out.flush()
+            }
+            val docSize = corpusWords(docIdx).size
+            for (wIndex <- 0 until docSize) {
+                val wordId = corpusWords(docIdx).get(wIndex)
+                val topicId = corpusTopics(docIdx).get(wIndex)
+
+                docTopicCount(docIdx)(topicId) -= 1
+                topicWordCountLDA(topicId)(wordId) -= 1
+                sumTopicWordCountLDA(topicId) -= 1
+
+                for (tIndex <- 0 until p.numTopics) {
+                    multiPros(tIndex) =
+                        (docTopicCount(docIdx)(tIndex) + p.alpha) * (topicWordCountLDA(tIndex)(wordId) + p.beta) /
+                            (sumTopicWordCountLDA(tIndex) + betaSum)
+                }
+                val newTopicId = Sampler.nextDiscrete(multiPros)
+
+                docTopicCount(docIdx)(newTopicId) += 1
+                topicWordCountLDA(newTopicId)(wordId) += 1
+                sumTopicWordCountLDA(newTopicId) += 1
+
+                // update topic
+                corpusTopics(docIdx).set(wIndex, newTopicId)
+            }
+        }
+    }
 
 
-    Thread.sleep(10000)
+    def loadTopicModelInfo(): TopicModelInfo = {
+        System.out.println ("Loading topic model info " + p.modelFileName)
+        val tm = ParallelTopicModel.read(new File(p.modelFileName))
+        val alph = tm.getAlphabet
+//        val vocabularySize = determineVocabularySize(tm, getVectorWords(pathToVectorWords))
+        new TopicModelInfo (alph, vocabularySize)
+    }
+
+//    private def determineVocabularySize(tm: ParallelTopicModel , vectorWords: mutable.Set[String]): Int = {
+//        var size = 0
+//        val it = tm.getAlphabet.iterator()
+//        while (it.hasNext) {
+//            val w = it.next().asInstanceOf[String]
+//            if (vectorWords.contains(w)) {
+//                size += 1
+//            }
+//        }
+//        size
+//    }
+//    private def getVectorWords(pathToVectorWords: String): mutable.Set[String] = {
+//        val vectorWords = mutable.Set[String]()
+//        val br = new BufferedReader(new FileReader(pathToVectorWords))
+//        var word: String = br.readLine()
+//        while (word != null) {
+//            vectorWords.add(word)
+//            word = br.readLine()
+//        }
+//        vectorWords
+//    }
 }
+
+
