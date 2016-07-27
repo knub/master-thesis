@@ -23,8 +23,11 @@ case class Args(
     numThreads: Int = 2,
     numTopics: Int = 256,
     numIterations: Int = 50,
+    numDocuments: Int = -1,
     alpha: Double = 0.01,
-    beta: Double = 0.01) {
+    beta: Double = 0.01,
+    saveStep: Int = 50,
+    inspectFileSuffix: String = "###") {
     def getPrintWriterFor(extension: String): PrintWriter = {
         val modelFile = new File(modelFileName)
         val modelTextFile = new File(modelFile.getCanonicalPath + extension)
@@ -60,10 +63,14 @@ object Main {
             c.copy(numTopics = x) }
         opt[Int]("num-iterations").action { (x, c) =>
             c.copy(numIterations = x) }
+        opt[Int]("num-documents").action { (x, c) =>
+            c.copy(numDocuments = x) }
         opt[Double]("alpha").action { (x, c) =>
             c.copy(alpha = x) }
         opt[Double]("beta").action { (x, c) =>
             c.copy(beta = x) }
+        opt[String]("inspect-file-suffix").action { (x, c) =>
+            c.copy(inspectFileSuffix = x) }
     }
 
     def main(args: Array[String]): Unit = {
@@ -93,7 +100,8 @@ object Main {
                 val res = loadExistingModel(args.modelFileName)
                 supplyTopicModelSimilarity(args, res)
             case "embedding-lda" =>
-                val embeddingLDA = new WordEmbeddingLDA
+                val embeddingLDA = new WordEmbeddingLDA(args)
+                embeddingLDA.inference()
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
         }
@@ -279,8 +287,9 @@ object Main {
     val STOP_BOLD = "\u001B[22m"
     case class Topic(id: Int, words: scala.collection.mutable.Buffer[String])
     def inspectTopicEvolution(args: Args): Unit = {
+        val fileSuffix = s"${args.inspectFileSuffix}-"
         val topicEvolutionFiles = new File(new File(args.modelFileName).getParent).listFiles().filter { file =>
-            file.getAbsolutePath.startsWith(args.modelFileName) && file.getAbsolutePath.contains("lflda-")
+            file.getAbsolutePath.startsWith(args.modelFileName) && file.getAbsolutePath.contains(fileSuffix)
         }.sorted
         val source = Source.fromFile(args.modelFileName + ".ssv").getLines.drop(1)
         val topics = source.toBuffer[String].map { line =>
@@ -299,7 +308,7 @@ object Main {
             for (j <- changedTopicsPerEvolution.indices) {
                 val changedWords = changedTopicsPerEvolution(j)(i).words
                 // hacky way to parse the iteration number from the file name
-                val fileName = Paths.get(topicEvolutionFiles(j).getAbsolutePath).getFileName.toString.split('.').dropRight(1).last.replace("lflda-", "")
+                val fileName = Paths.get(topicEvolutionFiles(j).getAbsolutePath).getFileName.toString.split('.').dropRight(1).last.replace(fileSuffix, "")
                 print(f"${i + 1}%2d $fileName ")
                 for (word <- originalWords) {
                     if (changedWords.contains(word)) {

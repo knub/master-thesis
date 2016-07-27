@@ -5,23 +5,15 @@ import java.io.{BufferedReader, File, FileReader}
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.Alphabet
 import com.carrotsearch.hppc.IntArrayList
-import knub.master_thesis.util.{FreeMemory, Sampler}
+import knub.master_thesis.util.{FreeMemory, Sampler, TopicModelWriter}
 
 import scala.collection.mutable
 
-case class WordEmbeddingLDAParams(
-    modelFileName: String,
-    numTopics: Int,
-    alpha: Double,
-    beta: Double,
-    numDocuments: Int,
-    numIterations: Int)
-
 case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int)
 
-class WordEmbeddingLDA(p: WordEmbeddingLDAParams) {
+class WordEmbeddingLDA(val p: Args) {
 
-//   val writer: LFLDATopicModelWriter
+   val writer = new TopicModelWriter(this)
 
     val TopicModelInfo(wordAlphabet, vocabularySize) = loadTopicModelInfo()
     val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
@@ -41,11 +33,14 @@ class WordEmbeddingLDA(p: WordEmbeddingLDAParams) {
 
     System.out.println("Memory: " + FreeMemory.get(true, 5) + " MB")
 
+    var word2IdVocabulary: mutable.Map[String, Int] = null
+    var id2WordVocabulary: mutable.Map[Int, String] = null
+
     private def readCorpus(pathToTopicModel: String) {
         var docId = 0
-//        val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".lflda.alphabet"))
-//        word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
-//        id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
+        val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".lflda.alphabet"))
+        word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
+        id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
         val brDocument = new BufferedReader(new FileReader(pathToTopicModel + ".lflda"))
         var lineNr = 0
         var documentWords = new IntArrayList()
@@ -91,17 +86,19 @@ class WordEmbeddingLDA(p: WordEmbeddingLDAParams) {
 
         for (iter <- 0 until p.numIterations) {
             println("\tLFLDA sampling iteration: " + iter)
+            if (iter % 10 == 0)
+                println(iter)
             sampleSingleIteration()
 
-//            if (savestep > 0 && iter % savestep == 0 && iter < numIterations) {
-//                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
-//                writer.write(String.valueOf(iter))
-//            }
+            if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
+                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
+                writer.write(String.valueOf(iter))
+            }
         }
         println("Sampling completed!")
-//        writer.writeParameters();
-//        System.out.println("Writing output from the last sample ...");
-//        writer.write("final");
+        writer.writeParameters()
+        System.out.println("Writing output from the last sample ...")
+        writer.write("final")
     }
 
     def sampleSingleIteration() {
@@ -142,8 +139,28 @@ class WordEmbeddingLDA(p: WordEmbeddingLDAParams) {
         System.out.println ("Loading topic model info " + p.modelFileName)
         val tm = ParallelTopicModel.read(new File(p.modelFileName))
         val alph = tm.getAlphabet
+        val vocabSize = alph.size()
 //        val vocabularySize = determineVocabularySize(tm, getVectorWords(pathToVectorWords))
-        new TopicModelInfo (alph, vocabularySize)
+        new TopicModelInfo (alph, vocabSize)
+    }
+
+
+    private def buildId2WordVocabulary(word2IdVocabulary: mutable.Map[String, Int]): mutable.Map[Int, String] = {
+        val result = mutable.Map[Int, String]()
+        for ((key, value) <- word2IdVocabulary) {
+            result.put(value, key)
+        }
+        result
+    }
+
+    private def readWord2IdVocabulary(line: String): mutable.Map[String, Int] = {
+        val result = mutable.Map[String, Int]()
+        val split = line.split(" ")
+        for (alphabetEntry <- split) {
+            val innerSplit = alphabetEntry.split("#")
+            result.put(innerSplit(0), java.lang.Integer.parseInt(innerSplit(1)))
+        }
+        result
     }
 
 //    private def determineVocabularySize(tm: ParallelTopicModel , vectorWords: mutable.Set[String]): Int = {
