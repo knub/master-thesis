@@ -281,8 +281,8 @@ object Main {
     }
 
 
-    val START_STRIKETHROUGH = "\u001B[09m"
-    val STOP_STRIKETHROUGH = "\u001B[29m"
+    val START_STRIKETHROUGH = "\u001B[03m"
+    val STOP_STRIKETHROUGH = "\u001B[23m"
     val START_BOLD = "\u001B[01m"
     val STOP_BOLD = "\u001B[22m"
     case class Topic(id: Int, words: scala.collection.mutable.Buffer[String])
@@ -300,8 +300,6 @@ object Main {
         }.sortBy(_.id).toArray
 
         val numTopics = topics.length
-
-        println(topicEvolutionFiles.deep)
 
         val changedTopicsPerEvolution = topicEvolutionFiles.map { topicFile =>
             readTopicsFromLFLDA(topicFile.getAbsolutePath)
@@ -332,7 +330,7 @@ object Main {
 
     def readTopicsFromLFLDA(fileName: String): Array[Topic] = {
         Source.fromFile(fileName).getLines().map { line =>
-            val words = line.split(" ").toBuffer
+            val words = line.split(" ").toBuffer.drop(1)
             Topic(-1, words)
         }.toArray
     }
