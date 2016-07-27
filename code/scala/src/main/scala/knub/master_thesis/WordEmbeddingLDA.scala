@@ -37,6 +37,7 @@ class WordEmbeddingLDA(val p: Args) {
     var id2WordVocabulary: mutable.Map[Int, String] = null
 
     private def readCorpus(pathToTopicModel: String) {
+        println("Reading corpus")
         var docId = 0
         val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".lflda.alphabet"))
         word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
@@ -53,10 +54,10 @@ class WordEmbeddingLDA(val p: Args) {
                     corpusTopics += documentTopics
                     documentWords = new IntArrayList()
                     documentTopics = new IntArrayList()
-                    docId += 1
-                    if (docId % 100000 == 0) {
+                    if (docId % 100 == 0) {
                         println(docId)
                     }
+                    docId += 1
                 }
             } else {
                 try {
@@ -76,8 +77,8 @@ class WordEmbeddingLDA(val p: Args) {
                         throw e
                 }
                 lineNr += 1
-                line = brDocument.readLine()
             }
+            line = brDocument.readLine()
         }
     }
 
