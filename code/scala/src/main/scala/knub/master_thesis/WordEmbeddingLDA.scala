@@ -17,7 +17,6 @@ class WordEmbeddingLDA(val p: Args) {
 
     val TopicModelInfo(wordAlphabet, vocabularySize) = loadTopicModelInfo()
     val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
-    val sumDocTopicCount = new Array[Int](p.numDocuments)
     val topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
     val sumTopicWordCountLDA = new Array[Int](p.numTopics)
 
@@ -66,7 +65,6 @@ class WordEmbeddingLDA(val p: Args) {
                     topicWordCountLDA(topicId)(wordId) += 1
                     sumTopicWordCountLDA(topicId) += 1
                     docTopicCount(docId)(topicId) += 1
-                    sumDocTopicCount(docId) += 1
                     documentWords.add(wordId)
                     documentTopics.add(topicId)
                 } catch {
@@ -86,13 +84,12 @@ class WordEmbeddingLDA(val p: Args) {
         println("Running Gibbs sampling inference: ")
 
         for (iter <- 0 until p.numIterations) {
-            println("\tLFLDA sampling iteration: " + iter)
-            sampleSingleIteration()
-
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
                 System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
-                writer.write(String.valueOf(iter))
+                writer.write(f"$iter%03d")
             }
+            println("\tLFLDA sampling iteration: " + iter)
+            sampleSingleIteration()
         }
         println("Sampling completed!")
         writer.writeParameters()
