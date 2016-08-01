@@ -99,8 +99,8 @@
                             <id>topic-model</id>
                             <mainClass>knub.master_thesis.Main</mainClass>
                             <jvmArgs>
-                                <jvmArg>-Xms40g</jvmArg>
-                                <jvmArg>-Xmx40g</jvmArg>
+                                <jvmArg>-Xms30g</jvmArg>
+                                <jvmArg>-Xmx30g</jvmArg>
                                 <jvmArg>-XX:ParallelGCThreads=8</jvmArg>
                             </jvmArgs>
                         </launcher>
