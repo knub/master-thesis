@@ -93,7 +93,7 @@ if __name__ == "__main__":
                 sys.stdout.flush()
             try:
                 most_similars = word2vec.most_similar(positive=[word], topn=20)
-                most_similars = [(word, prob) for word, prob in most_similars if word in known_words]
+                most_similars = [(sim_word, prob) for sim_word, prob in most_similars if sim_word in known_words]
                 for similar_word, prob in most_similars:
                     f.write(word + "\t" + similar_word + "\t" + str(prob) + "\n")
             except KeyError as e:
