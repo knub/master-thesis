@@ -32,8 +32,8 @@ class WordEmbeddingLDA(val p: Args) {
     var word2IdVocabulary: mutable.Map[String, Int] = null
     var id2WordVocabulary: mutable.Map[Int, String] = null
 
-    val replacementWords = mutable.HashMap[String, Array[Int]]()
-    val replacementProbabilities = mutable.HashMap[String, Array[Double]]()
+    val replacementWords = mutable.HashMap[Int, Array[Int]]()
+    val replacementProbabilities = mutable.HashMap[Int, Array[Double]]()
     readCorpus(p.modelFileName)
     prepareReplacements()
 
@@ -87,6 +87,7 @@ class WordEmbeddingLDA(val p: Args) {
     }
 
     def prepareReplacements(): Unit = {
+        println("Reading replacements")
         val lines = Source.fromFile(p.modelFileName + ".similarities").getLines().toList
 
         case class SimilaritiesLine(word: String, similarWord: String, embeddingSim: Double, topicModelSim: Double)
@@ -96,10 +97,11 @@ class WordEmbeddingLDA(val p: Args) {
         }
 
         parsedLines.groupBy(_.word).foreach { case (word, similars) =>
+            val wordId = wordAlphabet.lookupIndex(word)
             // filter low topic similarity
             val filteredSimilars = similars.filter { simLine => simLine.topicModelSim < 0.4 && simLine.embeddingSim > 0.6 }
-            replacementWords(word) = filteredSimilars.map { simLine => wordAlphabet.lookupIndex(simLine.similarWord) }.toArray
-            replacementProbabilities(word) = filteredSimilars.map(_.embeddingSim).toArray
+            replacementWords(wordId) = filteredSimilars.map { simLine => wordAlphabet.lookupIndex(simLine.similarWord) }.toArray
+            replacementProbabilities(wordId) = filteredSimilars.map(_.embeddingSim).toArray
         }
     }
 
@@ -129,7 +131,13 @@ class WordEmbeddingLDA(val p: Args) {
 //            }
             val docSize = corpusWords(docIdx).size
             for (wIndex <- 0 until docSize) {
-                val wordId = corpusWords(docIdx).get(wIndex)
+                val wordId = if (Sampler.nextCoinFlip(p.lambda)) {
+                    val originalWordId = corpusWords(docIdx).get(wIndex)
+                    val chosenIndex = Sampler.nextDiscrete(replacementProbabilities(originalWordId))
+                    replacementWords(originalWordId)(chosenIndex)
+                } else {
+                    corpusWords(docIdx).get(wIndex)
+                }
                 val topicId = corpusTopics(docIdx).get(wIndex)
 
                 docTopicCount(docIdx)(topicId) -= 1
