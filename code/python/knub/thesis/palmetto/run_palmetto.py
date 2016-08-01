@@ -14,8 +14,8 @@ def parse_topic_coherence(stdout):
             tc = float(m.group(0))
             topic_coherences.append(tc)
 
-    assert len(topic_coherences) in {2 ** i for i in range(1, 10)}, str(
-        len(topic_coherences)) + " is not a power of two"
+    # assert len(topic_coherences) in {2 ** i for i in range(1, 10)}, str(
+    #     len(topic_coherences)) + " is not a power of two"
     return topic_coherences
 
 
