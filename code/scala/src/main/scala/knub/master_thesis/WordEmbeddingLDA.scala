@@ -88,7 +88,7 @@ class WordEmbeddingLDA(val p: Args) {
 
     def prepareReplacements(): Unit = {
         println("Reading replacements")
-        val lines = Source.fromFile(p.modelFileName + ".similarities").getLines().toList
+        val lines = Source.fromFile(p.modelFileName + ".similarities.with-tm").getLines().toList
 
         case class SimilaritiesLine(word: String, similarWord: String, embeddingSim: Double, topicModelSim: Double)
         val parsedLines = lines.map { line =>
