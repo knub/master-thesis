@@ -123,6 +123,10 @@ object Main {
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
         val frequentWords = Source.fromFile(args.modelFileName + ".vocab").getLines().toArray
 
+        println("Alpha")
+        println(res.model.alpha.deep)
+        println("Beta")
+        println(res.model.beta)
         println("Write top words")
         writeTopWordsToTextFile(res, args)
         println("Write vocabulary")
