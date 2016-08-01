@@ -9,21 +9,21 @@ import knub.master_thesis.util.{FreeMemory, Sampler, TopicModelWriter}
 
 import scala.collection.mutable
 
-case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int)
+case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int, alpha: Array[Double], beta: Double)
 
 class WordEmbeddingLDA(val p: Args) {
 
     val writer = new TopicModelWriter(this)
 
-    val TopicModelInfo(wordAlphabet, vocabularySize) = loadTopicModelInfo()
+    val TopicModelInfo(wordAlphabet, vocabularySize, alpha, beta) = loadTopicModelInfo()
+    val alphaSum = alpha.sum
+    val betaSum = vocabularySize * beta
+
     val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
     val topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
     val sumTopicWordCountLDA = new Array[Int](p.numTopics)
 
     val multiPros = new Array[Double](p.numTopics)
-
-    val alphaSum = p.numTopics * p.alpha
-    val betaSum = vocabularySize * p.beta
 
     val corpusWords = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
     val corpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
@@ -115,7 +115,7 @@ class WordEmbeddingLDA(val p: Args) {
 
                 for (tIndex <- 0 until p.numTopics) {
                     multiPros(tIndex) =
-                        (docTopicCount(docIdx)(tIndex) + p.alpha) * (topicWordCountLDA(tIndex)(wordId) + p.beta) /
+                        (docTopicCount(docIdx)(tIndex) + alpha(tIndex)) * (topicWordCountLDA(tIndex)(wordId) + beta) /
                             (sumTopicWordCountLDA(tIndex) + betaSum)
                 }
                 val newTopicId = Sampler.nextDiscrete(multiPros)
@@ -137,7 +137,7 @@ class WordEmbeddingLDA(val p: Args) {
         val alph = tm.getAlphabet
         val vocabSize = alph.size()
 //        val vocabularySize = determineVocabularySize(tm, getVectorWords(pathToVectorWords))
-        new TopicModelInfo (alph, vocabSize)
+        new TopicModelInfo (alph, vocabSize, tm.alpha, tm.beta)
     }
 
 
