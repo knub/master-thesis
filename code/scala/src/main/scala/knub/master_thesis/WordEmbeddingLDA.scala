@@ -10,13 +10,13 @@ import knub.master_thesis.util.{FreeMemory, Sampler, TopicModelWriter}
 import scala.collection.mutable
 import scala.io.Source
 
-case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int, alpha: Array[Double], beta: Double)
+case class TopicModelInfo(vocabularySize: Int, alpha: Array[Double], beta: Double)
 
 class WordEmbeddingLDA(val p: Args) {
 
     val writer = new TopicModelWriter(this)
 
-    val TopicModelInfo(wordAlphabet, vocabularySize, alpha, beta) = loadTopicModelInfo()
+    val TopicModelInfo(vocabularySize, alpha, beta) = loadTopicModelInfo()
     val alphaSum = alpha.sum
     val betaSum = vocabularySize * beta
 
@@ -97,11 +97,13 @@ class WordEmbeddingLDA(val p: Args) {
         }
 
         parsedLines.groupBy(_.word).foreach { case (word, similars) =>
-            val wordId = wordAlphabet.lookupIndex(word)
+            val wordId = word2IdVocabulary(word)
             // filter low topic similarity
             val filteredSimilars = similars.filter { simLine => simLine.topicModelSim < 0.4 && simLine.embeddingSim > 0.6 }
-            replacementWords(wordId) = filteredSimilars.map { simLine => wordAlphabet.lookupIndex(simLine.similarWord) }.toArray
-            replacementProbabilities(wordId) = filteredSimilars.map(_.embeddingSim).toArray
+            if (filteredSimilars.nonEmpty) {
+                replacementWords(wordId) = filteredSimilars.map { simLine => word2IdVocabulary(simLine.similarWord) }.toArray
+                replacementProbabilities(wordId) = filteredSimilars.map(_.embeddingSim).toArray
+            }
         }
     }
 
@@ -133,8 +135,13 @@ class WordEmbeddingLDA(val p: Args) {
             for (wIndex <- 0 until docSize) {
                 val wordId = if (Sampler.nextCoinFlip(p.lambda)) {
                     val originalWordId = corpusWords(docIdx).get(wIndex)
-                    val chosenIndex = Sampler.nextDiscrete(replacementProbabilities(originalWordId))
-                    replacementWords(originalWordId)(chosenIndex)
+                    replacementProbabilities.get(originalWordId) match {
+                        case Some(replacementProbs) =>
+                            val chosenIndex = Sampler.nextDiscrete(replacementProbs)
+                            replacementWords(originalWordId)(chosenIndex)
+                        case None =>
+                            originalWordId
+                    }
                 } else {
                     corpusWords(docIdx).get(wIndex)
                 }
@@ -168,7 +175,7 @@ class WordEmbeddingLDA(val p: Args) {
         val alph = tm.getAlphabet
         val vocabSize = alph.size()
 //        val vocabularySize = determineVocabularySize(tm, getVectorWords(pathToVectorWords))
-        new TopicModelInfo (alph, vocabSize, tm.alpha, tm.beta)
+        new TopicModelInfo (vocabSize, tm.alpha, tm.beta)
     }
 
 
