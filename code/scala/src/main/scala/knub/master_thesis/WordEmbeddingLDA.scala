@@ -8,6 +8,7 @@ import com.carrotsearch.hppc.IntArrayList
 import knub.master_thesis.util.{FreeMemory, Sampler, TopicModelWriter}
 
 import scala.collection.mutable
+import scala.io.Source
 
 case class TopicModelInfo(wordAlphabet: Alphabet, vocabularySize: Int, alpha: Array[Double], beta: Double)
 
@@ -30,9 +31,14 @@ class WordEmbeddingLDA(val p: Args) {
 
     var word2IdVocabulary: mutable.Map[String, Int] = null
     var id2WordVocabulary: mutable.Map[Int, String] = null
+
+    val replacementWords = mutable.HashMap[String, Array[Int]]()
+    val replacementProbabilities = mutable.HashMap[String, Array[Double]]()
     readCorpus(p.modelFileName)
+    prepareReplacements()
 
     System.out.println("Memory: " + FreeMemory.get(true, 5) + " MB")
+
 
     private def readCorpus(pathToTopicModel: String) {
         println("Reading corpus")
@@ -77,6 +83,23 @@ class WordEmbeddingLDA(val p: Args) {
                 lineNr += 1
             }
             line = brDocument.readLine()
+        }
+    }
+
+    def prepareReplacements(): Unit = {
+        val lines = Source.fromFile(p.modelFileName + ".similarities").getLines().toList
+
+        case class SimilaritiesLine(word: String, similarWord: String, embeddingSim: Double, topicModelSim: Double)
+        val parsedLines = lines.map { line =>
+            val split = line.split('\t')
+            SimilaritiesLine(split(0), split(1), split(2).toDouble, split(3).toDouble)
+        }
+
+        parsedLines.groupBy(_.word).foreach { case (word, similars) =>
+            // filter low topic similarity
+            val filteredSimilars = similars.filter { simLine => simLine.topicModelSim < 0.4 && simLine.embeddingSim > 0.6 }
+            replacementWords(word) = filteredSimilars.map { simLine => wordAlphabet.lookupIndex(simLine.similarWord) }.toArray
+            replacementProbabilities(word) = filteredSimilars.map(_.embeddingSim).toArray
         }
     }
 
