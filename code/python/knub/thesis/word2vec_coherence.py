@@ -61,25 +61,27 @@ if __name__ == "__main__":
     words = [line.rstrip('\n') for line in open(args.topic_model + ".vocab")]
     nr_words = len(words)
     print str(nr_words) + " words"
-    N = factorial(nr_words) / (2 * factorial(nr_words - 2))
-    output_every = N / 1000
-    print str(N) + " pairs"
 
-    print "Unknown words:"
-    unknown_words = 0
+    print "Known words:"
+    known_words = set()
     for word in words:
-        if word not in word2vec:
-            unknown_words += 1
-    print unknown_words
+        if word in word2vec:
+            known_words.add(word)
+
+    nr_known_words = len(known_words)
+    print str(nr_known_words) + " known words"
+    N = factorial(nr_known_words) / (2 * factorial(nr_known_words - 2))
+    print str(N) + " pairs"
+    output_every = N / 1000
 
     print "Calculating similarities"
     with open(args.topic_model + ".similarities", "w") as f:
-        for i, (word1, word2) in enumerate(combinations(words, r=2)):
+        for i, (word1, word2) in enumerate(combinations(known_words, r=2)):
             if i % output_every == 0:
-                print str(i * 100 / N) + " %",
+                print str(i * 100 / N) + "%",
                 sys.stdout.flush()
             try:
                 sim = word2vec.similarity(word1, word2)
-                f.write(word1 + "\t" + word2 + "\t" + str(sim))
+                f.write(word1 + "\t" + word2 + "\t" + str(sim) + "\n")
             except KeyError as e:
                 print e
