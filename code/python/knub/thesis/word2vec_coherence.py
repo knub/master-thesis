@@ -9,7 +9,45 @@ from itertools import combinations
 import mkl
 from gensim.models.word2vec import Word2Vec
 
-if __name__ == "__main__":
+
+def write_n_most_similar_words_for_each_word(file_name, word2vec, known_words, n):
+    nr_known_words = len(known_words)
+    output_every = nr_known_words / 1000
+    with codecs.open(file_name, "w", encoding="utf-8") as f:
+        for i, word in enumerate(known_words):
+            if i % output_every == 0:
+                print str(i * 100 / nr_known_words) + "%",
+                sys.stdout.flush()
+            try:
+                most_similars = word2vec.most_similar(positive=[word], topn=n)
+                most_similars = [(sim_word, prob) for sim_word, prob in most_similars if sim_word in known_words]
+                for similar_word, prob in most_similars:
+                    f.write(word + "\t" + similar_word + "\t" + str(prob) + "\n")
+            except KeyError as e:
+                print e
+
+
+def write_all_pairwise_similarities(file_name, word2vec, known_words):
+    nr_known_words = len(known_words)
+    N = factorial(nr_known_words) / (2 * factorial(nr_known_words - 2))
+    print str(N) + " pairs"
+    output_every = N / 1000
+
+    print "Calculating all pairwise similarities"
+    with codecs.open(file_name, "w", encoding="utf-8") as f:
+        for i, (word1, word2) in enumerate(combinations(known_words, r=2)):
+            if i % output_every == 0:
+                print str(i * 100 / N) + "%",
+                sys.stdout.flush()
+            try:
+                sim = word2vec.similarity(word1, word2)
+                if sim > 0.5:
+                    f.write(word1 + "\t" + word2 + "\t" + str(sim) + "\n")
+            except KeyError as e:
+                print e
+
+
+def main():
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     mkl.set_num_threads(3)
 
@@ -21,8 +59,21 @@ if __name__ == "__main__":
     assert "topic" in args.topic_model, "'%s' not a topic model" % args.topic_model
     assert "embedding" in args.embedding_model, "'%s' not an embedding model" % args.embedding_model
 
-    print "Loading word2vec"
     word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
+    print "Loading words"
+    words = [line.rstrip('\n') for line in open(args.topic_model + ".vocab")]
+    nr_words = len(words)
+    print str(nr_words) + " words"
+
+    print "Known words:"
+    known_words = {word for word in words if word in word2vec}
+    print str(len(known_words)) + " known words"
+
+    write_all_pairwise_similarities(args.topic_model + ".similarities-all", word2vec, known_words)
+    # write_n_most_similar_words_for_each_word(args.topic_model + ".similarities-most-similar", word2vec, known_words, 20)
+
+if __name__ == "__main__":
+    main()
 
     # with open(args.topic_model + ".ssv", "r") as input:
     #     with open(args.embedding_model + ".ssv", "w") as output:
@@ -58,43 +109,4 @@ if __name__ == "__main__":
     #         except:
     #             pass
 
-    print "Loading words"
-    words = [line.rstrip('\n') for line in open(args.topic_model + ".vocab")]
-    nr_words = len(words)
-    print str(nr_words) + " words"
 
-    print "Known words:"
-    known_words = set()
-    for word in words:
-        if word in word2vec:
-            known_words.add(word)
-
-    nr_known_words = len(known_words)
-    print str(nr_known_words) + " known words"
-    N = factorial(nr_known_words) / (2 * factorial(nr_known_words - 2))
-    print str(N) + " pairs"
-    output_every = nr_known_words / 1000
-
-    print "Calculating similarities"
-    with codecs.open(args.topic_model + ".similarities", "w", encoding="utf-8") as f:
-        # for i, (word1, word2) in enumerate(combinations(known_words, r=2)):
-        #     if i % output_every == 0:
-        #         print str(i * 100 / N) + "%",
-        #         sys.stdout.flush()
-        #     try:
-        #         sim = word2vec.similarity(word1, word2)
-        #         word2vec.most_similar(positive=[word1])
-        #         f.write(word1 + "\t" + word2 + "\t" + str(sim) + "\n")
-        #     except KeyError as e:
-        #         print e
-        for i, word in enumerate(known_words):
-            if i % output_every == 0:
-                print str(i * 100 / nr_known_words) + "%",
-                sys.stdout.flush()
-            try:
-                most_similars = word2vec.most_similar(positive=[word], topn=20)
-                most_similars = [(sim_word, prob) for sim_word, prob in most_similars if sim_word in known_words]
-                for similar_word, prob in most_similars:
-                    f.write(word + "\t" + similar_word + "\t" + str(prob) + "\n")
-            except KeyError as e:
-                print e
