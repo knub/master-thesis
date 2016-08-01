@@ -1,6 +1,7 @@
 import argparse
 import logging
 from math import factorial
+import codecs
 import random
 import sys
 from itertools import combinations
@@ -72,16 +73,28 @@ if __name__ == "__main__":
     print str(nr_known_words) + " known words"
     N = factorial(nr_known_words) / (2 * factorial(nr_known_words - 2))
     print str(N) + " pairs"
-    output_every = N / 1000
+    output_every = nr_known_words / 1000
 
     print "Calculating similarities"
-    with open(args.topic_model + ".similarities", "w") as f:
-        for i, (word1, word2) in enumerate(combinations(known_words, r=2)):
+    with codecs.open(args.topic_model + ".similarities", "w", encoding="utf-8") as f:
+        # for i, (word1, word2) in enumerate(combinations(known_words, r=2)):
+        #     if i % output_every == 0:
+        #         print str(i * 100 / N) + "%",
+        #         sys.stdout.flush()
+        #     try:
+        #         sim = word2vec.similarity(word1, word2)
+        #         word2vec.most_similar(positive=[word1])
+        #         f.write(word1 + "\t" + word2 + "\t" + str(sim) + "\n")
+        #     except KeyError as e:
+        #         print e
+        for i, word in enumerate(known_words):
             if i % output_every == 0:
-                print str(i * 100 / N) + "%",
+                print str(i * 100 / nr_known_words) + "%",
                 sys.stdout.flush()
             try:
-                sim = word2vec.similarity(word1, word2)
-                f.write(word1 + "\t" + word2 + "\t" + str(sim) + "\n")
+                most_similars = word2vec.most_similar(positive=[word], topn=20)
+                most_similars = [(word, prob) for word, prob in most_similars if word in known_words]
+                for similar_word, prob in most_similars:
+                    f.write(word + "\t" + similar_word + "\t" + str(prob) + "\n")
             except KeyError as e:
                 print e
