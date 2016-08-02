@@ -37,7 +37,6 @@ def main():
 
     for topic_file in args.topic_files:
         palmetto_file = create_palmetto_file(topic_file)
-        print topic_file
         p = subprocess.Popen(
             ["java",
              "-jar",
