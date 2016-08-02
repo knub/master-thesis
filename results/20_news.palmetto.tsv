@@ -1,0 +1,25 @@
+topic.20news.50-1500/model.lflda-050.topics	0.437	0.090
+topic.20news.50-1500/model.lflda-100.topics	0.439	0.091
+topic.20news.50-1500/model.lflda-150.topics	0.445	0.086
+topic.20news.50-1500/model.lflda-200.topics	0.445	0.086
+topic.20news.50-1500/model.lflda-250.topics	0.444	0.087
+topic.20news.50-1500/model.lflda-300.topics	0.439	0.086
+topic.20news.50-1500/model.lflda-350.topics	0.438	0.088
+topic.20news.50-1500/model.lflda-400.topics	0.441	0.084
+topic.20news.50-1500/model.lflda-450.topics	0.440	0.086
+topic.20news.50-1500/model.lflda-500.topics	0.441	0.088
+topic.20news.50-1500/model.welda-000.topics	0.438	0.079
+topic.20news.50-1500/model.welda-050.topics	0.451	0.087
+topic.20news.50-1500/model.welda-100.topics	0.458	0.090
+topic.20news.50-1500/model.welda-150.topics	0.458	0.094
+topic.20news.50-1500/model.welda-200.topics	0.462	0.091
+topic.20news.50-1500/model.welda-250.topics	0.462	0.093
+topic.20news.50-1500/model.welda-300.topics	0.464	0.091
+topic.20news.50-1500/model.welda-350.topics	0.466	0.092
+topic.20news.50-1500/model.welda-400.topics	0.468	0.093
+topic.20news.50-1500/model.welda-450.topics	0.468	0.091
+topic.20news.50-1500/model.welda-500.topics	0.468	0.092
+topic.20news.50-1500/model.embedding.topics	0.448	0.128
+topic.20news.50-1500/model.ssv	0.422	0.084
+
+
