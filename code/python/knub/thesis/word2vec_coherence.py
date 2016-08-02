@@ -63,15 +63,15 @@ def calculate_similarities(word2vec, topic_model, all_pairwise):
         write_n_most_similar_words_for_each_word(topic_model + ".similarities-most-similar", word2vec, known_words, 20)
 
 
-def calculate_word2vec_topic_coherence(word2vec, topic_model, embedding_model):
+def calculate_word2vec_topic_coherence(word2vec, topic_model, embedding_model, start_at):
     with open(topic_model + ".ssv", "r") as lines:
-        with open(topic_model + "." + os.path.basename(embedding_model) + ".ssv", "w") as output:
+        with open(topic_model + "." + os.path.basename(embedding_model) + ".start-at-" + str(start_at) + ".ssv", "w") as output:
             for line in lines:
                 if "topic-count" in line:  # skip first header line
                     continue
-                split = line.split(" ")
+                split = line.rstrip().split(" ")
 
-                words = split[-10:]
+                words = split[-11 + start_at:]
                 for word in words:
                     try:
                         most_similars = word2vec.most_similar([word], topn=9)
@@ -79,7 +79,7 @@ def calculate_word2vec_topic_coherence(word2vec, topic_model, embedding_model):
                         most_similars = map(lambda s: s.encode('utf8'), most_similars)
                         most_similars.insert(0, word)
                         output.write("%s\n" % " ".join(most_similars))
-                        continue
+                        break
                     except KeyError:
                         pass
 
@@ -99,8 +99,10 @@ def main():
     word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
 
     # calculate_similarities(word2vec, args.topic_model, all_pairwise=False)
-    calculate_word2vec_topic_coherence(word2vec, args.topic_model, args.embedding_model)
 
+    for i in range(1, 10 + 1):
+        print "Starting at " + str(i)
+        calculate_word2vec_topic_coherence(word2vec, args.topic_model, args.embedding_model, start_at=i)
 
 if __name__ == "__main__":
     main()
