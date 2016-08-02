@@ -1,10 +1,10 @@
 import argparse
-import logging
-from math import factorial
 import codecs
-import random
+import logging
+import os
 import sys
 from itertools import combinations
+from math import factorial
 
 import mkl
 from gensim.models.word2vec import Word2Vec
@@ -47,6 +47,43 @@ def write_all_pairwise_similarities(file_name, word2vec, known_words):
                 print e
 
 
+def calculate_similarities(word2vec, topic_model, all_pairwise):
+    print "Loading words"
+    words = [line.rstrip('\n') for line in open(topic_model + ".vocab")]
+    nr_words = len(words)
+    print str(nr_words) + " words"
+
+    print "Known words:"
+    known_words = {word for word in words if word in word2vec}
+    print str(len(known_words)) + " known words"
+
+    if all_pairwise:
+        write_all_pairwise_similarities(topic_model + ".similarities-all", word2vec, known_words)
+    else:
+        write_n_most_similar_words_for_each_word(topic_model + ".similarities-most-similar", word2vec, known_words, 20)
+
+
+def calculate_word2vec_topic_coherence(word2vec, topic_model, embedding_model):
+    with open(topic_model + ".ssv", "r") as lines:
+        with open(topic_model + "." + os.path.basename(embedding_model) + ".ssv", "w") as output:
+            for line in lines:
+                if "topic-count" in line:  # skip first header line
+                    continue
+                split = line.split(" ")
+
+                words = split[-10:]
+                for word in words:
+                    try:
+                        most_similars = word2vec.most_similar([word], topn=9)
+                        most_similars = map(lambda t: t[0], most_similars)
+                        most_similars = map(lambda s: s.encode('utf8'), most_similars)
+                        most_similars.insert(0, word)
+                        output.write("%s\n" % " ".join(most_similars))
+                        continue
+                    except KeyError:
+                        pass
+
+
 def main():
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     mkl.set_num_threads(3)
@@ -60,40 +97,13 @@ def main():
     assert "embedding" in args.embedding_model, "'%s' not an embedding model" % args.embedding_model
 
     word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
-    print "Loading words"
-    words = [line.rstrip('\n') for line in open(args.topic_model + ".vocab")]
-    nr_words = len(words)
-    print str(nr_words) + " words"
 
-    print "Known words:"
-    known_words = {word for word in words if word in word2vec}
-    print str(len(known_words)) + " known words"
+    # calculate_similarities(word2vec, args.topic_model, all_pairwise=False)
+    calculate_word2vec_topic_coherence(word2vec, args.topic_model, args.embedding_model)
 
-    write_all_pairwise_similarities(args.topic_model + ".similarities-all", word2vec, known_words)
-    # write_n_most_similar_words_for_each_word(args.topic_model + ".similarities-most-similar", word2vec, known_words, 20)
 
 if __name__ == "__main__":
     main()
-
-    # with open(args.topic_model + ".ssv", "r") as input:
-    #     with open(args.embedding_model + ".ssv", "w") as output:
-    #         for line in input:
-    #             if "topic-count" not in line: # skip first header line
-    #                 split = line.split(" ")
-    #
-    #                 i = 2
-    #                 word_found = False
-    #                 while not word_found:
-    #                     try:
-    #                         best_topic_word = split[2] # first is topic, second is topic count, third is first word
-    #                         most_similars = word2vec.most_similar([best_topic_word], topn=9)
-    #                         most_similars = map(lambda t: t[0], most_similars)
-    #                         most_similars = map(lambda s: s.encode('utf8'), most_similars)
-    #                         most_similars.insert(0, best_topic_word)
-    #                         output.write("%s\n" % " ".join(most_similars))
-    #                         word_found = True
-    #                     except:
-    #                         i += 1
 
     # frequent_words = [line.rstrip('\n') for line in open("/data/wikipedia/2016-06-21/vocab.txt")]
     # frequent_words = frequent_words[10000:-40000]
@@ -108,5 +118,3 @@ if __name__ == "__main__":
     #                 output.write("%s\t%s\t%s\n" % (word, similar, prob))
     #         except:
     #             pass
-
-
