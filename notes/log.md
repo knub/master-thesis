@@ -12,3 +12,8 @@
 * What's a good first idea?
 * Plan: Implement LDA myself
 * How to evaluate our approach? Which document collection?
+
+# 2016-08-03
+* Worked on Gaussian LDA
+* Had to extract the topic words from final Gaussian LDA
+* See Paper: "Words in Gaussian LDA are ranked based on density ..."
