@@ -60,7 +60,7 @@ def preprocess_lflda(model_name):
          "-topicmodel",
          model_name,
          "-vectors",
-         "/data/wikipedia/2016-06-21/embedding-models/embedding.model.skip-gram.txt",
+         "/data/wikipedia/2016-06-21/embedding-models/skip-gram.model",
          ],
         cwd="/home/stefan.bunk/LFTM",
         grab_output=False)
@@ -75,7 +75,7 @@ def train_lflda(model_name, alpha, beta, _lambda):
          "-topicmodel",
          model_name,
          "-vectors",
-         "/data/wikipedia/2016-06-21/embedding-models/embedding.model.skip-gram.txt",
+         "/data/wikipedia/2016-06-21/embedding-models/skip-gram.model",
          "-alpha",
          str(alpha),
          "-beta",
