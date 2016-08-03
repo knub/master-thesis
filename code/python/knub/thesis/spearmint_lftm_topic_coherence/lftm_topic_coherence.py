@@ -61,8 +61,6 @@ def preprocess_lflda(model_name):
          model_name,
          "-vectors",
          "/data/wikipedia/2016-06-21/embedding-models/embedding.model.skip-gram.txt",
-         "-vocabulary",
-         "/data/wikipedia/2016-06-21/embedding-models/embedding.model.skip-gram.words"
          ],
         cwd="/home/stefan.bunk/LFTM",
         grab_output=False)
@@ -78,8 +76,6 @@ def train_lflda(model_name, alpha, beta, _lambda):
          model_name,
          "-vectors",
          "/data/wikipedia/2016-06-21/embedding-models/embedding.model.skip-gram.txt",
-         "-vocabulary",
-         "/data/wikipedia/2016-06-21/embedding-models/embedding.model.skip-gram.words",
          "-alpha",
          str(alpha),
          "-beta",
@@ -133,4 +129,16 @@ def lftm_topic_coherence(alpha, beta, _lambda):
 
 def main(job_id, params):
     print "params: ", params, " job_id: ", job_id
-    return lftm_topic_coherence(params["alpha"][0], params["beta"][0], params["lambda"][0])
+    alpha = params["alpha"][0]
+    beta = params["beta"][0]
+    _lambda = params["lambda"][0]
+
+    existing_results = [
+        (0.0001, 0.0001, 0.1, -0.423)
+    ]
+    for tmp_alpha, tmp_beta, tmp_lambda, result in existing_results:
+        if tmp_alpha == alpha and tmp_beta == beta and tmp_lambda == _lambda:
+            print "Found result " + str(result)
+            return result
+
+    return lftm_topic_coherence(alpha, beta, _lambda)
