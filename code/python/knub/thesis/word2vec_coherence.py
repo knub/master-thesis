@@ -47,7 +47,7 @@ def write_all_pairwise_similarities(file_name, word2vec, known_words):
                 print e
 
 
-def calculate_similarities(word2vec, topic_model, all_pairwise):
+def calculate_similarities(word2vec, embedding_model_name, topic_model, all_pairwise):
     print "Loading words"
     words = [line.rstrip('\n') for line in open(topic_model + ".vocab")]
     nr_words = len(words)
@@ -58,9 +58,9 @@ def calculate_similarities(word2vec, topic_model, all_pairwise):
     print str(len(known_words)) + " known words"
 
     if all_pairwise:
-        write_all_pairwise_similarities(topic_model + ".similarities-all", word2vec, known_words)
+        write_all_pairwise_similarities(topic_model + "." + embedding_model_name + ".similarities-all", word2vec, known_words)
     else:
-        write_n_most_similar_words_for_each_word(topic_model + ".similarities-most-similar", word2vec, known_words, 20)
+        write_n_most_similar_words_for_each_word(topic_model + "." + embedding_model_name + ".similarities-most-similar", word2vec, known_words, 20)
 
 
 def calculate_word2vec_topic_coherence(word2vec, topic_model, embedding_model, start_at):
@@ -98,7 +98,7 @@ def main():
 
     word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
 
-    # calculate_similarities(word2vec, args.topic_model, all_pairwise=False)
+    calculate_similarities(word2vec, os.path.basename(args.embedding_model), args.topic_model, all_pairwise=False)
 
     for i in range(1, 10 + 1):
         print "Starting at " + str(i)
