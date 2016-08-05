@@ -44,11 +44,11 @@ class WordEmbeddingLDA(val p: Args) {
     private def readCorpus(pathToTopicModel: String) {
         println("Reading corpus")
         var docId = 0
-        val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".lflda.alphabet"))
+        val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".restricted.alphabet"))
         word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
         brAlphabet.close()
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
-        val brDocument = new BufferedReader(new FileReader(pathToTopicModel + ".lflda"))
+        val brDocument = new BufferedReader(new FileReader(pathToTopicModel + ".restricted"))
         var lineNr = 0
         var documentWords = new IntArrayList()
         var documentTopics = new IntArrayList()
