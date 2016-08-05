@@ -45,7 +45,7 @@ object Main {
         List("topic-model-create", "topic-model-load",
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "embedding-lda",
-            "inspect-topic-evolution"
+            "inspect-topic-evolution", "20news-test"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
@@ -82,6 +82,7 @@ object Main {
         }
     }
 
+
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
@@ -105,15 +106,16 @@ object Main {
                 embeddingLDA.inference()
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
+            case "20news-test" =>
+                run20NewsTest()
         }
     }
 
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
         val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val tp = new TopicModel(args, alpha, beta, instancesIterator)
-        val res = tp.run(args.dataFolderName, args.stopWordsFileName)
-        val f = args.modelFileName
-        res.save(f)
+        val res = tp.run(args.stopWordsFileName)
+        res.save(args.modelFileName)
         res
     }
 
@@ -263,10 +265,10 @@ object Main {
         val simFunction = simBhattacharyya
         println(simFunction.name)
 
-        val fileWithTmSims = new File(args.dataFolderName + ".with-tm")
+        val fileWithTmSims = new File(args.modelFileName + ".similarities.with-tm")
         val pw = new PrintWriter(fileWithTmSims)
 
-        Source.fromFile(args.dataFolderName).getLines().foreach { line =>
+        Source.fromFile(args.modelFileName + ".similarities").getLines().foreach { line =>
             val Array(word1, word2, embeddingProb) = line.split("\t")
             val idx1 = res.dataAlphabet.lookupIndex(word1, false)
             val idx2 = res.dataAlphabet.lookupIndex(word2, false)
@@ -338,5 +340,10 @@ object Main {
             val words = line.split(" ").toBuffer.drop(1)
             Topic(-1, words)
         }.toArray
+    }
+
+    def run20NewsTest(): Unit = {
+
+
     }
 }

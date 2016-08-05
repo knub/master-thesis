@@ -17,6 +17,12 @@ class TopicModelResult(val model: ParallelTopicModel) {
 
     def save(fileName: String): Unit = {
         model.write(new File(fileName))
+        val documentTopics = model.getDocumentTopics(true, true)
+        val pw = new PrintWriter(fileName + ".document-topics")
+        for (topicDistribution <- documentTopics) {
+            pw.println(topicDistribution.mkString(" "))
+        }
+        pw.close()
     }
 
     // The data alphabet maps word IDs to strings
