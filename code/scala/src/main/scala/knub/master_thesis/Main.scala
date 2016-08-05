@@ -2,6 +2,7 @@ package knub.master_thesis
 
 import java.io._
 import java.nio.file.Paths
+import java.util.Random
 import java.util.regex.Pattern
 
 import cc.mallet.pipe.CharSequence2TokenSequence
@@ -9,6 +10,9 @@ import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
+import weka.classifiers.evaluation.Evaluation
+import weka.classifiers.functions.SMO
+import weka.core.{Attribute, DenseInstance, Instances}
 
 import scala.collection.JavaConversions._
 import scala.collection.parallel.ForkJoinTaskSupport
@@ -107,6 +111,8 @@ object Main {
                 inspectTopicEvolution(args)
             case "20news-test" =>
                 run20NewsTest(args)
+            case "20news-document-classification" =>
+                run20NewsDocumentClassification(args)
         }
     }
 
@@ -351,5 +357,63 @@ object Main {
             pw.println(inferencer.getSampledDistribution(instance, 20, 2, 10).mkString(" "))
         }
         pw.close()
+    }
+
+    def run20NewsDocumentClassification(args: Args): Unit = {
+        val labels = Source.fromFile("/home/knub/Repositories/master-thesis/data/20newsgroups/20news-bydate-train/articles.class.txt")
+            .getLines().map { line =>
+            line.toInt
+        }.toBuffer
+
+        val instanceList = Source.fromFile(args.modelFileName + ".document-topics").getLines().zipWithIndex.map { case (line, idx) =>
+            val features = (line + " " + labels(idx).toString).split(" ").map(_.toDouble)
+            val inst = new DenseInstance(1.0, features)
+            inst
+        }.toList
+        val nrFeatures = instanceList.head.numValues()
+
+        assert(instanceList.size == labels.size)
+        println(s"nrFeatures = $nrFeatures")
+
+        val attributes = new java.util.ArrayList[Attribute]()
+        for (i <- 0 until nrFeatures)
+            attributes.add(new Attribute(i.toString))
+        attributes.add(new Attribute("class"))
+
+        val instances = new Instances("data", attributes, instanceList.size)
+        instances.setClassIndex(nrFeatures)
+        instanceList.foreach { instance =>
+            instances.add(instance)
+        }
+
+        instances.randomize(new Random(21011991))
+        println(s"nrInstances = ${instances.numInstances()}")
+
+        val FOLDS = 10
+        for (i <- 0 until FOLDS) {
+            val train = instances.trainCV(FOLDS, i)
+            val test = instances.testCV(FOLDS, i)
+            println(train.numInstances())
+            println(test.numInstances())
+
+            val smo = new SMO
+            smo.buildClassifier(train)
+
+            var nrCorrect = 0
+            var nrIncorrect = 0
+            test.enumerateInstances().toList.foreach { testInstance =>
+                if (smo.classifyInstance(testInstance) == testInstance.classValue()) {
+                    nrCorrect += 1
+                } else {
+                    nrIncorrect += 1
+                }
+            }
+
+            val percentage = nrCorrect.toDouble / (nrCorrect + nrIncorrect)
+            println(s"$nrCorrect/${nrCorrect + nrIncorrect}")
+            System.exit(1)
+
+        }
+
     }
 }
