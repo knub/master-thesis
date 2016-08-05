@@ -73,7 +73,7 @@ def train_lflda(model_name, alpha, beta, _lambda):
          "##",
          model_name + ".skip-gram.model.restricted"], ".")
     num_documents = stdout.count("##")
-    print num_documents + " documents"
+    print str(num_documents) + " documents"
     print "Training LFLDA"
     run_process(
         ["bin/lftm",
@@ -134,6 +134,10 @@ def lftm_topic_coherence(alpha, beta, _lambda):
     return -score
 
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+
 def main(job_id, params):
     print "params: ", params, " job_id: ", job_id
     alpha = params["alpha"][0]
@@ -141,11 +145,17 @@ def main(job_id, params):
     _lambda = params["lambda"][0]
 
     existing_results = [
-        (0.0001, 0.0001, 0.1, -0.423)
+        (0.0001, 0.0001, 0.1, -0.423),
+        (0.02505, 0.02505, 0.55, -0.438),
+        (0.05, 0.05, 1.0, -0.427)
     ]
     for tmp_alpha, tmp_beta, tmp_lambda, result in existing_results:
-        if tmp_alpha == alpha and tmp_beta == beta and tmp_lambda == _lambda:
+        print "Comparing " + str(alpha) + " with " + str(tmp_alpha)
+        print "Comparing " + str(beta) + " with " + str(tmp_beta)
+        print "Comparing " + str(_lambda) + " with " + str(tmp_lambda)
+        if isclose(tmp_alpha, alpha) and isclose(tmp_beta, beta) and isclose(tmp_lambda, _lambda):
             print "Found result " + str(result)
             return result
+        print "###"
 
     return lftm_topic_coherence(alpha, beta, _lambda)
