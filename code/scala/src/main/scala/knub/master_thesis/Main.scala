@@ -82,7 +82,6 @@ object Main {
         }
     }
 
-
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
@@ -107,7 +106,7 @@ object Main {
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>
-                run20NewsTest()
+                run20NewsTest(args)
         }
     }
 
@@ -342,8 +341,15 @@ object Main {
         }.toArray
     }
 
-    def run20NewsTest(): Unit = {
+    def run20NewsTest(args: Args): Unit = {
+        val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val res = loadExistingModel(args.modelFileName)
 
-
+        val pw = args.getPrintWriterFor("." + new File(args.dataFolderName).getName + ".predictions.lda")
+        val inferencer = res.model.getInferencer
+        instancesIterator.foreach { instance =>
+            pw.println(inferencer.getSampledDistribution(instance, 20, 2, 10).mkString(" "))
+        }
+        pw.close()
     }
 }
