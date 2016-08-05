@@ -36,20 +36,21 @@ class WordEmbeddingLDA(val p: Args) {
 
     val replacementWords = mutable.HashMap[Int, Array[Int]]()
     val replacementProbabilities = mutable.HashMap[Int, Array[Double]]()
-    readCorpus(p.modelFileName)
+    readCorpus(p.modelFileName, p.embeddingFileName)
     prepareReplacements()
 
     System.out.println("Memory: " + FreeMemory.get(true, 5) + " MB")
 
 
-    private def readCorpus(pathToTopicModel: String) {
+    private def readCorpus(modelFileName: String, embeddingFileName: String) {
         println("Reading corpus")
         var docId = 0
-        val brAlphabet = new BufferedReader(new FileReader(pathToTopicModel + ".restricted.alphabet"))
+        val embeddingName = Paths.get(embeddingName).getFileName.toString
+        val brAlphabet = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".skip-gram.model.restricted.alphabet"))
         word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
         brAlphabet.close()
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
-        val brDocument = new BufferedReader(new FileReader(pathToTopicModel + ".restricted"))
+        val brDocument = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".skip-gram.model.restricted"))
         var lineNr = 0
         var documentWords = new IntArrayList()
         var documentTopics = new IntArrayList()
@@ -91,7 +92,8 @@ class WordEmbeddingLDA(val p: Args) {
 
     def prepareReplacements(): Unit = {
         println("Reading replacements")
-        val lines = Source.fromFile(p.modelFileName + ".similarities.with-tm").getLines().toList
+        val embeddingName = Paths.get(p.embeddingFileName).getFileName.toString
+        val lines = Source.fromFile(p.modelFileName + "." + embeddingName + ".similarities.with-tm").getLines().toList
 
         case class SimilaritiesLine(word: String, similarWord: String, embeddingSim: Double, topicModelSim: Double)
         val parsedLines = lines.map { line =>

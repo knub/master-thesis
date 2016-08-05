@@ -10,7 +10,6 @@ import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
-import weka.classifiers.evaluation.Evaluation
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
@@ -21,6 +20,7 @@ import scala.io.Source
 case class Args(
     mode: String = "",
     modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
+    embeddingFileName: String = "",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     stopWordsFileName: String = "../resources/stopwords.txt",
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
@@ -49,13 +49,16 @@ object Main {
         List("topic-model-create", "topic-model-load",
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "embedding-lda",
-            "inspect-topic-evolution", "20news-test"
+            "inspect-topic-evolution", "20news-test",
+            "20news-document-classification"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
 
         opt[String]('m', "model-file-name").action { (x, c) =>
             c.copy(modelFileName = x) }
+        opt[String]('m', "embedding-file-name").action { (x, c) =>
+            c.copy(embeddingFileName = x) }
         opt[String]('d', "data-folder-name").action { (x, c) =>
             c.copy(dataFolderName = x) }
         opt[String]("stop-words").action { (x, c) =>
