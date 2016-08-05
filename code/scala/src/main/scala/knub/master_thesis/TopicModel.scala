@@ -5,7 +5,7 @@ import cc.mallet.types.{Instance, InstanceList}
 
 class TopicModel(args: Args, alpha: Double, beta: Double, instancesIterator: java.util.Iterator[Instance]) {
 
-    def run(dataFolderName: String, stopWordsFileName: String): TopicModelResult = {
+    def run(stopWordsFileName: String): TopicModelResult = {
         val instances = new InstanceList(PreprocessingPipe.pipe(stopWordsFileName))
         instances.addThruPipe(instancesIterator)
 
