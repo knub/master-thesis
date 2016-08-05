@@ -1,6 +1,7 @@
 package knub.master_thesis
 
 import java.io.{BufferedReader, File, FileReader}
+import java.nio.file.Paths
 
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.Alphabet
