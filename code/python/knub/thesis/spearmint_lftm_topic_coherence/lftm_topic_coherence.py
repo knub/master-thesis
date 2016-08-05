@@ -67,6 +67,13 @@ def preprocess_lflda(model_name):
 
 
 def train_lflda(model_name, alpha, beta, _lambda):
+    print "Count documents"
+    stdout, _, _ = run_process(
+        ["grep",
+         "##",
+         model_name + ".skip-gram.model.restricted"], ".")
+    num_documents = stdout.count("##")
+    print num_documents + " documents"
     print "Training LFLDA"
     run_process(
         ["bin/lftm",
@@ -89,7 +96,7 @@ def train_lflda(model_name, alpha, beta, _lambda):
          "-ntopics",
          "50",
          "-ndocs",
-         "11314",
+         str(num_documents),
          "-niters",
          "500"
          ],
