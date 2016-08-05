@@ -21,6 +21,7 @@ class WordEmbeddingLDA(val p: Args) {
     val betaSum = vocabularySize * beta
 
     val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
+    val docWordCount = new Array[Int](p.numDocuments)
     val topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
     val sumTopicWordCountLDA = new Array[Int](p.numTopics)
 
@@ -71,6 +72,7 @@ class WordEmbeddingLDA(val p: Args) {
                     topicWordCountLDA(topicId)(wordId) += 1
                     sumTopicWordCountLDA(topicId) += 1
                     docTopicCount(docId)(topicId) += 1
+                    docWordCount(docId) += 1
                     documentWords.add(wordId)
                     documentTopics.add(topicId)
                 } catch {
