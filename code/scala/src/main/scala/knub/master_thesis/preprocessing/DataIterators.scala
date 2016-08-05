@@ -41,8 +41,8 @@ class TwentyNewsIterator(dataFolderName: String) {
     def iterator(): java.util.Iterator[Instance] = {
         val articlesPath = Paths.get(dataFolderName + "/articles.txt").toFile
         val articles = scala.io.Source.fromFile(articlesPath, "UTF-8").getLines().toBuffer
-        val articlesShuffled = scala.util.Random.shuffle(articles)
-        articlesShuffled.map { text =>
+//        val articlesShuffled = scala.util.Random.shuffle(articles)
+        articles.map { text =>
             new Instance(text, null, null, null)
         }.iterator.asJava
     }
