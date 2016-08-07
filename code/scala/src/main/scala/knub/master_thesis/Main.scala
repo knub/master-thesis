@@ -13,6 +13,7 @@ import knub.master_thesis.probabilistic.Divergence._
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
+import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.io.Source
@@ -20,7 +21,7 @@ import scala.io.Source
 case class Args(
     mode: String = "",
     modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
-    embeddingFileName: String = "",
+    embeddingFileName: String = "NOT YET SET",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     stopWordsFileName: String = "../resources/stopwords.txt",
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
@@ -373,7 +374,7 @@ object Main {
             val inst = new DenseInstance(1.0, features)
             inst
         }.toList
-        val nrFeatures = instanceList.head.numValues()
+        val nrFeatures = instanceList.head.numValues() - 1
 
         assert(instanceList.size == labels.size)
         println(s"nrFeatures = $nrFeatures")
@@ -381,7 +382,7 @@ object Main {
         val attributes = new java.util.ArrayList[Attribute]()
         for (i <- 0 until nrFeatures)
             attributes.add(new Attribute(i.toString))
-        attributes.add(new Attribute("class"))
+        attributes.add(new Attribute("class", (0 until 20).map(_.toString).toList.asJava))
 
         val instances = new Instances("data", attributes, instanceList.size)
         instances.setClassIndex(nrFeatures)
@@ -393,7 +394,7 @@ object Main {
         println(s"nrInstances = ${instances.numInstances()}")
 
         val FOLDS = 10
-        for (i <- 0 until FOLDS) {
+        val percentages = for (i <- 0 until FOLDS) yield {
             val train = instances.trainCV(FOLDS, i)
             val test = instances.testCV(FOLDS, i)
             println(train.numInstances())
@@ -413,10 +414,11 @@ object Main {
             }
 
             val percentage = nrCorrect.toDouble / (nrCorrect + nrIncorrect)
-            println(s"$nrCorrect/${nrCorrect + nrIncorrect}")
-            System.exit(1)
-
+//            println(s"$nrCorrect/${nrCorrect + nrIncorrect} = $percentage")
+            percentage
         }
+
+        println(s"Macro-averaged precision: ${percentages.sum.toDouble / percentages.size}")
 
     }
 }
