@@ -364,12 +364,12 @@ object Main {
     }
 
     def run20NewsDocumentClassification(args: Args): Unit = {
-        val labels = Source.fromFile("/home/knub/Repositories/master-thesis/data/20newsgroups/20news-bydate-train/articles.class.txt")
+        val labels = Source.fromFile(args.dataFolderName)
             .getLines().map { line =>
             line.toInt
         }.toBuffer
 
-        val instanceList = Source.fromFile(args.modelFileName + ".document-topics").getLines().zipWithIndex.map { case (line, idx) =>
+        val instanceList = Source.fromFile(args.modelFileName).getLines().zipWithIndex.map { case (line, idx) =>
             val features = (line + " " + labels(idx).toString).split(" ").map(_.toDouble)
             val inst = new DenseInstance(1.0, features)
             inst
@@ -397,8 +397,8 @@ object Main {
         val percentages = for (i <- 0 until FOLDS) yield {
             val train = instances.trainCV(FOLDS, i)
             val test = instances.testCV(FOLDS, i)
-            println(train.numInstances())
-            println(test.numInstances())
+//            println(train.numInstances())
+//            println(test.numInstances())
 
             val smo = new SMO
             smo.buildClassifier(train)
