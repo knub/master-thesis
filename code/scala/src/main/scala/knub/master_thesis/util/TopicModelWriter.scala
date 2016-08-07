@@ -70,7 +70,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
         writer.close()
     }
 
-    def writeDocTopicPros(name: String) {
+    def writeDocTopicProbs(name: String) {
         val writer = new BufferedWriter(new FileWriter(params.modelFileName + ".welda-" + name + ".theta"))
         for (i <- 0 until params.numDocuments) {
             for (j <- 0 until params.numTopics) {
@@ -85,7 +85,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
     def write(name: String) {
         writeTopTopicalWords(name)
         if (name == model.p.numIterations.toString) {
-            writeDocTopicPros(name)
+            writeDocTopicProbs(name)
             writeTopicAssignments(name)
             writeTopicWordPros(name)
         }

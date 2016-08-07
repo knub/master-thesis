@@ -147,7 +147,10 @@ def main(job_id, params):
     existing_results = [
         (0.0001, 0.0001, 0.1, -0.423),
         (0.02505, 0.02505, 0.55, -0.438),
-        (0.05, 0.05, 1.0, -0.427)
+        (0.05, 0.05, 1.0, -0.427),
+        (0.04915117, 0.01676279, 1.0, -0.428),
+        (0.01941704, 0.0001, 0.5333867, -0.42)
+
     ]
     for tmp_alpha, tmp_beta, tmp_lambda, result in existing_results:
         print "Comparing " + str(alpha) + " with " + str(tmp_alpha)
