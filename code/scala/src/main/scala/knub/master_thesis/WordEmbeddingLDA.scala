@@ -46,9 +46,7 @@ class WordEmbeddingLDA(val p: Args) {
         println("Reading corpus")
         var docId = 0
         val embeddingName = Paths.get(embeddingFileName).getFileName.toString
-        val brAlphabet = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted.alphabet"))
-        word2IdVocabulary = readWord2IdVocabulary(brAlphabet.readLine())
-        brAlphabet.close()
+        word2IdVocabulary = readWord2IdVocabulary(modelFileName, embeddingName)
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
         val brDocument = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted"))
         var lineNr = 0
@@ -192,13 +190,16 @@ class WordEmbeddingLDA(val p: Args) {
         result
     }
 
-    private def readWord2IdVocabulary(line: String): mutable.Map[String, Int] = {
+    private def readWord2IdVocabulary(modelFileName: String, embeddingName: String): mutable.Map[String, Int] = {
+        val brAlphabet = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted.alphabet"))
         val result = mutable.Map[String, Int]()
-        val split = line.split(" ")
-        for (alphabetEntry <- split) {
-            val innerSplit = alphabetEntry.split("#")
-            result.put(innerSplit(0), java.lang.Integer.parseInt(innerSplit(1)))
+        var line = brAlphabet.readLine()
+        while (line != null) {
+            val split = line.split("#")
+            result.put(split(0), split(1).toInt)
+            line = brAlphabet.readLine()
         }
+        brAlphabet.close()
         result
     }
 
