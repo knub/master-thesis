@@ -19,3 +19,7 @@
 * See Paper: "Words in Gaussian LDA are ranked based on density ..."
 * Our method is "unsupervised use case for word embeddings" (see gaussian lda paper/conclusion)
 * http://stackoverflow.com/questions/11162402/lda-topic-modeling-training-and-testing
+
+# 2016-08-13
+* Lowercasing or not? Currently different in TM and WE
+* Does it make entity recognition harder?

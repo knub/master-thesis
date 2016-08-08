@@ -11,16 +11,19 @@ import knub.master_thesis.util.{FreeMemory, Sampler, TopicModelWriter}
 import scala.collection.mutable
 import scala.io.Source
 
-case class TopicModelInfo(vocabularySize: Int, alpha: Array[Double], beta: Double)
+case class TopicModelInfo(alpha: Array[Double], beta: Double, betaSum: Double)
 
 class WordEmbeddingLDA(val p: Args) {
 
+    val embeddingName = Paths.get(p.embeddingFileName).getFileName.toString
+
     val writer = new TopicModelWriter(this)
 
-    val TopicModelInfo(vocabularySize, alpha, beta) = loadTopicModelInfo()
-    println(s"Topic model loaded, vocabularySize = $vocabularySize, alpha = $alpha, beta = $beta")
+    val TopicModelInfo(alpha, beta, betaSum) = loadTopicModelInfo()
+    val vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.alphabet").getLines().size
+    println(s"Topic model loaded, vocabularySize = $vocabularySize")
     val alphaSum = alpha.sum
-    val betaSum = vocabularySize * beta
+
 
     val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
     val docWordCount = new Array[Int](p.numDocuments)
@@ -46,8 +49,7 @@ class WordEmbeddingLDA(val p: Args) {
     private def readCorpus(modelFileName: String, embeddingFileName: String) {
         println("Reading corpus")
         var docId = 0
-        val embeddingName = Paths.get(embeddingFileName).getFileName.toString
-        word2IdVocabulary = readWord2IdVocabulary(modelFileName, embeddingName)
+        word2IdVocabulary = readWord2IdVocabulary(modelFileName)
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
         val brDocument = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted"))
         var lineNr = 0
@@ -91,7 +93,6 @@ class WordEmbeddingLDA(val p: Args) {
 
     def prepareReplacements(): Unit = {
         println("Reading replacements")
-        val embeddingName = Paths.get(p.embeddingFileName).getFileName.toString
         val lines = Source.fromFile(p.modelFileName + "." + embeddingName + ".similarities-most-similar.with-tm").getLines().toList
 
         case class SimilaritiesLine(word: String, similarWord: String, embeddingSim: Double, topicModelSim: Double)
@@ -179,7 +180,8 @@ class WordEmbeddingLDA(val p: Args) {
         val alph = tm.getAlphabet
         val vocabSize = alph.size()
 //        val vocabularySize = determineVocabularySize(tm, getVectorWords(pathToVectorWords))
-        new TopicModelInfo (vocabSize, tm.alpha, tm.beta)
+        val betaSum = vocabSize * beta
+        new TopicModelInfo (tm.alpha, tm.beta, betaSum)
     }
 
 
@@ -191,7 +193,7 @@ class WordEmbeddingLDA(val p: Args) {
         result
     }
 
-    private def readWord2IdVocabulary(modelFileName: String, embeddingName: String): mutable.Map[String, Int] = {
+    private def readWord2IdVocabulary(modelFileName: String): mutable.Map[String, Int] = {
         val brAlphabet = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted.alphabet"))
         val result = mutable.Map[String, Int]()
         var line = brAlphabet.readLine()
