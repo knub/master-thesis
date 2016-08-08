@@ -1,25 +1,44 @@
-topic.20news.50-1500/model.lflda-050.topics	0.437	0.090
-topic.20news.50-1500/model.lflda-100.topics	0.439	0.091
-topic.20news.50-1500/model.lflda-150.topics	0.445	0.086
-topic.20news.50-1500/model.lflda-200.topics	0.445	0.086
-topic.20news.50-1500/model.lflda-250.topics	0.444	0.087
-topic.20news.50-1500/model.lflda-300.topics	0.439	0.086
-topic.20news.50-1500/model.lflda-350.topics	0.438	0.088
-topic.20news.50-1500/model.lflda-400.topics	0.441	0.084
-topic.20news.50-1500/model.lflda-450.topics	0.440	0.086
-topic.20news.50-1500/model.lflda-500.topics	0.441	0.088
-topic.20news.50-1500/model.welda-000.topics	0.438	0.079
-topic.20news.50-1500/model.welda-050.topics	0.451	0.087
-topic.20news.50-1500/model.welda-100.topics	0.458	0.090
-topic.20news.50-1500/model.welda-150.topics	0.458	0.094
-topic.20news.50-1500/model.welda-200.topics	0.462	0.091
-topic.20news.50-1500/model.welda-250.topics	0.462	0.093
-topic.20news.50-1500/model.welda-300.topics	0.464	0.091
-topic.20news.50-1500/model.welda-350.topics	0.466	0.092
-topic.20news.50-1500/model.welda-400.topics	0.468	0.093
-topic.20news.50-1500/model.welda-450.topics	0.468	0.091
-topic.20news.50-1500/model.welda-500.topics	0.468	0.092
-topic.20news.50-1500/model.embedding.topics	0.448	0.128
-topic.20news.50-1500/model.ssv	0.422	0.084
-
-
+model	iteration	mean_coherence	stddev_coherence
+topic.20news.50-1500/model.lflda	50	0.437	0.090
+topic.20news.50-1500/model.lflda	100	0.439	0.091
+topic.20news.50-1500/model.lflda	150	0.445	0.086
+topic.20news.50-1500/model.lflda	200	0.445	0.086
+topic.20news.50-1500/model.lflda	250	0.444	0.087
+topic.20news.50-1500/model.lflda	300	0.439	0.086
+topic.20news.50-1500/model.lflda	350	0.438	0.088
+topic.20news.50-1500/model.lflda	400	0.441	0.084
+topic.20news.50-1500/model.lflda	450	0.440	0.086
+topic.20news.50-1500/model.lflda	500	0.441	0.088
+topic.20news.50-1500/model.welda	0	0.438	0.079
+topic.20news.50-1500/model.welda	50	0.451	0.087
+topic.20news.50-1500/model.welda	100	0.458	0.090
+topic.20news.50-1500/model.welda	150	0.458	0.094
+topic.20news.50-1500/model.welda	200	0.462	0.091
+topic.20news.50-1500/model.welda	250	0.462	0.093
+topic.20news.50-1500/model.welda	300	0.464	0.091
+topic.20news.50-1500/model.welda	350	0.466	0.092
+topic.20news.50-1500/model.welda	400	0.468	0.093
+topic.20news.50-1500/model.welda	450	0.468	0.091
+topic.20news.50-1500/model.welda	500	0.468	0.092
+topic.20news.50-1500/skip-gram.model	0	0.448	0.128
+topic.20news.50-1500/skip-gram.model	50	0.448	0.128
+topic.20news.50-1500/skip-gram.model	100	0.448	0.128
+topic.20news.50-1500/skip-gram.model	150	0.448	0.128
+topic.20news.50-1500/skip-gram.model	200	0.448	0.128
+topic.20news.50-1500/skip-gram.model	250	0.448	0.128
+topic.20news.50-1500/skip-gram.model	300	0.448	0.128
+topic.20news.50-1500/skip-gram.model	350	0.448	0.128
+topic.20news.50-1500/skip-gram.model	400	0.448	0.128
+topic.20news.50-1500/skip-gram.model	450	0.448	0.128
+topic.20news.50-1500/skip-gram.model	500	0.448	0.128
+topic.20news.50-1500/model.ssv	0	0.422	0.084
+topic.20news.50-1500/model.ssv	50	0.422	0.084
+topic.20news.50-1500/model.ssv	100	0.422	0.084
+topic.20news.50-1500/model.ssv	150	0.422	0.084
+topic.20news.50-1500/model.ssv	200	0.422	0.084
+topic.20news.50-1500/model.ssv	250	0.422	0.084
+topic.20news.50-1500/model.ssv	300	0.422	0.084
+topic.20news.50-1500/model.ssv	350	0.422	0.084
+topic.20news.50-1500/model.ssv	400	0.422	0.084
+topic.20news.50-1500/model.ssv	450	0.422	0.084
+topic.20news.50-1500/model.ssv	500	0.422	0.084
