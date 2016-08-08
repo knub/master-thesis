@@ -96,9 +96,9 @@ def main():
     assert "topic" in args.topic_model, "'%s' not a topic model" % args.topic_model
     assert "embedding" in args.embedding_model, "'%s' not an embedding model" % args.embedding_model
 
-    # word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
+    word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
 
-    # calculate_similarities(word2vec, os.path.basename(args.embedding_model), args.topic_model, all_pairwise=False)
+    calculate_similarities(word2vec, os.path.basename(args.embedding_model), args.topic_model, all_pairwise=False)
 
     # for i in range(1, 10 + 1):
     #     print "Starting at " + str(i)

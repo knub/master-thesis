@@ -94,6 +94,8 @@ object Main {
         args.mode match {
             case "topic-model-create" =>
                 val res = trainAndSaveNewModel(args, args.alpha, args.beta)
+                println("Write vocabulary")
+                writeVocabulary(res, args)
                 println("Top words")
                 writeTopWordsToTextFile(res, args)
                 println(res.displayTopWords(10))
@@ -133,6 +135,8 @@ object Main {
     }
 
     def analyzeResult(res: TopicModelResult, args: Args): Unit = {
+        println("Write vocabulary")
+        writeVocabulary(res, args)
         val frequentWords = Source.fromFile(args.modelFileName + ".vocab").getLines().toArray
 
         println("Alpha")
@@ -141,8 +145,6 @@ object Main {
         println(res.model.beta)
         println("Write top words")
         writeTopWordsToTextFile(res, args)
-        println("Write vocabulary")
-        writeVocabulary(res, args)
         println("Write topic probs")
         val topicProbs = writeTopicProbsToFile(res, args, frequentWords.toSet)
         val simFinder = new SimilarWordFinder(res, args, frequentWords, topicProbs)
@@ -270,14 +272,18 @@ object Main {
     }
 
     def supplyTopicModelSimilarity(args: Args, res: TopicModelResult): Unit = {
+        val SIM_TYPE = "most-similar"
         val (topicProbs, _) = res.getNormalizedWordTopics
         val simFunction = simBhattacharyya
         println(simFunction.name)
 
-        val fileWithTmSims = new File(args.modelFileName + ".similarities.with-tm")
+        val embeddingName = Paths.get(args.embeddingFileName).getFileName.toString
+
+        val fileWithTmSims = new File(s"${args.modelFileName}.$embeddingName.similarities-$SIM_TYPE.with-tm")
         val pw = new PrintWriter(fileWithTmSims)
 
-        Source.fromFile(args.modelFileName + ".similarities").getLines().foreach { line =>
+
+        Source.fromFile(s"${args.modelFileName}.$embeddingName.similarities-$SIM_TYPE").getLines().foreach { line =>
             val Array(word1, word2, embeddingProb) = line.split("\t")
             val idx1 = res.dataAlphabet.lookupIndex(word1, false)
             val idx2 = res.dataAlphabet.lookupIndex(word2, false)
@@ -418,7 +424,7 @@ object Main {
             percentage
         }
 
-        println(s"Macro-averaged precision: ${percentages.sum.toDouble / percentages.size}")
+        println(s"Macro-averaged precision: ${percentages.sum / percentages.size}")
 
     }
 }
