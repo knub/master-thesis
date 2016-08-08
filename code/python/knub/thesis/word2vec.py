@@ -34,7 +34,7 @@ def word2vec():
     sentences = LineSentence(args.sentences)
     model = Word2Vec(sentences, size=200, window=5, min_count=10, workers=args.threads, sg=True, hs=0,
                      negative=10, sample=0.001, iter=5)
-    model.save_word2vec_format(args.model, binary=True, fvocab=args.model + ".vocab")
+    model.save_word2vec_format(args.model, binary=True, fvocab=args.model + ".counts")
     logging.info("Finished training word2vec")
     logging.info(model.most_similar(positive=['woman', 'king'], negative=['man']))
     logging.info(model.doesnt_match("breakfast cereal dinner lunch".split()))
