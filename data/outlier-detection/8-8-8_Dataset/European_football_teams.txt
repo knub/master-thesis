@@ -1,0 +1,17 @@
+FC_Barcelona
+Bayern_Munich
+Real_Madrid
+AC_Milan
+Juventus
+Atletico_Madrid
+Chelsea
+Borussia_Dortmund
+
+Miami_Dolphins
+McLaren
+Los_Angeles_Lakers
+Bundesliga
+football
+goal
+couch
+fridge
