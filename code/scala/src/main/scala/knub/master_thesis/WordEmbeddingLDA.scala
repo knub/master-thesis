@@ -120,7 +120,7 @@ class WordEmbeddingLDA(val p: Args) {
                 System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
                 writer.write(f"$iter%03d")
             }
-            println("\tLFLDA sampling iteration: " + iter)
+            println("\tWELDA sampling iteration: " + iter)
             sampleSingleIteration()
         }
         println("Sampling completed!")
