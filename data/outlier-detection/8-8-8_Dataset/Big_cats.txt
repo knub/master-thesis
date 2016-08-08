@@ -1,0 +1,17 @@
+tiger
+lion
+cougar
+jaguar
+leopard
+cheetah
+wildcat
+lynx
+
+dog
+mouse
+dolphin
+shark
+savanna
+jungle
+day
+car

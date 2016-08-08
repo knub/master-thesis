@@ -1,0 +1,40 @@
+
+-- CLUSTER CREATION --
+
+Each cluster is composed by 8 words/concepts which are semantically very similar and are all connected by a clear well-known relation. 
+For example, a cluster of "months of the year" is composed by ("January", "February", "March", ..., ). It is preferable to select topics as narrow as possible (e.g. it would be preferable to have a cluster of "countries in North America" than a cluster of "countries" in general). 
+
+IMPORTANT NOTE: Whenever possible, we would also try to select a cluster as diverse as possible (e.g. for the cluster "cities in Europe", we would not select more than 2/3 cities from the same country).
+		In the cases where all elements of the clusters are equally well-known and diverse (e.g. "months of the year" , we randomly select eight elements of the cluster.
+
+-- OUTLIERS --
+
+Then, for each cluster we are going to add a set of 8 outliers (i.e. elements that are not supposed to be part of the cluster). We are going to divide the set of outliers in four different categories (in this order):
+
+-C1: Two very similar elements to the ones in the cluster (Important to be certain that they are NOT as similar as the elements within the cluster and that they cannot form a separate cluster with seven elements of the main cluster).
+-C2: Two similar and related elements (lower degree of similarity and relatedness in comparison with the first category) to the ones in the cluster.
+-C3: Two related but not similar elements to the ones in the cluster.
+-C4: Two unrelated and not similar elements to the ones in the cluster.
+
+
+-- FORMAT  --
+
+The format of the clusters (+outliers) should be in a simple .txt file as follows.
+
+First element of the cluster
+Second element of the cluster
+Third element of the cluster
+Fourth element of the cluster
+Fifth element of the cluster
+Sixth element of the cluster
+Seventh element of the cluster
+Eigth element of the cluster
+<Empty line>
+First element of outliers category C1
+Second element of outliers category C1
+First element of outliers category C2
+Second element of outliers category C2
+First element of outliers category C3
+Second element of outliers category C3
+First element of outliers category C4
+Second element of outliers category C4
