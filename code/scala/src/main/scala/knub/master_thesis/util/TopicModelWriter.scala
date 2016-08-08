@@ -40,6 +40,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
             writer.write(String.valueOf(tIndex))
             val topicWordProbs = mutable.Map[Int, Double]()
             for (wIndex <- 0 until model.vocabularySize) {
+                // TODO: Think about what is better sorting?
 //                val pro = (model.topicWordCountLDA(tIndex)(wIndex) + params.beta) /
 //                        (model.sumTopicWordCountLDA(tIndex) + model.betaSum)
                 val pro = model.topicWordCountLDA(tIndex)(wIndex)

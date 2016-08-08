@@ -18,6 +18,7 @@ class WordEmbeddingLDA(val p: Args) {
     val writer = new TopicModelWriter(this)
 
     val TopicModelInfo(vocabularySize, alpha, beta) = loadTopicModelInfo()
+    println(s"Topic model loaded, vocabularySize = $vocabularySize, alpha = $alpha, beta = $beta")
     val alphaSum = alpha.sum
     val betaSum = vocabularySize * beta
 
@@ -200,6 +201,7 @@ class WordEmbeddingLDA(val p: Args) {
             line = brAlphabet.readLine()
         }
         brAlphabet.close()
+        println(s"Finished reading vocabulary, ${result.size} words")
         result
     }
 
