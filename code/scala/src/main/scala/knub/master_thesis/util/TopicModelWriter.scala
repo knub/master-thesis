@@ -78,7 +78,10 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
         for (i <- 0 until params.numDocuments) {
             for (j <- 0 until params.numTopics) {
                 val pro = (model.docTopicCount(i)(j) + params.alpha) / (model.docWordCount(i) + model.alphaSum)
-                writer.write(pro + " ")
+                if (j == 0)
+                    writer.write(pro.toString)
+                else
+                    writer.write(" " + pro)
             }
             writer.write("\n")
         }
