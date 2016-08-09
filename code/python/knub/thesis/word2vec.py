@@ -50,7 +50,7 @@ def bigrams():
                 score = (pab - 20) / pa / pb * len(vocab)
                 is_bigram = score > 40
 
-                print "%s-%s %f = %s" % (word_a, word_b, score, str(is_bigram))
+                print "%s_%s %f = %s" % (word_a, word_b, score, str(is_bigram))
 
 
 

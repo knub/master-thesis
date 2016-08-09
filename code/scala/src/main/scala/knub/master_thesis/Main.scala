@@ -315,6 +315,7 @@ object Main {
                 file.getAbsolutePath.contains(fileSuffix) &&
                 file.getAbsolutePath.endsWith(".topics")
         }.sorted
+        println(topicEvolutionFiles.map(_.getName).deep)
         val source = Source.fromFile(args.modelFileName + ".ssv").getLines.drop(1)
         val topics = source.toBuffer[String].map { line =>
             val split = line.split(" ")
