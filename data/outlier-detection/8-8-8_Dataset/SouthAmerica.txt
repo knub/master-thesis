@@ -8,7 +8,7 @@ Ecuador
 Bolivia
 
 Bogotá
-Rio_de_Janeiro xxxxxxxxxxxxxxx
+Rio_de_Janeiro
 New_York
 Madrid
 town

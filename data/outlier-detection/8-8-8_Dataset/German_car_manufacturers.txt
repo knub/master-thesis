@@ -11,7 +11,7 @@ Michelin
 Bridgestone
 Boeing
 Samsung
-Michael_Schumacher XXXX
+Michael_Schumacher
 Angela_Merkel
 Capri
 pineapple
