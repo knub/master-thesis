@@ -29,7 +29,7 @@ def write_n_most_similar_words_for_each_word(file_name, word2vec, known_words, n
 
 def write_all_pairwise_similarities(file_name, word2vec, known_words):
     nr_known_words = len(known_words)
-    N = factorial(nr_known_words) / (2 * factorial(nr_known_words - 2))
+    N = nr_known_words * (nr_known_words - 1) / 2
     print str(N) + " pairs"
     output_every = N / 1000
 
@@ -53,8 +53,17 @@ def calculate_similarities(word2vec, embedding_model_name, topic_model, all_pair
     nr_words = len(words)
     print str(nr_words) + " words"
 
+    known_words = []
+    for word in words:
+        if word in word2vec:
+            known_words.append(word)
+        elif word.capitalize() in word2vec:
+            known_words.append(word.capitalize())
+        elif word.upper() in word2vec:
+            known_words.append(word.upper())
+
+    # known_words = {word for word in words if word in word2vec}
     print "Known words:"
-    known_words = {word for word in words if word in word2vec}
     print str(len(known_words)) + " known words"
 
     if all_pairwise:
@@ -98,7 +107,7 @@ def main():
 
     word2vec = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
 
-    calculate_similarities(word2vec, os.path.basename(args.embedding_model), args.topic_model, all_pairwise=False)
+    calculate_similarities(word2vec, os.path.basename(args.embedding_model), args.topic_model, all_pairwise=True)
 
     # for i in range(1, 10 + 1):
     #     print "Starting at " + str(i)
