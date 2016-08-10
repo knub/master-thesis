@@ -16,6 +16,8 @@ case class TopicModelInfo(alpha: Array[Double], beta: Double, betaSum: Double)
 class WordEmbeddingLDA(val p: Args) {
 
     val LAMBDA = p.lambda
+    assert(LAMBDA >= 0.0, "lambda must be at least zero")
+    assert(LAMBDA <= 1.0, "lambda must be at most one")
     val TM_SIM_THRESHOLD = 0.4
     val WE_SIM_THRESHOLD = 0.6
 
