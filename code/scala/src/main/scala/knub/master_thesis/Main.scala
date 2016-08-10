@@ -113,8 +113,10 @@ object Main {
                 val res = loadExistingModel(args.modelFileName)
                 supplyTopicModelSimilarity(args, res)
             case "embedding-lda" =>
-                val embeddingLDA = new WordEmbeddingLDA(args)
-                embeddingLDA.inference()
+                for (lambda <- List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)) {
+                    val embeddingLDA = new WordEmbeddingLDA(args.copy(lambda = lambda))
+                    embeddingLDA.inference()
+                }
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>
