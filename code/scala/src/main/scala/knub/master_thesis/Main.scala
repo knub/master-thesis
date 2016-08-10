@@ -31,7 +31,7 @@ case class Args(
     numDocuments: Int = -1,
     alpha: Double = 0.01,
     beta: Double = 0.01,
-    lambda: Double = 0.5,
+    lambda: Double = -1.0,
     saveStep: Int = 50,
     inspectFileSuffix: String = "###") {
     def getPrintWriterFor(extension: String): PrintWriter = {
