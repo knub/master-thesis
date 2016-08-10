@@ -33,7 +33,7 @@ case class Args(
     beta: Double = 0.01,
     lambda: Double = -1.0,
     saveStep: Int = 50,
-    inspectFileSuffix: String = "###") {
+    inspectFileContains: String = "###") {
     def getPrintWriterFor(extension: String): PrintWriter = {
         val modelFile = new File(modelFileName)
         val modelTextFile = new File(modelFile.getCanonicalPath + extension)
@@ -80,8 +80,8 @@ object Main {
             c.copy(beta = x) }
         opt[Double]("lambda").action { (x, c) =>
             c.copy(lambda = x) }
-        opt[String]("inspect-file-suffix").action { (x, c) =>
-            c.copy(inspectFileSuffix = x) }
+        opt[String]("inspect-file-contains").action { (x, c) =>
+            c.copy(inspectFileContains = x) }
     }
 
     def main(args: Array[String]): Unit = {
@@ -314,10 +314,9 @@ object Main {
     val STOP_BOLD = "\u001B[22m"
     case class Topic(id: Int, words: scala.collection.mutable.Buffer[String])
     def inspectTopicEvolution(args: Args): Unit = {
-        val fileSuffix = s"${args.inspectFileSuffix}-"
         val topicEvolutionFiles = new File(new File(args.modelFileName).getParent).listFiles().filter { file =>
             file.getAbsolutePath.startsWith(args.modelFileName) &&
-                file.getAbsolutePath.contains(fileSuffix) &&
+                file.getAbsolutePath.contains(args.inspectFileContains) &&
                 file.getAbsolutePath.endsWith(".topics")
         }.sorted
         println(topicEvolutionFiles.map(_.getName).deep)
@@ -338,7 +337,7 @@ object Main {
             for (j <- changedTopicsPerEvolution.indices) {
                 val changedWords = changedTopicsPerEvolution(j)(i).words
                 // hacky way to parse the iteration number from the file name
-                val fileName = Paths.get(topicEvolutionFiles(j).getAbsolutePath).getFileName.toString.split('.').dropRight(1).last.replace(fileSuffix, "")
+                val fileName = Paths.get(topicEvolutionFiles(j).getAbsolutePath).getFileName.toString.split('.').dropRight(1).last
                 print(f"${i + 1}%2d $fileName ")
                 for (word <- originalWords) {
                     if (changedWords.contains(word)) {
