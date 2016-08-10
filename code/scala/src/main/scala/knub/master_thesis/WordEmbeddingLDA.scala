@@ -123,24 +123,22 @@ class WordEmbeddingLDA(val p: Args) {
     }
 
     def inference(): Unit = {
-        println("Running Gibbs sampling inference: ")
-
         for (iter <- 0 until p.numIterations) {
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
                 System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
                 writer.write(f"$iter%03d")
             }
-            println("\tWELDA sampling iteration: " + iter)
+            if (iter % 50 == 0) {
+                println("\tWELDA sampling iteration: " + iter)
+            }
             sampleSingleIteration()
         }
-        println("Sampling completed!")
         writer.writeParameters()
-        System.out.println("Writing output from the last sample ...")
+        println("Sampling completed!")
         writer.write(p.numIterations.toString)
     }
 
     def sampleSingleIteration() {
-        println("\t\tRunning iteration ...")
         for (docIdx <- 0 until p.numDocuments) {
 //            if (docIdx % 100000 == 0) {
 //                System.out.print(docIdx + " ")

@@ -114,6 +114,7 @@ object Main {
                 supplyTopicModelSimilarity(args, res)
             case "embedding-lda" =>
                 for (lambda <- List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)) {
+                    println(lambda)
                     val embeddingLDA = new WordEmbeddingLDA(args.copy(lambda = lambda))
                     embeddingLDA.inference()
                 }
