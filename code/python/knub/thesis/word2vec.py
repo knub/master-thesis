@@ -13,44 +13,39 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 def bigrams():
     logging.info("Training bigrams")
 
-    base_path = "/home/stefan.bunk/master-thesis/data/outlier-detection/8-8-8_Dataset/"
-
-    [(_, _, files)] = os.walk(base_path)
-    words = []
-    for file in files:
-        with open(base_path + file, "r") as f:
-            for line in f.readlines():
-                line = line.rstrip()
-                if line:
-                    words.append(line)
-
-    print words
-
     sentences = LineSentence(args.sentences)
-    # bigram_model = Phrases(sentences, 20, 40)
+    bigram_model = Phrases(sentences, 20, 40)
+    with codecs.open(args.sentences + ".bigram", "w", encoding="utf-8") as f:
+        for tokens in bigram_model[sentences]:
+            f.write(" ".join(tokens) + "\n")
 
-    _, vocab = Phrases.learn_vocab(sentences, max_vocab_size=40000000)
-
-    # with codecs.open(args.sentences + ".bigram", "w", encoding="utf-8") as f:
-    #     for tokens in bigram_model[sentences]:
-    #         f.write(" ".join(tokens) + "\n")
-
-
-    delimiter = "_"
-    for word in words:
-        split = word.split("_")
-        if len(split) == 2:
-            word_a, word_b = split
-
-            bigram_word = delimiter.join((word_a, word_b))
-            if bigram_word in vocab:
-                pa = float(vocab[word_a])
-                pb = float(vocab[word_b])
-                pab = float(vocab[bigram_word])
-                score = (pab - 20) / pa / pb * len(vocab)
-                is_bigram = score > 40
-
-                print "%s_%s %f = %s" % (word_a, word_b, score, str(is_bigram))
+    # base_path = "/home/stefan.bunk/master-thesis/data/outlier-detection/8-8-8_Dataset/"
+    # [(_, _, files)] = os.walk(base_path)
+    # words = []
+    # for f in files:
+    #     with open(base_path + f, "r") as f:
+    #         for line in f.readlines():
+    #             line = line.rstrip()
+    #             if line:
+    #                 words.append(line)
+    #
+    # print words
+    # _, vocab = Phrases.learn_vocab(sentences, max_vocab_size=40000000)
+    # delimiter = "_"
+    # for word in words:
+    #     split = word.split("_")
+    #     if len(split) == 2:
+    #         word_a, word_b = split
+    #
+    #         bigram_word = delimiter.join((word_a, word_b))
+    #         if bigram_word in vocab:
+    #             pa = float(vocab[word_a])
+    #             pb = float(vocab[word_b])
+    #             pab = float(vocab[bigram_word])
+    #             score = (pab - 20) / pa / pb * len(vocab)
+    #             is_bigram = score > 40
+    #
+    #             print "%s_%s %f = %s" % (word_a, word_b, score, str(is_bigram))
 
 
 
