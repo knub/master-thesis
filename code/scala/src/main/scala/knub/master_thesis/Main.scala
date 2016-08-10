@@ -285,8 +285,8 @@ object Main {
 
         Source.fromFile(s"${args.modelFileName}.$embeddingName.similarities-$SIM_TYPE").getLines().foreach { line =>
             val Array(word1, word2, embeddingProb) = line.split("\t")
-            val idx1 = res.dataAlphabet.lookupIndex(word1, false)
-            val idx2 = res.dataAlphabet.lookupIndex(word2, false)
+            val idx1 = res.dataAlphabet.lookupIndex(word1.toLowerCase(), false)
+            val idx2 = res.dataAlphabet.lookupIndex(word2.toLowerCase(), false)
             if (idx1 != -1 && idx2 != -1) {
                 val divergence = simFunction.sim(topicProbs(idx1), topicProbs(idx2))
                 val topicSimilarity = 1 - divergence
