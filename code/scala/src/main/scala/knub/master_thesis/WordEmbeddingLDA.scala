@@ -17,7 +17,7 @@ class WordEmbeddingLDA(val p: Args) {
 
     val LAMBDA = p.lambda
     val TM_SIM_THRESHOLD = 0.4
-    val WE_SIM_THRESHOLD =0.6
+    val WE_SIM_THRESHOLD = 0.6
 
     val embeddingName = Paths.get(p.embeddingFileName).getFileName.toString
 
@@ -108,8 +108,9 @@ class WordEmbeddingLDA(val p: Args) {
         parsedLines.groupBy(_.word).foreach { case (word, similars) =>
             val wordId = word2IdVocabulary(word)
             // filter low topic similarity
-            val filteredSimilars = similars.filter { simLine =>
-                simLine.topicModelSim < TM_SIM_THRESHOLD && simLine.embeddingSim > WE_SIM_THRESHOLD }
+//            val filteredSimilars = similars.filter { simLine =>
+//                simLine.topicModelSim < TM_SIM_THRESHOLD && simLine.embeddingSim > WE_SIM_THRESHOLD }
+            val filteredSimilars = similars
             if (filteredSimilars.nonEmpty) {
                 replacementWords(wordId) = filteredSimilars.map { simLine => word2IdVocabulary(simLine.similarWord) }.toArray
                 replacementProbabilities(wordId) = filteredSimilars.map(_.embeddingSim).toArray
