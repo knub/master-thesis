@@ -10,10 +10,10 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
 
     val params = model.p
 
-    val modelFileName = s"${params.modelFileName}.${model.embeddingName}"
+    val baseName = s"${params.modelFileName}.${model.embeddingName}.welda.lambda-${model.LAMBDA.toString.replace('.', '-')}"
 
     def writeParameters() {
-        val writer = new BufferedWriter(new FileWriter(modelFileName + ".welda.params"))
+        val writer = new BufferedWriter(new FileWriter(baseName + ".welda.params"))
         writer.write("-model" + "\t" + "WELDA")
         writer.write("\n-topicmodel" + "\t" + params.modelFileName)
         writer.write("\n-ntopics" + "\t" + params.numTopics)
@@ -25,7 +25,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
     }
 
     def writeTopicAssignments(name: String) {
-        val writer = new BufferedWriter(new FileWriter(modelFileName + ".welda-" + name + ".topic-assignments"))
+        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.topic-assignments"))
         for (dIndex <- 0 until params.numDocuments) {
             val docSize = model.corpusWords(dIndex).size
             for (wIndex <- 0 until docSize) {
@@ -37,7 +37,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
     }
 
     def writeTopTopicalWords(name: String): Unit = {
-        val writer = new BufferedWriter(new FileWriter(modelFileName + ".welda-" + name + ".topics"))
+        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.topics"))
         for (tIndex <- 0 until params.numTopics) {
             writer.write(String.valueOf(tIndex))
             val topicWordProbs = mutable.Map[Int, Double]()
@@ -61,7 +61,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
     }
 
     def writeTopicWordPros(name: String) {
-        val writer = new BufferedWriter(new FileWriter(modelFileName + ".welda-" + name + ".phi"))
+        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.phi"))
         for (t <- 0 until params.numTopics) {
             for (w <- 0 until model.vocabularySize) {
                 val pro = (model.topicWordCountLDA(t)(w) + params.beta) /
@@ -74,7 +74,7 @@ class TopicModelWriter(private val model: WordEmbeddingLDA) {
     }
 
     def writeDocTopicProbs(name: String) {
-        val writer = new BufferedWriter(new FileWriter(modelFileName + ".welda-" + name + ".theta"))
+        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.theta"))
         for (i <- 0 until params.numDocuments) {
             for (j <- 0 until params.numTopics) {
                 val pro = (model.docTopicCount(i)(j) + params.alpha) / (model.docWordCount(i) + model.alphaSum)
