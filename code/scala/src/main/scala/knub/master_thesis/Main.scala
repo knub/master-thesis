@@ -78,6 +78,8 @@ object Main {
             c.copy(alpha = x) }
         opt[Double]("beta").action { (x, c) =>
             c.copy(beta = x) }
+        opt[Double]("lambda").action { (x, c) =>
+            c.copy(lambda = x) }
         opt[String]("inspect-file-suffix").action { (x, c) =>
             c.copy(inspectFileSuffix = x) }
     }
