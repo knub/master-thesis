@@ -108,13 +108,15 @@ class WordEmbeddingLDA(val p: Args) {
         }
 
         parsedLines.groupBy(_.word).foreach { case (word, similars) =>
-            val wordId = word2IdVocabulary(word)
+            val wordId = word2IdVocabulary(word.toLowerCase())
             // filter low topic similarity
 //            val filteredSimilars = similars.filter { simLine =>
 //                simLine.topicModelSim < TM_SIM_THRESHOLD && simLine.embeddingSim > WE_SIM_THRESHOLD }
             val filteredSimilars = similars
             if (filteredSimilars.nonEmpty) {
-                replacementWords(wordId) = filteredSimilars.map { simLine => word2IdVocabulary(simLine.similarWord) }.toArray
+                replacementWords(wordId) = filteredSimilars.map { simLine =>
+                    word2IdVocabulary(simLine.similarWord.toLowerCase())
+                }.toArray
                 replacementProbabilities(wordId) = filteredSimilars.map(_.embeddingSim).toArray
             }
         }
