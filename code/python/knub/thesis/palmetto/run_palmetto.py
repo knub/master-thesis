@@ -5,6 +5,23 @@ import subprocess
 import os
 
 
+def parse_iteration(s):
+    res = re.search("\\.(\\d\\d\\d)\\.", s)
+    if not res:
+        raise Exception("Could not parse iteration")
+    iteration = int(res.group(1))
+    return iteration
+
+
+def parse_lambda(s):
+    res = re.search("lambda-(0-\\d+)", s)
+    if res:
+        _lambda = float(res.group(1).replace("-", "."))
+        return _lambda
+    else:
+        return None
+
+
 def parse_topic_coherence(stdout):
     topic_coherences = []
 
@@ -30,12 +47,15 @@ def create_palmetto_file(topic_file):
                     output.write(new_line)
     return palmetto_file
 
+
 def main():
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
     parser.add_argument("topic_files", type=str, nargs="+")
     args = parser.parse_args()
 
     for topic_file in args.topic_files:
+        iteration = parse_iteration(topic_file)
+        _lambda = parse_lambda(topic_file)
         palmetto_file = create_palmetto_file(topic_file)
         p = subprocess.Popen(
             ["java",
@@ -55,7 +75,10 @@ def main():
             return RuntimeError("Could not compute topics")
         else:
             topic_coherences = parse_topic_coherence(stdout)
-            print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.std(topic_coherences))
+            if _lambda:
+                print "%s\t%d\t%.5f\t%.3f\t%.3f" % (topic_file, iteration, _lambda, np.mean(topic_coherences), np.std(topic_coherences))
+            else:
+                print "%s\t%d\t%.3f\t%.3f" % (topic_file, iteration, np.mean(topic_coherences), np.std(topic_coherences))
 
         os.remove(palmetto_file)
 
