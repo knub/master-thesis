@@ -21,10 +21,11 @@ import scala.io.Source
 case class Args(
     mode: String = "",
     modelFileName: String = "/home/knub/Repositories/master-thesis/models/topic-models/topic.model",
-    embeddingFileName: String = "NOT YET SET",
+    embeddingFileName: String = "NOT SET",
     dataFolderName: String = "/home/knub/Repositories/master-thesis/code/resources/plain-text-test",
     stopWordsFileName: String = "../resources/stopwords.txt",
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
+    inspectionFolder: String = "NOT SET",
     numThreads: Int = 2,
     numTopics: Int = 256,
     numIterations: Int = 50,
@@ -56,12 +57,14 @@ object Main {
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
 
-        opt[String]('m', "model-file-name").action { (x, c) =>
+        opt[String]("model-file-name").action { (x, c) =>
             c.copy(modelFileName = x) }
-        opt[String]('m', "embedding-file-name").action { (x, c) =>
+        opt[String]("embedding-file-name").action { (x, c) =>
             c.copy(embeddingFileName = x) }
-        opt[String]('d', "data-folder-name").action { (x, c) =>
+        opt[String]("data-folder-name").action { (x, c) =>
             c.copy(dataFolderName = x) }
+        opt[String]("inspection-folder").action { (x, c) =>
+            c.copy(inspectionFolder = x) }
         opt[String]("stop-words").action { (x, c) =>
             c.copy(stopWordsFileName = x) }
         opt[String]("concept-categorization").action { (x, c) =>
@@ -314,9 +317,8 @@ object Main {
     val STOP_BOLD = "\u001B[22m"
     case class Topic(id: Int, words: scala.collection.mutable.Buffer[String])
     def inspectTopicEvolution(args: Args): Unit = {
-        val topicEvolutionFiles = new File(new File(args.modelFileName).getParent).listFiles().filter { file =>
-            file.getAbsolutePath.startsWith(args.modelFileName) &&
-                file.getAbsolutePath.contains(args.inspectFileContains) &&
+        val topicEvolutionFiles = new File(args.inspectionFolder).listFiles().filter { file =>
+            file.getAbsolutePath.contains(args.inspectFileContains) &&
                 file.getAbsolutePath.endsWith(".topics")
         }.sorted
         println(topicEvolutionFiles.map(_.getName).deep)
