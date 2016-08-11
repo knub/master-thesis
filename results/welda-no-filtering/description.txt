@@ -1,0 +1,2 @@
+Running WELDA with no WE-sim or TM-sim thresholds.
+Trained on google
