@@ -10,6 +10,7 @@ import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
+import knub.master_thesis.welda.WordEmbeddingLDA
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
