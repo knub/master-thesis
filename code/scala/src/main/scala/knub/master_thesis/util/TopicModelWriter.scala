@@ -2,7 +2,7 @@ package knub.master_thesis.util
 
 import java.io.{BufferedWriter, FileWriter}
 
-import knub.master_thesis.WordEmbeddingLDA
+import knub.master_thesis.welda.WordEmbeddingLDA
 
 import scala.collection.mutable
 

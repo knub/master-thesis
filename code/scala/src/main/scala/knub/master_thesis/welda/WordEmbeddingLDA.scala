@@ -1,12 +1,14 @@
-package knub.master_thesis
+package knub.master_thesis.welda
 
 import java.io.{BufferedReader, File, FileReader}
 import java.nio.file.Paths
 
 import cc.mallet.topics.ParallelTopicModel
-import cc.mallet.types.Alphabet
 import com.carrotsearch.hppc.IntArrayList
+import knub.master_thesis.Args
 import knub.master_thesis.util.{FreeMemory, Sampler, TopicModelWriter}
+import org.deeplearning4j.models.word2vec.Word2Vec
+import org.nd4j.linalg.cpu.nativecpu.NDArray
 
 import scala.collection.mutable
 import scala.io.Source
