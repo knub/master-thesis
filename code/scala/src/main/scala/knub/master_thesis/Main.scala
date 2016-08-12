@@ -10,7 +10,7 @@ import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
-import knub.master_thesis.welda.WordEmbeddingLDA
+import knub.master_thesis.welda.SimpleSimBasedReplacementWELDA
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
@@ -119,7 +119,7 @@ object Main {
             case "embedding-lda" =>
                 for (lambda <- List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)) {
                     println(lambda)
-                    val embeddingLDA = new WordEmbeddingLDA(args.copy(lambda = lambda))
+                    val embeddingLDA = new SimpleSimBasedReplacementWELDA(args.copy(lambda = lambda))
                     embeddingLDA.inference()
                 }
             case "inspect-topic-evolution" =>
