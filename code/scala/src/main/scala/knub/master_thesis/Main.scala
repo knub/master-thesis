@@ -10,7 +10,7 @@ import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
-import knub.master_thesis.welda.SimpleSimBasedReplacementWELDA
+import knub.master_thesis.welda.{GaussianWELDA, SimpleSimBasedReplacementWELDA}
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
@@ -51,9 +51,9 @@ object Main {
 
         List("topic-model-create", "topic-model-load",
             "text-preprocessing", "word-similarity",
-            "supply-tm-similarity", "embedding-lda",
-            "inspect-topic-evolution", "20news-test",
-            "20news-document-classification"
+            "supply-tm-similarity", "welda-sim",
+            "welda-gaussian", "inspect-topic-evolution",
+            "20news-test", "20news-document-classification"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
@@ -78,6 +78,8 @@ object Main {
             c.copy(numIterations = x) }
         opt[Int]("num-documents").action { (x, c) =>
             c.copy(numDocuments = x) }
+        opt[Int]("save-step").action { (x, c) =>
+            c.copy(saveStep = x) }
         opt[Double]("alpha").action { (x, c) =>
             c.copy(alpha = x) }
         opt[Double]("beta").action { (x, c) =>
@@ -116,12 +118,15 @@ object Main {
             case "supply-tm-similarity" =>
                 val res = loadExistingModel(args.modelFileName)
                 supplyTopicModelSimilarity(args, res)
-            case "embedding-lda" =>
+            case "welda-sim" =>
                 for (lambda <- List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)) {
                     println(lambda)
-                    val embeddingLDA = new SimpleSimBasedReplacementWELDA(args.copy(lambda = lambda))
-                    embeddingLDA.inference()
+                    val weldaSim = new SimpleSimBasedReplacementWELDA(args.copy(lambda = lambda))
+                    weldaSim.inference()
                 }
+            case "welda-gaussian" =>
+                val weldaGaussian = new GaussianWELDA(args)
+                weldaGaussian.inference()
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>

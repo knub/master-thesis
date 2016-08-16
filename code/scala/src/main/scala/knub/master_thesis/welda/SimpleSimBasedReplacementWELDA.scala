@@ -95,5 +95,5 @@ class SimpleSimBasedReplacementWELDA(p: Args) extends BaseWELDA(p) {
         }
     }
 
-    override def fileBaseName: String = s"${p.modelFileName}.$embeddingName.welda.lambda-${LAMBDA.toString.replace('.', '-')}"
+    override def fileBaseName: String = s"${p.modelFileName}.$embeddingName.welda.simple.lambda-${LAMBDA.toString.replace('.', '-')}"
 }
