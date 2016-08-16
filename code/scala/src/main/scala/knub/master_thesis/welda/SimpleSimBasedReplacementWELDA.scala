@@ -21,7 +21,6 @@ class SimpleSimBasedReplacementWELDA(p: Args) extends BaseWELDA(p) {
     val TM_SIM_THRESHOLD = 0.4
     val WE_SIM_THRESHOLD = 0.6
 
-
     val replacementWords = mutable.HashMap[Int, Array[Int]]()
     val replacementProbabilities = mutable.HashMap[Int, Array[Double]]()
     prepareReplacements()
@@ -98,5 +97,3 @@ class SimpleSimBasedReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     override def fileBaseName: String = s"${p.modelFileName}.$embeddingName.welda.lambda-${LAMBDA.toString.replace('.', '-')}"
 }
-
-

@@ -9,6 +9,7 @@ import knub.master_thesis.Args
 import knub.master_thesis.util.TopicModelWriter
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 
 abstract class BaseWELDA(val p: Args) {
@@ -16,26 +17,50 @@ abstract class BaseWELDA(val p: Args) {
 
     val writer = new TopicModelWriter(this)
 
-    val TopicModelInfo(alpha, beta, betaSum) = loadTopicModelInfo()
-    val vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.alphabet").getLines().size
-    println(s"Topic model loaded, vocabularySize = $vocabularySize")
-    val alphaSum = alpha.sum
+    var alpha: Array[Double] = null
+    var beta: Double = .0
+    var betaSum: Double = .0
+    var alphaSum: Double = .0
 
+    var vocabularySize: Int = _
 
-    val docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
-    val docWordCount = new Array[Int](p.numDocuments)
-    val topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
-    val sumTopicWordCountLDA = new Array[Int](p.numTopics)
+    var docTopicCount: Array[Array[Int]] = _
+    var docWordCount: Array[Int] = _
+    var topicWordCountLDA: Array[Array[Int]] = _
+    var sumTopicWordCountLDA: Array[Int] = _
+    var multiPros: Array[Double] = _
 
-    val multiPros = new Array[Double](p.numTopics)
-
-    val corpusWords = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
-    val corpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
+    var corpusWords: ArrayBuffer[IntArrayList] = _
+    var corpusTopics: ArrayBuffer[IntArrayList] = _
 
     var word2IdVocabulary: mutable.Map[String, Int] = null
     var id2WordVocabulary: mutable.Map[Int, String] = null
 
-    readCorpus(p.modelFileName, p.embeddingFileName)
+    init()
+
+    def init(): Unit = {
+        val info = loadTopicModelInfo()
+        alpha = info.alpha
+        beta = info.beta
+        betaSum = info.betaSum
+        alphaSum = alpha.sum
+
+        vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.alphabet").getLines().size
+        println(s"Topic model loaded, vocabularySize = $vocabularySize")
+
+
+        docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
+        docWordCount = new Array[Int](p.numDocuments)
+        topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
+        sumTopicWordCountLDA = new Array[Int](p.numTopics)
+
+        multiPros = new Array[Double](p.numTopics)
+
+        corpusWords = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
+        corpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
+
+        readCorpus(p.modelFileName, p.embeddingFileName)
+    }
 
     def loadTopicModelInfo(): TopicModelInfo = {
         System.out.println ("Loading topic model info " + p.modelFileName)
