@@ -2,7 +2,7 @@ package knub.master_thesis.util
 
 import java.io.{BufferedWriter, FileWriter}
 
-import knub.master_thesis.welda.{BaseWELDA, SimpleSimBasedReplacementWELDA}
+import knub.master_thesis.welda.BaseWELDA
 
 import scala.collection.mutable
 
@@ -10,7 +10,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
 
     val params = model.p
 
-    val baseName = model.fileBaseName
+    def baseName = model.fileBaseName
 
     def writeParameters() {
         val writer = new BufferedWriter(new FileWriter(baseName + ".welda.params"))

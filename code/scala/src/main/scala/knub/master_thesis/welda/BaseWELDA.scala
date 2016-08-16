@@ -2,6 +2,7 @@ package knub.master_thesis.welda
 
 import java.io.{BufferedReader, File, FileReader}
 import java.nio.file.Paths
+import java.util.Date
 
 import cc.mallet.topics.ParallelTopicModel
 import com.carrotsearch.hppc.IntArrayList
@@ -47,7 +48,6 @@ abstract class BaseWELDA(val p: Args) {
 
         vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.alphabet").getLines().size
         println(s"Topic model loaded, vocabularySize = $vocabularySize")
-
 
         docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
         docWordCount = new Array[Int](p.numDocuments)
@@ -140,14 +140,15 @@ abstract class BaseWELDA(val p: Args) {
         }
     }
 
+    val TOPIC_OUTPUT_EVERY = 50
     def inference(): Unit = {
         for (iter <- 0 until p.numIterations) {
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
                 System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
                 writer.write(f"$iter%03d")
             }
-            if (iter % 50 == 0) {
-                println("\tWELDA sampling iteration: " + iter)
+            if (iter % TOPIC_OUTPUT_EVERY == 0) {
+                println(s"\tWELDA sampling iteration $iter at ${new Date}")
             }
             sampleSingleIteration()
         }
