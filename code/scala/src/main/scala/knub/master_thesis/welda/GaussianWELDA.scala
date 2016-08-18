@@ -4,7 +4,7 @@ import java.io.File
 import java.util
 
 import be.tarsos.lsh.{CommandLineInterface, LSH, Vector}
-import breeze.linalg.{DenseMatrix, DenseVector}
+import breeze.linalg.{DenseMatrix, DenseVector, _}
 import breeze.stats.distributions.{MultivariateGaussian, RandBasis}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import knub.master_thesis.Args
@@ -13,13 +13,16 @@ import org.apache.commons.math3.random.MersenneTwister
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class GaussianWELDA(p: Args) extends BaseWELDA(p) {
+class GaussianWELDA(p: Args) extends {
+    val PCA_DIMENSIONS = 10
+    val GAUSSIAN_OVER_TOP_N = 20
+} with BaseWELDA(p) {
 
     override val TOPIC_OUTPUT_EVERY = 1
     // value sets, over how many top words the gaussians are calculated
-    val GAUSSIAN_OVER_TOP_N = 250
     // how often to sample from the gaussians
     val LAMBDA = p.lambda
     println(s"LAMBDA is set to ${LAMBDA.toString}")
@@ -29,7 +32,8 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
     // after each generation, re-estimate gaussians
 
     var word2Vec: WordVectors = _
-    var numDimensions: Int = _
+    var pcaVectors: mutable.Map[String, Array[Double]] = _
+//    var numDimensions: Int = _
 
     var nrFirstWordNotInVocab = 0L
     var nrReplacedWords = 0L
@@ -39,17 +43,32 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
     override def init(): Unit = {
         super.init()
         word2Vec = WordVectorSerializer.loadTxtVectors(new File(p.embeddingFileName + ".txt"))
+        pcaVectors = mutable.Map()
 
-        val embeddings = new util.ArrayList[be.tarsos.lsh.Vector](word2IdVocabulary.size)
-        word2IdVocabulary.keys.foreach { word =>
+        val embeddingsList = new mutable.ArrayBuffer[Array[Double]](word2IdVocabulary.size)
+        val vocabulary: Array[String] = word2IdVocabulary.keys.toArray
+        vocabulary.foreach { word =>
             val embeddingDimensions = word2Vec.getWordVector(word)
-            embeddings.add(new Vector(word, embeddingDimensions))
+            embeddingsList += embeddingDimensions
         }
-        val hashFamily = CommandLineInterface.getHashFamily(0.0, "cos", embeddings.get(0).getDimensions)
-        lsh = new LSH(embeddings, hashFamily)
+        val rows = embeddingsList.toArray
+        val M = DenseMatrix(rows: _*)
+
+        val pcaM = pca(M, PCA_DIMENSIONS)
+
+        val lshVectors = for (i <- vocabulary.indices) yield {
+            val vec = pcaM(i, ::).t.toArray
+            val word = vocabulary(i)
+            pcaVectors(word) = vec
+            new Vector(word, vec)
+        }
+
+        val hashFamily = CommandLineInterface.getHashFamily(0.0, "cos", PCA_DIMENSIONS)
+        lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
         lsh.buildIndex(16, 4)
 
-        numDimensions = word2Vec.getWordVector("this").length
+
+//        numDimensions = word2Vec.getWordVector("this").length
     }
 
     //noinspection AccessorLikeMethodIsEmptyParen
@@ -71,19 +90,38 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
 
     var gaussianDistributions: Array[MultivariateGaussian] = _
 
+    def pca(m: DenseMatrix[Double], numDimensions: Int): DenseMatrix[Double] = {
+        val rawPCA = breeze.linalg.princomp(m).scores
+        val pcaResult = rawPCA(::, 0 until numDimensions)
+        pcaResult
+    }
+
     def estimateGaussians() = {
         val topTopicWords = getTopTopicWords()
         val topTopicVectors = topTopicWords.map { topWords =>
             topWords.flatMap { topWord =>
-                if (word2Vec.hasWord(topWord))
-                    Some(word2Vec.getWordVector(topWord))
+                if (pcaVectors.contains(topWord))
+                    Some(pcaVectors(topWord))
                 else
                     None
             }
         }
+
+        def determineGaussianParameters(vectors: Seq[Array[Double]]): (DenseVector[Double], DenseMatrix[Double]) = {
+            val mean = new Array[Double](PCA_DIMENSIONS)
+            for (i <- 0 until PCA_DIMENSIONS) {
+                var meanAtDim = 0.0
+                vectors.foreach { a =>
+                    meanAtDim += a(i)
+                }
+                mean(i) = meanAtDim / vectors.size
+            }
+            (new DenseVector(mean), null)
+        }
+
         val meanVectors = topTopicVectors.map { topVectors =>
-            val mean = new Array[Double](numDimensions)
-            for (i <- 0 until numDimensions) {
+            val mean = new Array[Double](PCA_DIMENSIONS)
+            for (i <- 0 until PCA_DIMENSIONS) {
                 var meanAtDim = 0.0
                 topVectors.foreach { a =>
                     meanAtDim += a(i)
@@ -94,7 +132,7 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
         }
         val covariances = topTopicVectors.zipWithIndex.map { case (topVectors, topicId) =>
             val meanVector = meanVectors(topicId)
-            var covariance = new DenseMatrix[Double](numDimensions, numDimensions)
+            var covariance = new DenseMatrix[Double](PCA_DIMENSIONS, PCA_DIMENSIONS)
             topVectors.foreach { topVector =>
                 val topVectorAsMatrix = new DenseVector(topVector)
                 val diff = topVectorAsMatrix - meanVector
@@ -120,12 +158,8 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
                 val wordId = if (Sampler.nextCoinFlip(LAMBDA)) {
                     // sample a vector from the multivariate gaussian
                     // use vector form here to get nearest word to a sampled vector
-//                    Timer.start("SAMPLING")
                     val vectorSample = gaussianDistributions(topicId).sample()
-//                    Timer.end("SAMPLING")
-//                    Timer.start("CONVERTING")
 //                    val sample = new NDArray(Array(vectorSample.data))
-//                    Timer.end("CONVERTING")
 //                    Timer.start("FINDING LSH")
                     val nearestNeighbours = lsh.query(new Vector("to search", vectorSample.data), 1)
                     if (nearestNeighbours.isEmpty) {
@@ -188,7 +222,7 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
         val samples = getSamples()
         val samplesMatrix = DenseMatrix(samples: _*)
 
-        numDimensions = 2
+        val numDimensions = 2
         val mean = new Array[Double](numDimensions)
         for (i <- 0 until numDimensions) {
             var meanAtDim = 0.0
