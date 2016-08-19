@@ -12,39 +12,41 @@ import knub.master_thesis.util.Sampler
 import org.apache.commons.math3.random.MersenneTwister
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
+import org.nd4j.linalg.cpu.nativecpu.NDArray
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class GaussianWELDA(p: Args) extends {
+class GaussianWELDA(p: Args) extends BaseWELDA(p) {
     val PCA_DIMENSIONS = 10
     val GAUSSIAN_OVER_TOP_N = 20
-} with BaseWELDA(p) {
-
     override val TOPIC_OUTPUT_EVERY = 1
+
     // value sets, over how many top words the gaussians are calculated
     // how often to sample from the gaussians
     val LAMBDA = p.lambda
     val DISTANCE_FUNCTION = p.gaussianWELDADistanceFunction
+
     println(s"LAMBDA is set to ${LAMBDA.toString}")
     println(s"Distance Function is set to $DISTANCE_FUNCTION")
     assert(LAMBDA >= 0.0, "lambda must be at least zero")
     assert(LAMBDA <= 1.0, "lambda must be at most one")
 
-    // after each generation, re-estimate gaussians
-
     var word2Vec: WordVectors = _
     var pcaVectors: mutable.Map[String, Array[Double]] = _
 //    var numDimensions: Int = _
 
-    var nrFirstWordNotInVocab = 0L
-    var nrReplacedWords = 0L
+    var nrReplacedWordsSuccessful = 0L
+    var nrReplacedWordsTries = 0L
 
     var lsh: LSH = _
 
+    var folder: String = _
+
     override def init(): Unit = {
         super.init()
-        word2Vec = WordVectorSerializer.loadTxtVectors(new File(p.embeddingFileName + ".txt"))
+        word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.modelFileName}.$embeddingName.embedding.txt"))
+        println(s"Loaded vectors have ${word2Vec.getWordVector("house").length} dimensions")
         pcaVectors = mutable.Map()
 
         val embeddingsList = new mutable.ArrayBuffer[Array[Double]](word2IdVocabulary.size)
@@ -55,6 +57,7 @@ class GaussianWELDA(p: Args) extends {
         }
         val rows = embeddingsList.toArray
         val M = DenseMatrix(rows: _*)
+        println(s"Dimensions of embedding matrix = ${M.rows}, ${M.cols}")
 
         val pcaM = pca(M, PCA_DIMENSIONS)
 
@@ -65,12 +68,19 @@ class GaussianWELDA(p: Args) extends {
             new Vector(word, vec)
         }
 
+        println(s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
+
         val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
         lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
-        lsh.buildIndex(16, 4)
+        DISTANCE_FUNCTION match {
+            case "cos" =>
+                lsh.buildIndex(32, 4)
+            case "l2" =>
+                lsh.buildIndex(4, 4)
+        }
 
-
-//        numDimensions = word2Vec.getWordVector("this").length
+        folder = s"${p.modelFileName}.$embeddingName.welda.gaussian.distance-$DISTANCE_FUNCTION.lambda-${LAMBDA.toString.replace('.', '-')}"
+        new File(folder).mkdir()
     }
 
     //noinspection AccessorLikeMethodIsEmptyParen
@@ -98,6 +108,27 @@ class GaussianWELDA(p: Args) extends {
         pcaResult
     }
 
+    def determineGaussianParameters(vectors: Seq[Array[Double]]): (DenseVector[Double], DenseMatrix[Double]) = {
+        val mean = new Array[Double](PCA_DIMENSIONS)
+        for (i <- 0 until PCA_DIMENSIONS) {
+            var meanAtDim = 0.0
+            vectors.foreach { a =>
+                meanAtDim += a(i)
+            }
+            mean(i) = meanAtDim / vectors.size
+        }
+        val meanVector = new DenseVector(mean)
+        var covariance = new DenseMatrix[Double](PCA_DIMENSIONS, PCA_DIMENSIONS)
+        vectors.foreach { vectorValues =>
+            val vector = new DenseVector(vectorValues)
+            val normalized = vector - meanVector
+            val result = normalized * normalized.t
+            covariance += result
+        }
+        covariance *= 1.0 / (vectors.size - 1)
+        (meanVector, covariance)
+    }
+
     def estimateGaussians() = {
         val topTopicWords = getTopTopicWords()
         val topTopicVectors = topTopicWords.map { topWords =>
@@ -109,32 +140,10 @@ class GaussianWELDA(p: Args) extends {
             }
         }
 
-        def determineGaussianParameters(vectors: Seq[Array[Double]]): (DenseVector[Double], DenseMatrix[Double]) = {
-            val mean = new Array[Double](PCA_DIMENSIONS)
-            for (i <- 0 until PCA_DIMENSIONS) {
-                var meanAtDim = 0.0
-                vectors.foreach { a =>
-                    meanAtDim += a(i)
-                }
-                mean(i) = meanAtDim / vectors.size
-            }
-            val meanVector = new DenseVector(mean)
-            var covariance = new DenseMatrix[Double](PCA_DIMENSIONS, PCA_DIMENSIONS)
-            vectors.foreach { vectorValues =>
-                val vector = new DenseVector(vectorValues)
-                val normalized = vector - meanVector
-                val result = normalized * normalized.t
-                covariance += result
-            }
-            covariance *= 1.0 / (vectors.size - 1)
-            (meanVector, covariance)
-        }
-
         val gaussianParameters = topTopicVectors.map(determineGaussianParameters)
         gaussianDistributions = gaussianParameters.map { case (meanVector, covarianceMatrix) =>
             new MultivariateGaussian(meanVector, covarianceMatrix)
         }
-
     }
 
     override def sampleSingleIteration(): Unit = {
@@ -149,26 +158,22 @@ class GaussianWELDA(p: Args) extends {
                     // sample a vector from the multivariate gaussian
                     // use vector form here to get nearest word to a sampled vector
                     val vectorSample = gaussianDistributions(topicId).sample()
+//                    Timer.start("FINDING WORD2VEC")
 //                    val sample = new NDArray(Array(vectorSample.data))
+//                    val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
+//                    Timer.end("FINDING WORD2VEC")
 //                    Timer.start("FINDING LSH")
-                    val nearestNeighbours = lsh.query(new Vector("to search", vectorSample.data), 1)
-                    if (nearestNeighbours.isEmpty) {
-                        val nearestWordLsh = if (nearestNeighbours.isEmpty) "<NULL>" else nearestNeighbours.get(0).getKey
-//                        Timer.end("FINDING LSH")
-//                        Timer.start("FINDING WORD2VEC")
-//                        val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
-//                        Timer.end("FINDING WORD2VEC")
-//                        println(s"$nearestWordLsh -- $nearestWordWord2Vec")
-                        nrReplacedWords += 1
-                        word2IdVocabulary.get(nearestWordLsh) match {
-                            case Some(id) =>
-                                id
-                            case None =>
-                                nrFirstWordNotInVocab += 1
-                                corpusWords(docIdx).get(wIndex)
-                        }
-                    } else {
-                        corpusWords(docIdx).get(wIndex)
+                    val nearestNeighbours = lsh.query(new Vector("", vectorSample.data), 1)
+                    val nearestWordLsh = if (nearestNeighbours.isEmpty) "<NULL>" else nearestNeighbours.get(0).getKey
+//                    Timer.end("FINDING LSH")
+//                    println(s"$nearestWordLsh -- $nearestWordWord2Vec")
+                    nrReplacedWordsTries += 1
+                    word2IdVocabulary.get(nearestWordLsh) match {
+                        case Some(id) =>
+                            nrReplacedWordsSuccessful += 1
+                            id
+                        case None =>
+                            corpusWords(docIdx).get(wIndex)
                     }
                 } else {
                     corpusWords(docIdx).get(wIndex)
@@ -192,14 +197,14 @@ class GaussianWELDA(p: Args) extends {
                 // update topic
                 corpusTopics(docIdx).set(wIndex, newTopicId)
             }
-//            println(s"How often does replacing work: ${nrFirstWordNotInVocab.toDouble / nrReplacedWords}")
+//            println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
             Timer.printAll()
         }
 
     }
 
 
-    override def fileBaseName: String = s"${p.modelFileName}.$embeddingName.welda.gaussian.lambda-${LAMBDA.toString.replace('.', '-')}"
+    override def fileBaseName: String = s"$folder/welda"
 
     def testCovarianceMatrixCalculation() = {
         def getSamples(): IndexedSeq[DenseVector[Double]] = {

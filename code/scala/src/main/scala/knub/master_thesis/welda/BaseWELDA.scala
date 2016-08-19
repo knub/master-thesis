@@ -37,8 +37,6 @@ abstract class BaseWELDA(val p: Args) {
     var word2IdVocabulary: mutable.Map[String, Int] = null
     var id2WordVocabulary: mutable.Map[Int, String] = null
 
-    init()
-
     def init(): Unit = {
         val info = loadTopicModelInfo()
         alpha = info.alpha
