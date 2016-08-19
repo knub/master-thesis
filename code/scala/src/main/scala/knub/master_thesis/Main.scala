@@ -35,7 +35,8 @@ case class Args(
     beta: Double = 0.01,
     lambda: Double = -1.0,
     saveStep: Int = 50,
-    inspectFileContains: String = "###") {
+    inspectFileContains: String = "###",
+    gaussianWELDADistanceFunction: String = "") {
     def getPrintWriterFor(extension: String): PrintWriter = {
         val modelFile = new File(modelFileName)
         val modelTextFile = new File(modelFile.getCanonicalPath + extension)
@@ -125,8 +126,26 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
+//                val lambdas = List(0.5, 0.8)
+//                val distanceFunc = List("cos", "l2")
+//                val embeddings = List(
+//                    "/data/wikipedia/2016-06-21/embedding-models/skip-gram.model.model.skip-gram.model.restricted.alphabet.model.txt",
+//                    "/data/wikipedia/2016-06-21/embedding-models/google.model.model.google.model.restricted.alphabet.model.txt"
+//                )
+//                val cases = for (lambda <- lambdas; distanceFunc <- distanceFunc; embedding <- embeddings)
+//                    yield (lambda, distanceFunc, embedding)
+//
+//                val parCases = cases.par
+//                parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(4))
+//                parCases.foreach { case (lambda, distanceFunction, embedding) =>
+//                    println(s"Starting lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+//                    val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, gaussianWELDADistanceFunction = distanceFunction, embeddingFileName = embedding))
+//                    weldaGaussian.inference()
+//                    println(s"Finshed lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+//                }
                 val weldaGaussian = new GaussianWELDA(args)
                 weldaGaussian.inference()
+
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>
