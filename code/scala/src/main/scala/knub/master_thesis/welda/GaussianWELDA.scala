@@ -25,7 +25,9 @@ class GaussianWELDA(p: Args) extends {
     // value sets, over how many top words the gaussians are calculated
     // how often to sample from the gaussians
     val LAMBDA = p.lambda
+    val DISTANCE_FUNCTION = p.gaussianWELDADistanceFunction
     println(s"LAMBDA is set to ${LAMBDA.toString}")
+    println(s"Distance Function is set to $DISTANCE_FUNCTION")
     assert(LAMBDA >= 0.0, "lambda must be at least zero")
     assert(LAMBDA <= 1.0, "lambda must be at most one")
 
@@ -63,7 +65,7 @@ class GaussianWELDA(p: Args) extends {
             new Vector(word, vec)
         }
 
-        val hashFamily = CommandLineInterface.getHashFamily(0.0, "cos", PCA_DIMENSIONS)
+        val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
         lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
         lsh.buildIndex(16, 4)
 
@@ -116,34 +118,22 @@ class GaussianWELDA(p: Args) extends {
                 }
                 mean(i) = meanAtDim / vectors.size
             }
-            (new DenseVector(mean), null)
-        }
-
-        val meanVectors = topTopicVectors.map { topVectors =>
-            val mean = new Array[Double](PCA_DIMENSIONS)
-            for (i <- 0 until PCA_DIMENSIONS) {
-                var meanAtDim = 0.0
-                topVectors.foreach { a =>
-                    meanAtDim += a(i)
-                }
-                mean(i) = meanAtDim / topVectors.size
-            }
-            new DenseVector(mean)
-        }
-        val covariances = topTopicVectors.zipWithIndex.map { case (topVectors, topicId) =>
-            val meanVector = meanVectors(topicId)
+            val meanVector = new DenseVector(mean)
             var covariance = new DenseMatrix[Double](PCA_DIMENSIONS, PCA_DIMENSIONS)
-            topVectors.foreach { topVector =>
-                val topVectorAsMatrix = new DenseVector(topVector)
-                val diff = topVectorAsMatrix - meanVector
-                val result = diff * diff.t
+            vectors.foreach { vectorValues =>
+                val vector = new DenseVector(vectorValues)
+                val normalized = vector - meanVector
+                val result = normalized * normalized.t
                 covariance += result
             }
-            covariance *= 1.0 / (topVectors.size - 1)
+            covariance *= 1.0 / (vectors.size - 1)
+            (meanVector, covariance)
         }
-        gaussianDistributions = (0 until p.numTopics).map { i =>
-            new MultivariateGaussian(meanVectors(i), covariances(i))
-        }.toArray
+
+        val gaussianParameters = topTopicVectors.map(determineGaussianParameters)
+        gaussianDistributions = gaussianParameters.map { case (meanVector, covarianceMatrix) =>
+            new MultivariateGaussian(meanVector, covarianceMatrix)
+        }
 
     }
 
@@ -207,6 +197,7 @@ class GaussianWELDA(p: Args) extends {
         }
 
     }
+
 
     override def fileBaseName: String = s"${p.modelFileName}.$embeddingName.welda.gaussian.lambda-${LAMBDA.toString.replace('.', '-')}"
 
