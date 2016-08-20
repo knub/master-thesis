@@ -9,22 +9,22 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Convert word2vec model from binary to txt")
-    parser.add_argument("model", type=str)
-    parser.add_argument("--vocabulary", type=str)
+    parser.add_argument("--embedding-model", type=str)
+    parser.add_argument("--topic-model", type=str)
     args = parser.parse_args()
 
-    model = Word2Vec.load_word2vec_format(args.model, binary=True)
+    model = Word2Vec.load_word2vec_format(args.embedding_model, binary=True)
 
-    if args.vocabulary is None:
-        print "No vocabulary set, converting all words"
-        model.save_word2vec_format(args.model + ".txt", binary=False)
+    if args.topic_model is None:
+        print "No topic model set, converting all words"
+        model.save_word2vec_format(args.embedding_model + ".txt", binary=False)
     else:
-        print "Vocabulary is set, using only words from " + args.vocabulary
-        vocab_name = os.path.basename(args.vocabulary)
-        with open(args.model + "." + vocab_name + ".model.txt", "w", encoding="utf-8") as output:
-            with open(args.vocabulary, "r", encoding="utf-8") as f:
+        embedding_name = os.path.basename(args.embedding_model)
+        print "Topic model is set, using only words from " + args.topic_model
+        with open(args.topic_model + "." + embedding_name + ".embedding.txt", "w", encoding="utf-8") as output:
+            with open(args.topic_model + "." + embedding_name + ".restricted.alphabet", "r", encoding="utf-8") as f:
                 for line in f:
-                    word = line.rstrip()
+                    word = line.rstrip().split("#")[0]
                     try:
                         output.write(word + " ")
                         output.write(" ".join(map(str, model[word])))
