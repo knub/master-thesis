@@ -164,7 +164,7 @@ In this way of thinking, an author picks certain topics to write about, and then
 The goal is then to uncover the unseen, so called ``latent'', topics from a text corpus.
 All of these approaches have in common that they assume a bag-of-words representation of documents.
 
-\subsection{Earlier approaches}
+\subsection{Early approaches}
 A basic generative topic model is the mixture of unigrams model~\cite{Nigam2000}.
 In this model, a topic is a fixed probability distribution over the vocabulary.
 However, only one topic is allowed per document, which limits its predictive power.
@@ -200,7 +200,7 @@ With these two hyperparameters, the generative document creation process of LDA 
               \item For each position $i$ in the document
               \begin{enumerate}
                      \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
-                     \item Choose word $w \sim Multinomial(\phi_{z_{d,i}})$ for current word
+                     \item Choose word $w \sim Multinomial(\phi_{z_{d,i}})$
               \end{enumerate}
        \end{enumerate}
 \end{enumerate}
@@ -239,6 +239,32 @@ In this thesis, we will use two particularly fast and robust implementations:
 \end{itemize}
 
 % LDA has problems on small texts/documents
+
+
+\subsection{Evaluation of topic models}
+% TODO: Add previous methods like held-out likelihood etc, but that did not correlate very well
+A common evaluation metric for topic models is \emph{topic coherence}.
+Topic coherence measures, how well the top-words in the topics belong together and form a common theme.
+A good topic (examples taken from \cite{Boyd-graber2014}) is: \\
+\hspace*{1cm} \framebox[1.1\width]{trout fish fly fishing water angler stream rod flies salmon} \\
+The words in topic clearly form a narrow topic, all words belong to the common ``fishing'' theme.
+One can easily imagine a document, which contains all of these words.
+On the contrary, an example for a bad topic is: \\
+\hspace*{1cm} \framebox[1.1\width]{notion sense choice situation idea natural explictly explicit definition refer} \\
+The topic contains very general words, no clear common theme is recognizable.
+This topic is not useful for a human trying to understand a document collection.
+
+The goal of a topic coherence metric is to capture the this usefulness of a topic for a human user.
+Therefore, the goal of topic coherence measure is to have a high correlation with human ratings.
+The base idea for such a coherence measure was introduced by Newman et al.~\cite{Newman2010}.
+They evaluated metrics based on WordNet, Google searches and word-cooccurrences in Wikipedia articles, and found that latter provides the best metric.
+Röder et al.~\cite{Roder2015} build on this idea and evaluated a total of 237912 coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
+
+We will use this metric, which is called $C_V$ in the original paper, to evaluate topic coherence throughout our master thesis.
+
+All
+
+cite the care and feeding paper
 
 \section{Word embeddings}
 
@@ -353,10 +379,27 @@ The method by Mikolov has been successfully trained on a corpus with about 100 b
 % TODO: both somewhat use vector space model TODO: add seminal reference
 % distributional semantic models (DSMs)
 
-\section{Existing combinations}
-The existing related work, which combines topic modeling approaches with word embeddings, can be roughly divided in two directions.
-One type of model tries to improve topic models by incorporating word vectors, while the other aims to improve word embeddings with topic models.
+\paragraph{Typical operations}
+Both models have different operations in which they perform well, which are standard operations for the respective models.
+
+Word embeddings: find similar words
+This is also explains the difference in evaluation.
+Topic models are typically evaluated using topic coherence, i.e. how well the top words from the topics belong together and have a common, easily identifiable theme.
+Word embeddings, on the contrary, are typically evaluated using word analogy reasoning tasks or word similarity tasks.
+When building new topic models which use word embeddings, the goal is to incorporate a priori semantic information about words into the model.
+The assumption is, that words which are similar to each other should have a higher probability to occur in the same topic together.
+
+
+\section{Word embeddings in topic models}
+The recent popularity of word embedding methods has led to a reevaluation of topic models.
+There are two directions for research in this area.
+% The existing related work, which combines topic modeling approaches with word embeddings, can be roughly divided in two directions.
+One type of model tries to improve topic models by incorporating word vectors into the model.
+As LDA is based on the bag-of-words model, no relationship between words is encoded in the model.
+The prior knowledge about semantically similar words, that word embedding models provide, is used to create more coherent topic models.
+The other type of model aims to improve word embeddings by incorparating ideas from topic models.
 We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinations}.\footnote{ToCoh: Topic Coherence; WordSim: Word Similarity; DocClass: Document Classification; DocClust: Document Clustering; Analogy: Word Analogy Reasoning; SentComp: Sentence Completion}
+In the rest of section we will present some models in detail.
 \begin{table*}
        \centering
        \caption{Overview over related work of combinations between topic models (TM) and word embeddings (WE) and how they have been evaluated}
@@ -387,48 +430,166 @@ We summarize the prior work in this field in Table~\ref{table:tm_and_we_combinat
        \label{table:tm_and_we_combinations}
 \end{table*}
 \footnotetext{The online evaluation tool can be accessed at \url{http://palmetto.aksw.org/palmetto-webapp}}
-% \begin{table*}
-%        \centering
-%        \caption{Overview over related work of combinations between topic models and word embeddings}
-%        \begin{tabular}{|l|l|}
-%               \hline
-%               \textbf{Output: Topic Model} & \textbf{Output: Word Embeddings} \\
-%               \hline
-%               • Gaussian LDA, Das et al.~\cite{Das2015}                                                          & • Topical Word Embeddings, Liu et al.~\cite{Liu2015} \\
-%               • \parbox[t]{7cm}{Improving Topic Models with Latent Feature Word Representations, Nguyen et al.~\cite{Nguyen2015}} & • \parbox[t]{7cm}{Conceptual Text Understand in Distributional Semantic Space, Cheng et al.~\cite{Cheng2015}} \\
-%               • \parbox[t]{7cm}{Unsupervised Topic Modelling for Short Texts Using Distributed Representations of Words, Sridhar~\cite{Sridhar2015}} & • lda2vec, Moody~\cite{Moody2016} \\
-%               \hline
-%        \end{tabular}
-%        \label{table:tm_and_we_combinations_previous}
-% \end{table*}
 
-The work by Das et al.~\cite{Das2015} belongs to the first group. They propose a method named Gaussian LDA.
+\subsection{Improved topic models}
+
+We will focus on models, which yield improved topic models and present them in the following paragraphs.
+\paragraph{Gaussian LDA}
+Das et al.~\cite{Das2015} proposed a method named Gaussian LDA.
 In this approach, a topic is no longer a distribution over words in the vocabulary, but a Gaussian distribution in the word embedding space.
 Also, words are no longer atomic units, but are represented by their corresponding pre-trained word embeddings.
+The authors use word embeddings trained on the English Wikipedia, which are not published.
 Each topic is associated with a mean $\mu_k$ and a covariance matrix $\Sigma_k$.
 The prior distribution over the means is a normal distribution, and the prior distribution over the covariances is an inverse Wishart distribution.
-These parameters are inferred using Gibbs sampling as in standard LDA. % together with linear algebra tricks
+
+Three hyperparameters have to be set for Gaussian LDA.
+$\nu$ represents the degrees of freedom for the inverse Wishart distribution and is typically set to the number of dimensions of the word embeddings.
+$\Psi$ represents the scale matrix of the inverse Wishart distribution and is set to the identity matrix.
+$\kappa$ represents the smoothing parameter for the counts of words assigned to a certain topic.
+With these hyperparameters, the generative process of Gaussian LDA can be summarized as follows:
+\begin{enumerate}
+       \item Fix number of topics $K$ in the document collection
+       \item Choose covariance matrix $\Sigma_k \sim \mathcal{W}^{-1}(\Psi, \nu)$ for each topic $j \in \{1~..~K\}$
+       \item Choose mean $\mu_k \sim Normal(\mu, \frac{1}{\kappa} \Sigma_k)$ for each topic $j \in \{1~..~K\}$
+       \item Now, for each document $d$:
+       \begin{enumerate}
+              \item Choose topic distribution $\theta_d \sim Dirichlet(\alpha)$
+              \item For each position $i$ in the document
+              \begin{enumerate}
+                     \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
+                     \item Choose word $w \sim Normal(\mu_{z_{d,i}}, \Sigma_{z_{d,i}})$
+              \end{enumerate}
+       \end{enumerate}
+\end{enumerate}
+
+These parameters are inferred using Gibbs sampling as in standard LDA with the following sampling equation: % together with linear algebra tricks
+\begin{equation*}
+  p(z_{d,i} | z_{-(d,i), V_d}) \propto (n_{k,d} + \alpha_k) \times t_{\nu_k - M + 1}\Big(v_{d,i} \Big| \mu_k, \frac{\kappa_k + 1}{\kappa_k} \Sigma_k\Big)
+\end{equation*}
+where $z_{-(d,i)}$ are all topic assignments in all documents except the current word, $V_d$ is the sequence, $M$ is the number of dimension of the word vectors.
+The evaluation of the multivariate $t$ distribution requires the determinant and the inverse of the covariance matrices $\Sigma_k$, which is an $\mathcal{O}(M^3)$ operation.
+Also, this parameters need to be updated after each word.
+Even though the authors provide some performance improvements using linear algebra identities, inference in Gaussian LDA is very slow.
+We will compare the runtime with other models in TODO.
+
+\paragraph{Latent Feature Topic Models}
+Another approach is taken by Nguyen et al.~\cite{Nguyen2015}.
+They use word embeddings to sample words not only from the multinomial topic distribution, but also from the embedding space.
+Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
+This parameter decides, whether the word is sampled as usual from the topic-word distribution or from the latent feature vectors.
+When sampling in the embedding space, the authors need to define a distribution over all the words.
+This is achieved by introducing one topic vector $\tau_t$ for all topics.
+This topic vector lies in the same space as the word embeddings.
+Then, to sample in the embedding space, the model samples from the following softmax-normalized multinomial word distribution:
+\begin{equation*}
+    Multinomial(w | \tau_t, \omega) = \frac{exp(\tau_t * \omega_w)}{\sum_{w' \in W} exp(\tau_t * \omega_{w'})},
+\end{equation*}
+where $\tau_t$ is the representation of topic $t$ in the word embedding space and $\omega$ are the pretrained and fixed word embedding vectors.
+The topic embeddings $\tau_t$ are updated after each iteration of Gibbs sampling via a maximum likelihood estimation based on all other parameters given.
+Here, the topic assignments are fixed.
+The negative log likelihood including $L_2$ regularization for each topic vector $\tau_t$ is given as:
+\begin{equation*}
+    L_t = - \sum_{w \in W} K^{t,w} \Big(\tau_t * \omega_w - \log \sum_{w' \in W} \exp (\tau_t * \omega_{w'}) \Big) + \mu * || \tau_t ||^2,
+\end{equation*}
+and is minimized with respect to the topic vectors.
+Optimization is done via L-BFGS~\cite{Liu1989}.
+
+Using the the topic vectors, the generative process can be summarized as follows:
+\begin{enumerate}
+    \item Fix number of topics $K$ in the document collection
+    \item Choose word distributions $\phi_j \sim Dirichlet(\beta)$ for each topic $j \in \{1~..~K\}$
+    \item Now, for each document $d$:
+    \begin{enumerate}
+        \item Choose topic distribution $\theta_d \sim Dirichlet(\alpha)$
+        \item For each position $i$ in the document
+        \begin{enumerate}
+            \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
+            \item Choose binary variable $s_{d_i}$, which decides whether the word is sampled from the multinomial as usual or from the word embedding space
+            \item Choose word $w \sim (1 - s_{d_i}) * Multinomial(\phi_{z_{d,i}}) + s_{d_i} * Multinomial(\tau_{z_{d_{i}}} \omega^T)$
+        \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014} and conclude that none of these works better than the other.
+
+\paragraph{Nonparametric Spherical Model}
+Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modelling.
+They build on top of Gaussian LDA, but argue that Gaussian distributions do not capture the embedding space very well.
+Instead they propose the von Mises-Fisher distribution to capture topics in the embedding space.
+The von Mises-Fisher distribution is a distribution on the hypersphere with a mean direction $\mu$ and a concentration parameter $\kappa$.
+If there are only two dimensions, the distribution reduces to the von Mises distribution on the circle.
+Using the von-Mises Fisher distribution requires all word vectors to be normalized so they lie on the $M$-dimensional unit hypersphere.
+
+Intuitively, the von-Mises Fisher distribution is a good distribution choice, because it is built on the .
+The Gaussian LDA model tries to group words in a topic, which are near each other in the embedding space, where ``near'' is measured by the euclidean distance.
+However, word similarity in embedding models is usually not measured by euclidean distance, but rather by cosine distance~\cite{Mikolov2013a}, which is exactly what is captured by the von Mises-Fisher distribution.
+
+In the spherical topic model, each topic is represented by a von Mises-Fisher distribution with parameters $\mu_k$ and $\kappa_k$.
+A log-normal prior is placed on $\kappa_k$ and a von Mises-Fisher prior is placed on the $\mu_k$'s.
+In contrast to the previous models, this model is not based on LDA but rather on hierarchical Dirichlet processes.
+These models allow the number of topics to be determined automatically.
+% To allow a variable number of topics the document-topic distribution is sampled.
+All together, the generative process looks as follows:
+\begin{enumerate}
+    \item Choose base distribution $\beta \sim GEM(\gamma)$ from stick-breaking distribution
+    \item Choose topic direction on unit sphere $\mu_k \sim vMF(\mu_0, \kappa_0)$ for all topics $k$
+    \item Choose topic concentration $\kappa_k \sim log\mbox{-}normal(m, \sigma)$ for all topics $k$
+    \item Now, for each document $d$:
+    \begin{enumerate}
+        \item Choose topic distribution $\theta_d \sim DP(\alpha, \beta)$
+        \item For each position $i$ in the document
+        \begin{enumerate}
+            \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
+            \item Choose word $w \sim vMF(\mu_{z_{d,i}}, \kappa_{z_{d,i}})$
+        \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+
+The authors use 50-dimensional word embeddings, which they trained on Wikipedia.
+The word vectors are not available.
+
+\paragraph{Generative Topic Embedding}
+Li et al.\cite{Li2016} propose generative topic embeddings.
+They call their system TopicVec.
+The TopicVec model is less focused on topic coherence, but rather on document representations.
+They treat a document as a ``bag-of-vectors'' and learn a topic model and the word embeddings in parallel.
+This is in contrast to the other models, which are always built on pre-trained word vectors.
+The authors claim, that this method ``exploits the word collocation patterns both at the level of the local context and the global document''~\cite{Li2016}.
+
+The vectors are learned by maximizing the probability of a word occurring with its context, according to the following formula:
+\begin{equation*}
+  P(w_c | w_0 : w_{c - 1}, z_c, d_i) = P(w_c) * \exp \bigg( v_{w_{c}}^T * \Big( \sum\limits_{l=0}^{c-1} v_{w_l} + t_{z_c} \Big) + \sum\limits_{l=0}^{c - 1} a_{w_{l} w_c}  + r_{z_c} \bigg),
+\end{equation*}
+where $c$ is the context window size, $w_c$ is the word at the last position of the current context window, $v_{w_c}$ is the word's vector embedding, $t_{z_c}$ is the topic embedding vector of the word at position $c$ and $r_{z_c}$ is a normalizing constant.
+The terms $a_{w_l w_c}$ are bigram residuals, which capture the relationship between each context word and the target word explictly.
+Similarly to other methods TopicVec also encodes a topic with a vector $t_k$ in the embedding space.
+Topic vectors
+
+
+The generative process looks as follows:
+\begin{enumerate}
+    \item Fix number of topics $K$ in the document collection
+    \item Choose topic vector $t_j \sim Unif(S_{\gamma})$ from hypersphere of radius $\gamma$ for each topic $j \in \{1~..~K\}$
+    \item Now, for each document $d$:
+    \begin{enumerate}
+        \item Choose topic distribution $\theta_d \sim Dirichlet(\alpha)$
+        \item For each position $i$ in the document
+        \begin{enumerate}
+            \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
+            \item Choose word $w \sim Multinomial()$
+        \end{enumerate}
+    \end{enumerate}
+\end{enumerate}
+
+
+\paragraph{Gaussian Mixture Model in Embedding Space}
 Another idea is proposed by Sridhar~\cite{Sridhar2015}.
 They start by training word embeddings.
 Afterwards they fit a Gaussian mixture model directly on the word embedding space.
 A topic is represented by mean and covariance matrix.
 In contrast to Das et al.~\cite{Das2015}, Sridhar~\cite{Sridhar2015} assumes the topics to be fixed given the word embeddings, while Das et al.~\cite{Das2015} only take the embeddings as a basis and still learn the topics based on the word co-occurrences in the corpus.
-Another approach is taken by Nguyen et al.~\cite{Nguyen2015}.
-They use word embeddings to sample words not only from the multinomial topic distribution, but also from the embedding space.
-Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
-This parameter decides, whether the word is sampled as usual from the topic-word distribution or from the latent feature vectors.
-To sample in the embedding space, they sample from a softmax-normalized categorical distribution defined by:
-\begin{equation*}
-       Cat(w | \tau_t, \omega) = \frac{exp(\tau_t * \omega_w)}{\sum_{w' \in W} exp(\tau_t * \omega_{w'})},
-\end{equation*}
-where $\tau_t$ is the representation of topic $t$ in the word embedding space and $\omega$ are the pretrained and fixed word embedding vectors.
-The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014}.
-The topic embeddings $\tau$ are updated in each iteration of Gibbs sampling via a MAP estimate based on all other parameters given.
-A similar idea is used by Cheng et al.~\cite{Cheng2015}.
-In fact, the first model they propose is the same as the first model from Nguyen et al.~\cite{Nguyen2015}.
-In addition to some other new models, which are similar to Cheng et al.'s work, they also propose new models, which do not assume independence between word and concept embeddings.
-These \emph{generative word-concept skip-gram} models perform best in their word-similarity and paraphrase detection benchmarks.
 
+
+\subsection{Improved word embeddings}
 We now focus on methods for better word embeddings.
 Liu et al.~\cite{Liu2015} propose topical word embeddings.
 These embeddings make use of word topics inferred via LDA to generate better word vectors.
@@ -441,6 +602,11 @@ These two vectors are then combined for the vector of the word-topic pair.
 To the authors' surprise, the simplest method one performs best in their word similarity and text classification benchmarks.
 Using the additional topic information when training word embeddings has practical benefits for similarity evaluation.
 When the model is asked for similar words to the word ``apple'', it returns ``peach'', ``juice'', ``strawberry'' or it returns ``mac'', ``ipod'', ``android'' depending on the topic of the word.
+
+A similar idea is used by Cheng et al.~\cite{Cheng2015}.
+In fact, the first model they propose is the same as the first model from Liu et al.~\cite{Liu2015}.
+In addition to some other new models, which are similar to Cheng et al.'s work, they also propose new models, which do not assume independence between word and concept embeddings.
+These \emph{generative word-concept skip-gram} models perform best in their word-similarity and paraphrase detection benchmarks.
 
 Moody~\cite{Moody2016} proposes lda2vec.
 His method learns word vectors together with learning topic vectors and an intuitive topic-based document interpretation.
@@ -509,6 +675,10 @@ Only use best word:
 model.google.model.welda.lambda.only-most-similar-we
 Use all words, no filtering:
 model.google.model.welda.lambda.full-no-filtering
+
+Gaussian WELDA
+
+Von-Mises-Fisher WELDA
 \chapter{Thoughts}
 \section{Bayesian Optimization}
 \begin{itemize}
