@@ -8,7 +8,8 @@ import os
 def parse_iteration(s):
     res = re.search("\\.(\\d\\d\\d)\\.", s)
     if not res:
-        raise Exception("Could not parse iteration")
+        print "WARN: Could not parse iteration"
+        return 0
     iteration = int(res.group(1))
     return iteration
 
@@ -48,6 +49,30 @@ def create_palmetto_file(topic_file):
     return palmetto_file
 
 
+def calculate_topic_coherences(f):
+    palmetto_file = create_palmetto_file(f)
+    p = subprocess.Popen(
+        ["java",
+         "-jar",
+         "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar",
+         "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd",
+         "C_V",
+         palmetto_file],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    stdout, stderr = p.communicate()
+    os.remove(palmetto_file)
+    error = p.returncode
+    if error:
+        print stderr
+        print "-" * 100
+        print stdout
+        return RuntimeError("Could not compute topics")
+    else:
+        topic_coherences = parse_topic_coherence(stdout)
+        return topic_coherences
+
+
 def main():
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
     parser.add_argument("topic_files", type=str, nargs="+")
@@ -56,31 +81,12 @@ def main():
     for topic_file in args.topic_files:
         iteration = parse_iteration(topic_file)
         _lambda = parse_lambda(topic_file)
-        palmetto_file = create_palmetto_file(topic_file)
-        p = subprocess.Popen(
-            ["java",
-             "-jar",
-             "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar",
-             "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd",
-             "C_V",
-             palmetto_file],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        stdout, stderr = p.communicate()
-        error = p.returncode
-        if error:
-            print stderr
-            print "-" * 100
-            print stdout
-            return RuntimeError("Could not compute topics")
+        topic_coherences = calculate_topic_coherences(topic_file)
+        if _lambda:
+            print "%s\t%d\t%.5f\t%.3f\t%.3f" % (topic_file, iteration, _lambda, np.mean(topic_coherences), np.std(topic_coherences))
         else:
-            topic_coherences = parse_topic_coherence(stdout)
-            if _lambda:
-                print "%s\t%d\t%.5f\t%.3f\t%.3f" % (topic_file, iteration, _lambda, np.mean(topic_coherences), np.std(topic_coherences))
-            else:
-                print "%s\t%d\t%.3f\t%.3f" % (topic_file, iteration, np.mean(topic_coherences), np.std(topic_coherences))
+            print "%s\t%d\t%.3f\t%.3f" % (topic_file, iteration, np.mean(topic_coherences), np.std(topic_coherences))
 
-        os.remove(palmetto_file)
 
 if __name__ == "__main__":
     main()
