@@ -24,5 +24,5 @@ if __name__ == "__main__":
                     output.write(" ".join(map(str, word2vec[word])))
                 except KeyError:
                     print word
-                    output.write(" ".join(map(str, word2vec["this"])))
+                    output.write(" ".join(map(str, word2vec["house"])))
                 output.write("\n")
