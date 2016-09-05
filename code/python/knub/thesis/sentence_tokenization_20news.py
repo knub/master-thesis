@@ -24,6 +24,8 @@ def get_filenames():
         for filename in filenames:
             files.append((dirpath + "/" + filename, class_index))
         class_index += 1
+
+    # Shuffling to randomize
     shuffle(files)
     return files, class_mapper
 
@@ -41,6 +43,7 @@ def main():
     articles_class_file = codecs.open(args.twentynews_folder + "/articles.class.txt", "w", encoding="utf-8")
 
     for filename, class_index in filenames:
+        basename = os.path.basename(filename)
         with codecs.open(filename, "r", encoding="iso-8859-1") as f:
             content = list(f.readlines())
             body = list(dropwhile(lambda x: x != "\n", content))
@@ -49,14 +52,13 @@ def main():
             sentences = sent_tokenize(body)
             for sentence in sentences:
                 words = word_tokenize(sentence)
-                for word in words:
-                    is_punctuation = all([s in string.punctuation for s in word])
-                    if not is_punctuation:
-                        articles_file.write(word)
-                        articles_file.write(" ")
-                        sentences_file.write(word)
-                        sentences_file.write(" ")
-                sentences_file.write("\n")
+                words = [word for word in words if not all([s in string.punctuation for s in word])]
+                if words:
+                    sentences_file.write(str(basename) + "\t" + str(class_index) + "\t")
+                    words = " ".join(words)
+                    articles_file.write(words)
+                    sentences_file.write(words)
+                    sentences_file.write("\n")
         articles_class_file.write(str(class_index) + "\n")
         articles_file.write("\n")
 

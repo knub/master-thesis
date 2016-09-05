@@ -29,7 +29,7 @@ class TopicModel(args: Args, alpha: Double, beta: Double, instancesIterator: jav
     def calculateAlphaWithBackgroundTopic(numTopics: Int, alpha: Double): Array[Double] = {
         val a = new Array[Double](numTopics)
         java.util.Arrays.fill(a, alpha)
-        a(0) = alpha * 5
+        a(0) = alpha * 1
         a
     }
 }
