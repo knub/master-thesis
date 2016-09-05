@@ -1,16 +1,25 @@
 package knub.master_thesis.preprocessing
 
 import java.nio.file.{Files, Path, Paths}
+import java.util
 
 import cc.mallet.types.Instance
 
 import scala.collection.JavaConverters._
+import scala.io.Source
 
 object DataIterators {
+
+
     def getIteratorForDataFolderName(dataFolderName: String): java.util.Iterator[Instance] = {
         if (dataFolderName.contains("plain-text")) {
+            println("Detected Wikipedia")
             wikipedia(dataFolderName)
+        } else if (dataFolderName.contains("20news-bydate-train-with-classes/sentences.txt")) {
+            println("Detected 20 news sentences corpus")
+            twentyNewsSentences(dataFolderName)
         } else if (dataFolderName.contains("20newsgroups")) {
+            println("Detected 20 news corpus")
             twentyNews(dataFolderName)
         } else {
             throw new Exception("No data iterator found for given data folder name.")
@@ -23,6 +32,21 @@ object DataIterators {
 
     def twentyNews(dataFolderName: String) = {
         new TwentyNewsIterator(dataFolderName).iterator()
+    }
+    def twentyNewsSentences(dataFolderName: String): java.util.Iterator[Instance] = {
+        Source.fromFile(dataFolderName).getLines().zipWithIndex.map { case (line, idx) =>
+            try {
+                val split = line.split('\t')
+                val doc = split(0).toInt
+                val clazz = split(1).toInt
+                val text = split(2)
+                new Instance(text, clazz, doc, null)
+            } catch {
+                case e: Exception =>
+                    println(s"$idx>>>$line<<<")
+                    throw e
+            }
+        }.asJava
     }
 }
 
