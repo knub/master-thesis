@@ -1,20 +1,24 @@
 package knub.master_thesis.preprocessing
 
+import java.io.File
 import java.nio.file.{Files, Path, Paths}
 import java.util
 
 import cc.mallet.types.Instance
+import org.apache.commons.io.FileUtils
 
 import scala.collection.JavaConverters._
 import scala.io.Source
+import scala.util.matching.Regex
 
 object DataIterators {
-
 
     def getIteratorForDataFolderName(dataFolderName: String): java.util.Iterator[Instance] = {
         if (dataFolderName.contains("plain-text")) {
             println("Detected Wikipedia")
             wikipedia(dataFolderName)
+        } else if (dataFolderName.contains("nips")) {
+            nips(dataFolderName)
         } else if (dataFolderName.contains("20news-bydate-train-with-classes/sentences.txt")) {
             println("Detected 20 news sentences corpus")
             twentyNewsSentences(dataFolderName)
@@ -24,6 +28,22 @@ object DataIterators {
         } else {
             throw new Exception("No data iterator found for given data folder name.")
         }
+    }
+
+    def nips(dataFolderName: String): java.util.Iterator[Instance] = {
+        val regex = new Regex("nips[0-9]{2}")
+        val files = new File(dataFolderName).list().filter { f =>
+            regex.findFirstIn(f).isDefined
+        }.map { f =>
+            new File(dataFolderName + "/" + f)
+        }
+
+        files.flatMap { folder =>
+            folder.list().map { document =>
+                val content = FileUtils.readFileToString(new File(s"$folder/$document"))
+                new Instance(content, folder, document, null)
+            }
+        }.iterator.asJava
     }
 
     def wikipedia(dataFolderName: String) = {
