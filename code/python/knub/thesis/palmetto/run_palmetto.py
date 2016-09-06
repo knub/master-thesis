@@ -5,22 +5,28 @@ import subprocess
 import os
 
 
-def parse_iteration(s):
-    res = re.search("\\.(\\d\\d\\d)\\.", s)
-    if not res:
-        print "WARN: Could not parse iteration"
-        return 0
-    iteration = int(res.group(1))
-    return iteration
+def parse_params(s):
+    dirname = os.path.basename(os.path.dirname(s))
+    basename = os.path.basename(s)
 
-
-def parse_lambda(s):
-    res = re.search("lambda-(0-\\d+)", s)
-    if res:
-        _lambda = float(res.group(1).replace("-", "."))
-        return _lambda
-    else:
-        return None
+    name_parts_dir = dirname.split(".")
+    name_parts_file = basename.split(".")
+    params = []
+    for part in name_parts_dir + name_parts_file:
+        split = part.split("-")
+        if len(split) == 2:
+            try:
+                params.append(split[1])
+            except ValueError:
+                pass
+        elif len(split) == 3:
+            try:
+                v = float(".".join(split[-2:]))
+                params.append(v)
+            except ValueError:
+                pass
+    params = [str(p) for p in params]
+    return "\t".join(params)
 
 
 def parse_topic_coherence(stdout):
@@ -79,13 +85,12 @@ def main():
     args = parser.parse_args()
 
     for topic_file in args.topic_files:
-        iteration = parse_iteration(topic_file)
-        _lambda = parse_lambda(topic_file)
+        params_str = parse_params(topic_file)
         topic_coherences = calculate_topic_coherences(topic_file)
-        if _lambda:
-            print "%s\t%d\t%.5f\t%.3f\t%.3f" % (topic_file, iteration, _lambda, np.mean(topic_coherences), np.std(topic_coherences))
+        if params_str:
+            print "%s\t%s\t%.3f\t%.3f" % (topic_file, params_str, np.mean(topic_coherences), np.std(topic_coherences))
         else:
-            print "%s\t%d\t%.3f\t%.3f" % (topic_file, iteration, np.mean(topic_coherences), np.std(topic_coherences))
+            print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.std(topic_coherences))
 
 
 if __name__ == "__main__":
