@@ -16,8 +16,8 @@ def tsne_with_init_pca(embeddings, n=2):
     return tsne.fit_transform(embeddings)
 
 
-SKIP_GRAM_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/word-embeddings/embedding.model.skip-gram"
-WORD2VEC_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/word-embeddings/GoogleNews-vectors-negative300.bin"
+SKIP_GRAM_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/embedding-models/dim-200.skip-gram.embedding"
+WORD2VEC_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/embedding-models/google.embedding"
 
 def load_embedding_model(model):
     return gensim.models.Word2Vec.load_word2vec_format(model, binary=True)
