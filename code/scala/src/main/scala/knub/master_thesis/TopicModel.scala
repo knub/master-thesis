@@ -1,7 +1,5 @@
 package knub.master_thesis
 
-import java.util
-
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{Instance, InstanceList}
 

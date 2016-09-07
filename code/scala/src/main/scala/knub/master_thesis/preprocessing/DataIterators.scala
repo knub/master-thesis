@@ -13,18 +13,18 @@ import scala.util.matching.Regex
 
 object DataIterators {
 
-    def getIteratorForDataFolderName(dataFolderName: String): java.util.Iterator[Instance] = {
+    def getIteratorForDataFolderName(dataFolderName: String): (java.util.Iterator[Instance], String) = {
         if (dataFolderName.contains("plain-text")) {
             println("Detected Wikipedia")
-            wikipedia(dataFolderName)
+            (wikipedia(dataFolderName), "../resources/stopwords.txt")
         } else if (dataFolderName.contains("nips")) {
-            nips(dataFolderName)
+            (nips(dataFolderName), "../resources/stopwords.txt")
         } else if (dataFolderName.contains("20news-bydate-train-with-classes/sentences.txt")) {
             println("Detected 20 news sentences corpus")
-            twentyNewsSentences(dataFolderName)
+            (twentyNewsSentences(dataFolderName), "../resources/stopwords.20news.txt")
         } else if (dataFolderName.contains("20newsgroups")) {
             println("Detected 20 news corpus")
-            twentyNews(dataFolderName)
+            (twentyNews(dataFolderName), "../resources/stopwords.20news.txt")
         } else {
             throw new Exception("No data iterator found for given data folder name.")
         }

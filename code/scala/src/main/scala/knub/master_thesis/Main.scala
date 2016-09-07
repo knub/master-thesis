@@ -158,7 +158,7 @@ object Main {
     }
 
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
-        val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val (instancesIterator, stopWordsFileName) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val tp = new TopicModel(args, alpha, beta, instancesIterator)
         val res = tp.run(args.stopWordsFileName)
         res.save(args.modelFileName)
@@ -234,7 +234,7 @@ object Main {
 
 
     def writeArticlesTextFile(args: Args): Unit = {
-        val iterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val (iterator, _) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val converter = new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}"))
 
 
@@ -392,7 +392,7 @@ object Main {
     }
 
     def run20NewsTest(args: Args): Unit = {
-        val instancesIterator = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
+        val (instancesIterator, _) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val res = loadExistingModel(args.modelFileName)
 
         val pw = args.getPrintWriterFor("." + new File(args.dataFolderName).getName + ".predictions.lda")
