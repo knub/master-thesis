@@ -11,6 +11,7 @@ import cc.mallet.types.TokenSequence
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
 import knub.master_thesis.welda.{GaussianWELDA, SimpleSimBasedReplacementWELDA}
+import org.apache.commons.io.FileUtils
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
@@ -102,12 +103,17 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
+                val startTime = System.currentTimeMillis()
                 val res = trainAndSaveNewModel(args, args.alpha, args.beta)
+                val endTime = System.currentTimeMillis()
+                val duration = (endTime - startTime) / 1000
+                println(s"Learning took $duration s")
                 println("Write vocabulary")
                 writeVocabulary(res, args)
                 println("Top words")
                 writeTopWordsToTextFile(res, args)
                 println(res.displayTopWords(10))
+                FileUtils.writeStringToFile(new File(args.modelFileName + ".runtime"), duration.toString)
             case "topic-model-load" =>
                 val res = loadExistingModel(args.modelFileName)
                 analyzeResult(res, args)
