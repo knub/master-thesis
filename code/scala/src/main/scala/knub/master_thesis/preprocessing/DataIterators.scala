@@ -84,13 +84,15 @@ class TwentyNewsIterator(dataFolderName: String) {
 
     def iterator(): java.util.Iterator[Instance] = {
         val articlesPath = Paths.get(dataFolderName + "/articles.txt").toFile
+        val articlesClassesPath = Paths.get(dataFolderName + "/articles.class.txt").toFile
+
         val articles = scala.io.Source.fromFile(articlesPath, "UTF-8").getLines().toBuffer
-//        val articlesShuffled = scala.util.Random.shuffle(articles)
-        articles.map { text =>
-            new Instance(text, null, null, null)
+        val classes = scala.io.Source.fromFile(articlesClassesPath, "UTF-8").getLines().toBuffer
+        assert(articles.length == classes.length)
+        articles.zip(classes).map { case (text, clazz) =>
+            new Instance(text, clazz, null, null)
         }.iterator.asJava
     }
-
 }
 class WikiPlainTextIterator(dataFolderName: String) extends java.util.Iterator[Instance] {
 
