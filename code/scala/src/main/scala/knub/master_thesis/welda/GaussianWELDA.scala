@@ -32,7 +32,7 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
     assert(LAMBDA >= 0.0, "lambda must be at least zero")
     assert(LAMBDA <= 1.0, "lambda must be at most one")
 
-    var word2Vec: WordVectors = _
+//    var word2Vec: WordVectors = _
     var pcaVectors: mutable.Map[String, Array[Double]] = _
 //    var numDimensions: Int = _
 
@@ -45,7 +45,7 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
 
     override def init(): Unit = {
         super.init()
-        word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.modelFileName}.$embeddingName.embedding.txt"))
+        val word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.embeddingFileName}"))
         println(s"Loaded vectors have ${word2Vec.getWordVector("house").length} dimensions")
         pcaVectors = mutable.Map()
 
