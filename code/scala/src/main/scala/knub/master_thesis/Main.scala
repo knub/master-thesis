@@ -166,7 +166,8 @@ object Main {
     def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
         val (instancesIterator, stopWordsFileName) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val tp = new TopicModel(args, alpha, beta, instancesIterator)
-        val res = tp.run(args.stopWordsFileName)
+        println(s"Using stopword list from $stopWordsFileName")
+        val res = tp.run(stopWordsFileName)
         res.save(args.modelFileName)
         res
     }
