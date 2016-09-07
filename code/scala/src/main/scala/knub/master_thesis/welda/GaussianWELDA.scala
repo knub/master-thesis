@@ -45,7 +45,7 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
 
     override def init(): Unit = {
         super.init()
-        val word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.embeddingFileName}"))
+        val word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.modelFileName.replace("/model", "/")}$embeddingName.restricted.vocab.embedding.txt"))
         println(s"Loaded vectors have ${word2Vec.getWordVector("house").length} dimensions")
         pcaVectors = mutable.Map()
 
