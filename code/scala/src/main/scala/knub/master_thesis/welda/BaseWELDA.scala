@@ -44,7 +44,7 @@ abstract class BaseWELDA(val p: Args) {
         betaSum = info.betaSum
         alphaSum = alpha.sum
 
-        vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.alphabet").getLines().size
+        vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.vocab").getLines().size
         println(s"Topic model loaded, vocabularySize = $vocabularySize")
 
         docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
@@ -80,12 +80,13 @@ abstract class BaseWELDA(val p: Args) {
     }
 
     private def readWord2IdVocabulary(modelFileName: String): mutable.Map[String, Int] = {
-        val brAlphabet = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted.alphabet"))
+        val brAlphabet = new BufferedReader(new FileReader(modelFileName + "." + embeddingName + ".restricted.vocab"))
         val result = mutable.Map[String, Int]()
         var line = brAlphabet.readLine()
+        var i = 0
         while (line != null) {
-            val split = line.split("#")
-            result.put(split(0), split(1).toInt)
+            result.put(line, i)
+            i += 1
             line = brAlphabet.readLine()
         }
         brAlphabet.close()
