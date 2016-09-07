@@ -1,4 +1,4 @@
-model	iteration	mean_coherence	stddev_coherence
+model	iteration	TC	TC_std
 topic.20news.50-1500/model.lflda	50	0.437	0.090
 topic.20news.50-1500/model.lflda	100	0.439	0.091
 topic.20news.50-1500/model.lflda	150	0.445	0.086
