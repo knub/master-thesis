@@ -21,14 +21,15 @@ if __name__ == "__main__":
     else:
         embedding_name = os.path.basename(args.embedding_model)
         print "Topic model is set, using only words from " + args.topic_model
-        with open(args.topic_model + "." + embedding_name + ".embedding.txt", "w", encoding="utf-8") as output:
-            with open(args.topic_model + "." + embedding_name + ".restricted.alphabet", "r", encoding="utf-8") as f:
+        with open(args.topic_model.replace("/model", "/") + embedding_name + ".restricted.vocab.embedding.txt", "w", encoding="utf-8") as output:
+            with open(args.topic_model + "." + embedding_name + ".restricted.vocab", "r", encoding="utf-8") as f:
                 for line in f:
-                    word = line.rstrip().split("#")[0]
+                    word = line.rstrip()
                     try:
                         output.write(word + " ")
                         output.write(" ".join(map(str, model[word])))
                     except KeyError:
+                        print word + " not in embedding model"
                         pass
                     output.write("\n")
 
