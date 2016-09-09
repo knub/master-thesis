@@ -111,16 +111,17 @@ object Main {
                         println(folder)
                         new File(folder).mkdir()
                         val startTime = System.currentTimeMillis()
-                        val res = trainAndSaveNewModel(args.copy(alpha = alpha, beta = beta, modelFileName = s"$folder/model"))
+                        val newArgs = args.copy(alpha = alpha, beta = beta, modelFileName = s"$folder/model")
+                        val res = trainAndSaveNewModel(newArgs)
                         val endTime = System.currentTimeMillis()
                         val duration = (endTime - startTime) / 1000
                         println(s"Learning took $duration s")
                         println("Write vocabulary")
-                        writeVocabulary(res, args)
+                        writeVocabulary(res, newArgs)
                         println("Top words")
-                        writeTopWordsToTextFile(res, args)
+                        writeTopWordsToTextFile(res, newArgs)
                         println(res.displayTopWords(10))
-                        FileUtils.writeStringToFile(new File(args.modelFileName + ".runtime"), duration.toString)
+                        FileUtils.writeStringToFile(new File(newArgs.modelFileName + ".runtime"), duration.toString)
                     }
                 }
             case "topic-model-load" =>
