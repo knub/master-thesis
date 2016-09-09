@@ -103,17 +103,26 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
-                val startTime = System.currentTimeMillis()
-                val res = trainAndSaveNewModel(args, args.alpha, args.beta)
-                val endTime = System.currentTimeMillis()
-                val duration = (endTime - startTime) / 1000
-                println(s"Learning took $duration s")
-                println("Write vocabulary")
-                writeVocabulary(res, args)
-                println("Top words")
-                writeTopWordsToTextFile(res, args)
-                println(res.displayTopWords(10))
-                FileUtils.writeStringToFile(new File(args.modelFileName + ".runtime"), duration.toString)
+                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+                        val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500" +
+                            s".alpha-${alpha.toString.replace('.', '-')}" +
+                            s".beta-${beta.toString.replace('.', '-')}"
+                        println(folder)
+                        new File(folder).mkdir()
+                        val startTime = System.currentTimeMillis()
+                        val res = trainAndSaveNewModel(args.copy(alpha = alpha, beta = beta, modelFileName = s"$folder/model"))
+                        val endTime = System.currentTimeMillis()
+                        val duration = (endTime - startTime) / 1000
+                        println(s"Learning took $duration s")
+                        println("Write vocabulary")
+                        writeVocabulary(res, args)
+                        println("Top words")
+                        writeTopWordsToTextFile(res, args)
+                        println(res.displayTopWords(10))
+                        FileUtils.writeStringToFile(new File(args.modelFileName + ".runtime"), duration.toString)
+                    }
+                }
             case "topic-model-load" =>
                 val res = loadExistingModel(args.modelFileName)
                 analyzeResult(res, args)
@@ -163,9 +172,9 @@ object Main {
         }
     }
 
-    def trainAndSaveNewModel(args: Args, alpha: Double, beta: Double): TopicModelResult = {
+    def trainAndSaveNewModel(args: Args): TopicModelResult = {
         val (instancesIterator, stopWordsFileName) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
-        val tp = new TopicModel(args, alpha, beta, instancesIterator)
+        val tp = new TopicModel(args, args.alpha, args.beta, instancesIterator)
         println(s"Using stopword list from $stopWordsFileName")
         val res = tp.run(stopWordsFileName)
         res.save(args.modelFileName)
