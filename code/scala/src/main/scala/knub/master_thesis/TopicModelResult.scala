@@ -47,7 +47,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
                     result(doc)(1 + topic) *= normalizer
                 }
             }
-            result(doc)(0) = data.get(doc).instance.getTarget.asInstanceOf[Double]
+            result(doc)(0) = data.get(doc).instance.getTarget.asInstanceOf[Integer].toDouble
         }
         result
     }
