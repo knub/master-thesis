@@ -103,27 +103,31 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
-//                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
-//                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
-                for (alpha <- List(0.02)) {
-                    for (beta <- List(0.02)) {
-                        val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.base" +
+                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+//                for (alpha <- List(0.02)) {
+//                    for (beta <- List(0.02)) {
+                        val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500" +
                             s".alpha-${alpha.toString.replace('.', '-')}" +
                             s".beta-${beta.toString.replace('.', '-')}"
                         println(folder)
                         new File(folder).mkdir()
-                        val startTime = System.currentTimeMillis()
-                        val newArgs = args.copy(alpha = alpha, beta = beta, modelFileName = s"$folder/model")
-                        val res = trainAndSaveNewModel(newArgs)
-                        val endTime = System.currentTimeMillis()
-                        val duration = (endTime - startTime) / 1000
-                        println(s"Learning took $duration s")
-                        println("Write vocabulary")
-                        writeVocabulary(res, newArgs)
-                        println("Top words")
-                        writeTopWordsToTextFile(res, newArgs)
-                        println(res.displayTopWords(10))
-                        FileUtils.writeStringToFile(new File(newArgs.modelFileName + ".runtime"), duration.toString)
+                        if (!new File(s"$folder/model.ssv").exists()) {
+                            val startTime = System.currentTimeMillis()
+                            val newArgs = args.copy(alpha = alpha, beta = beta, modelFileName = s"$folder/model")
+                            val res = trainAndSaveNewModel(newArgs)
+                            val endTime = System.currentTimeMillis()
+                            val duration = (endTime - startTime) / 1000
+                            println(s"Learning took $duration s")
+                            println("Write vocabulary")
+                            writeVocabulary(res, newArgs)
+                            println("Top words")
+                            writeTopWordsToTextFile(res, newArgs)
+                            println(res.displayTopWords(10))
+                            FileUtils.writeStringToFile(new File(newArgs.modelFileName + ".runtime"), duration.toString)
+                        } else {
+                            println(s"$folder results already exist")
+                        }
                     }
                 }
             case "topic-model-load" =>
