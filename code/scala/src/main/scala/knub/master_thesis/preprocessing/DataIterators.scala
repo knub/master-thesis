@@ -61,12 +61,13 @@ object DataIterators {
             new File(dataFolderName + "/" + f)
         }
 
-        files.flatMap { folder =>
+        val instances = files.flatMap { folder =>
             folder.list().map { document =>
                 val content = FileUtils.readFileToString(new File(s"$folder/$document"))
                 new Instance(content, folder, document, null)
             }
-        }.iterator.asJava
+        }
+        scala.util.Random.shuffle(instances.toList).iterator.asJava
     }
 
     def wikipedia(dataFolderName: String) = {
