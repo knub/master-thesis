@@ -114,7 +114,7 @@ class TwentyNewsIterator(dataFolderName: String) {
         val classes = scala.io.Source.fromFile(articlesClassesPath, "UTF-8").getLines().toBuffer
         assert(articles.length == classes.length)
         articles.zip(classes).map { case (text, clazz) =>
-            new Instance(text, clazz, null, null)
+            new Instance(text, clazz.toInt, null, null)
         }.iterator.asJava
     }
 }
