@@ -113,8 +113,14 @@ class TwentyNewsIterator(dataFolderName: String) {
         val articles = scala.io.Source.fromFile(articlesPath, "UTF-8").getLines().toBuffer
         val classes = scala.io.Source.fromFile(articlesClassesPath, "UTF-8").getLines().toBuffer
         assert(articles.length == classes.length)
-        articles.zip(classes).map { case (text, clazz) =>
-            new Instance(text, clazz.toInt, null, null)
+        var i = 0
+        articles.zip(classes).map { case (articlesLine, clazz) =>
+            val split = articlesLine.split('\t')
+            assert(split.length == 2, s"split length should be 2 but is ${split.length} at line $i")
+            i += 1
+            val fileName = split(0)
+            val text = split(1)
+            new Instance(text, clazz.toInt, fileName, articlesLine)
         }.iterator.asJava
     }
 }
