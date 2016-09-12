@@ -5,6 +5,7 @@ import java.nio.file.{Files, Path, Paths}
 import java.util
 
 import cc.mallet.types.Instance
+import knub.master_thesis.util.CorpusReader
 import org.apache.commons.io.FileUtils
 
 import scala.collection.JavaConverters._
@@ -13,10 +14,14 @@ import scala.util.matching.Regex
 
 object DataIterators {
 
+
     def getIteratorForDataFolderName(dataFolderName: String): (java.util.Iterator[Instance], String) = {
         if (dataFolderName.contains("plain-text")) {
             println("Detected Wikipedia")
             (wikipedia(dataFolderName), "../resources/stopwords.txt")
+        } else if (dataFolderName.contains(".restricted")) {
+            println("Detected restricted corpus corpus")
+            (restrictedCorpus(dataFolderName), "../resources/stopwords.txt")
         } else if (dataFolderName.contains("nips")) {
             (nips(dataFolderName), "../resources/stopwords.txt")
         } else if (dataFolderName.contains("20news-bydate-train-with-classes/sentences.txt")) {
@@ -28,6 +33,24 @@ object DataIterators {
         } else {
             throw new Exception("No data iterator found for given data folder name.")
         }
+    }
+
+    def restrictedCorpus(dataFolderName: String): java.util.Iterator[cc.mallet.types.Instance] = {
+        val vocabulary = Source.fromFile(dataFolderName + ".vocab").getLines.toArray
+        val classes = Source.fromFile(dataFolderName + ".classes").getLines.toList
+        val corpus = CorpusReader.readCorpus(dataFolderName)
+
+        val documents = corpus.documents.asScala.map { doc =>
+            val sb = new StringBuilder
+            doc.iterator().asScala.foreach { i =>
+                sb.append(s" ${vocabulary(i.value)}")
+            }
+            sb.toString()
+        }
+        assert(documents.length == classes.length)
+        documents.zip(classes).map { case (document, clazz) =>
+            new Instance(document, clazz.toInt, null, null)
+        }.iterator.asJava
     }
 
     def nips(dataFolderName: String): java.util.Iterator[Instance] = {
