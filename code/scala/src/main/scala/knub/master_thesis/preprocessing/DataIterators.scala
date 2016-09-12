@@ -24,7 +24,7 @@ object DataIterators {
             (twentyNewsSentences(dataFolderName), "../resources/stopwords.20news.txt")
         } else if (dataFolderName.contains("20newsgroups")) {
             println("Detected 20 news corpus")
-            (twentyNews(dataFolderName), "../resources/stopwords.20news.txt")
+            (twentyNews(dataFolderName), "../resources/stopwords.txt")
         } else {
             throw new Exception("No data iterator found for given data folder name.")
         }
