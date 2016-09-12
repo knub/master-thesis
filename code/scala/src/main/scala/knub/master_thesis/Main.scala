@@ -103,8 +103,10 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
-                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
-                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+//                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+//                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+                for (alpha <- List(0.02)) {
+                    for (beta <- List(0.02)) {
                         val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500" +
                             s".alpha-${alpha.toString.replace('.', '-')}" +
                             s".beta-${beta.toString.replace('.', '-')}"

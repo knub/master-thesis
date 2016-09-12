@@ -20,7 +20,7 @@ object DataIterators {
             println("Detected Wikipedia")
             (wikipedia(dataFolderName), "../resources/stopwords.txt")
         } else if (dataFolderName.contains(".restricted")) {
-            println("Detected restricted corpus corpus")
+            println("Detected restricted corpus")
             (restrictedCorpus(dataFolderName), "../resources/stopwords.txt")
         } else if (dataFolderName.contains("nips")) {
             (nips(dataFolderName), "../resources/stopwords.txt")
