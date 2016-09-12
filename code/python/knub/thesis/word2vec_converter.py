@@ -25,6 +25,12 @@ if __name__ == "__main__":
             with open(args.topic_model + "." + embedding_name + ".restricted.vocab", "r", encoding="utf-8") as f:
                 for line in f:
                     word = line.rstrip()
+                    if word in model:
+                        pass
+                    elif word.capitalize() in model:
+                        word = word.capitalize()
+                    elif word.upper() in model:
+                        word = word.upper()
                     try:
                         output.write(word + " ")
                         output.write(" ".join(map(str, model[word])))
