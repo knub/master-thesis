@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 import numpy as np
 import re
 import subprocess
@@ -83,6 +84,10 @@ def main():
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
     parser.add_argument("topic_files", type=str, nargs="+")
     args = parser.parse_args()
+
+    now = datetime.now()
+
+    print now.strftime("%a, %Y-%m-%d %H:%M")
 
     for topic_file in args.topic_files:
         params_str = parse_params(topic_file)
