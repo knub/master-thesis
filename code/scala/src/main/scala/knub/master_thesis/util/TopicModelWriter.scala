@@ -74,7 +74,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
     }
 
     def writeDocTopicProbs(name: String) {
-        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.theta"))
+        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.document-topics"))
         for (i <- 0 until params.numDocuments) {
             for (j <- 0 until params.numTopics) {
                 val pro = (model.docTopicCount(i)(j) + params.alpha) / (model.docWordCount(i) + model.alphaSum)
@@ -88,9 +88,10 @@ class TopicModelWriter(private val model: BaseWELDA) {
         writer.close()
     }
 
-    def write(name: String) {
+    def write(it: Int) {
+        val name = f"iteration-$it%03d"
         writeTopTopicalWords(name)
-        if (name == model.p.numIterations.toString) {
+        if (it == model.p.numIterations) {
             writeDocTopicProbs(name)
             writeTopicAssignments(name)
             writeTopicWordPros(name)

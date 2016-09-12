@@ -148,27 +148,35 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-//                val lambdas = List(0.5, 0.8)
-//                val distanceFunc = List("cos", "l2")
-//                val embeddings = List(
-//                    "/data/wikipedia/2016-06-21/embedding-models/skip-gram.model",
-//                    "/data/wikipedia/2016-06-21/embedding-models/google.model"
-//                )
-//                val cases = for (lambda <- lambdas; distanceFunc <- distanceFunc; embedding <- embeddings)
-//                    yield (lambda, distanceFunc, embedding)
-//
-//                val parCases = cases.par
+                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
+                val distanceFunc = List("cos")
+                val embeddings = List(
+                    "/san2/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
+                    "/san2/data/wikipedia/2016-06-21/embedding-models/google.embedding"
+                )
+                val cases = for (embedding <- embeddings; lambda <- lambdas; distanceFunc <- distanceFunc)
+                    yield (lambda, distanceFunc, embedding)
+
+                cases.foreach(println)
+
+                val parCases = cases//.par
 //                parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(4))
-//                parCases.foreach { case (lambda, distanceFunction, embedding) =>
-//                    println(s"Starting lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
-//                    val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, gaussianWELDADistanceFunction = distanceFunction, embeddingFileName = embedding))
-//                    weldaGaussian.init()
-//                    weldaGaussian.inference()
-//                    println(s"Finshed lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
-//                }
-                val weldaGaussian = new GaussianWELDA(args.copy(gaussianWELDADistanceFunction = "cos"))
-                weldaGaussian.init()
-                weldaGaussian.inference()
+                parCases.foreach { case (lambda, distanceFunction, embedding) =>
+                    println(s"Starting lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+                    try {
+                        val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, gaussianWELDADistanceFunction = distanceFunction, embeddingFileName = embedding))
+                        weldaGaussian.init()
+                        weldaGaussian.inference()
+                        println(s"Finshed lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+                    } catch {
+                        case e: Exception =>
+                            println(s"Failed lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+                            println(e)
+                    }
+                }
+//                val weldaGaussian = new GaussianWELDA(args.copy(gaussianWELDADistanceFunction = "cos"))
+//                weldaGaussian.init()
+//                weldaGaussian.inference()
 
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
