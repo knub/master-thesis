@@ -42,8 +42,13 @@ def main():
     articles_file = codecs.open(args.twentynews_folder + "/articles.txt", "w", encoding="utf-8")
     articles_class_file = codecs.open(args.twentynews_folder + "/articles.class.txt", "w", encoding="utf-8")
 
+    i = 0
     for filename, class_index in filenames:
+        if i % 1000 == 0:
+            print i
+        i += 1
         basename = os.path.basename(filename)
+        current_article = ""
         with codecs.open(filename, "r", encoding="iso-8859-1") as f:
             content = list(f.readlines())
             body = list(dropwhile(lambda x: x != "\n", content))
@@ -56,11 +61,13 @@ def main():
                 if words:
                     sentences_file.write(str(basename) + "\t" + str(class_index) + "\t")
                     words = " ".join(words)
-                    articles_file.write(words)
+                    current_article += words + " "
+                    # articles_file.write(words)
                     sentences_file.write(words)
                     sentences_file.write("\n")
-        articles_class_file.write(str(class_index) + "\n")
-        articles_file.write("\n")
+        if current_article:
+            articles_file.write(filename + "\t" + current_article + "\n")
+            articles_class_file.write(str(class_index) + "\n")
 
     sentences_file.close()
     articles_file.close()
