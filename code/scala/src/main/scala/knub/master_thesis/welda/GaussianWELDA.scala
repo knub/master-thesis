@@ -9,6 +9,7 @@ import breeze.stats.distributions.{MultivariateGaussian, RandBasis}
 import de.uni_potsdam.hpi.coheel.util.Timer
 import knub.master_thesis.Args
 import knub.master_thesis.util.Sampler
+import org.apache.commons.lang3.text.WordUtils
 import org.apache.commons.math3.random.MersenneTwister
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
@@ -18,6 +19,10 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 class GaussianWELDA(p: Args) extends BaseWELDA(p) {
+
+    println("Removing LSH cache")
+    new File(".").listFiles().filter(_.getName.contains("be.tarsos")).foreach { f => println(f); f.delete() }
+
     val PCA_DIMENSIONS = 10
     val GAUSSIAN_OVER_TOP_N = 20
     override val TOPIC_OUTPUT_EVERY = 1
@@ -45,14 +50,26 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
 
     override def init(): Unit = {
         super.init()
-        val word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.modelFileName.replace("/model", "/")}$embeddingName.restricted.vocab.embedding.txt"))
+        val word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.modelFileName.replaceAll("/model$", "/")}$embeddingName.restricted.vocab.embedding.txt"))
         println(s"Loaded vectors have ${word2Vec.getWordVector("house").length} dimensions")
         pcaVectors = mutable.Map()
 
         val embeddingsList = new mutable.ArrayBuffer[Array[Double]](word2IdVocabulary.size)
         val vocabulary: Array[String] = word2IdVocabulary.keys.toArray
         vocabulary.foreach { word =>
-            val embeddingDimensions = word2Vec.getWordVector(word)
+            val actualWord =
+                if (word2Vec.hasWord(word))
+                    word
+                else if (word2Vec.hasWord(WordUtils.capitalize(word)))
+                    WordUtils.capitalize(word)
+                else if (word2Vec.hasWord(word.toUpperCase))
+                    word.toUpperCase()
+                else
+                    throw new RuntimeException(word)
+            val embeddingDimensions = word2Vec.getWordVector(actualWord)
+            if (embeddingDimensions == null) {
+                throw new RuntimeException(word)
+            }
             embeddingsList += embeddingDimensions
         }
         val rows = embeddingsList.toArray

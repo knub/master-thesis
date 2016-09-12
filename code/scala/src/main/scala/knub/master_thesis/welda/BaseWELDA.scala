@@ -65,7 +65,6 @@ abstract class BaseWELDA(val p: Args) {
         val tm = ParallelTopicModel.read(new File(p.modelFileName))
         val alph = tm.getAlphabet
         val vocabSize = alph.size()
-        //        val vocabularySize = determineVocabularySize(tm, getVectorWords(pathToVectorWords))
         val betaSum = vocabSize * beta
         new TopicModelInfo (tm.alpha, tm.beta, betaSum)
     }
@@ -144,7 +143,7 @@ abstract class BaseWELDA(val p: Args) {
         for (iter <- 0 until p.numIterations) {
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
                 System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
-                writer.write(f"$iter%03d")
+                writer.write(iter)
             }
             if (iter % TOPIC_OUTPUT_EVERY == 0) {
                 println(s"\tWELDA sampling iteration ${iter + 1} at ${new Date}")
@@ -153,7 +152,7 @@ abstract class BaseWELDA(val p: Args) {
         }
         writer.writeParameters()
         println("Sampling completed!")
-        writer.write(p.numIterations.toString)
+        writer.write(p.numIterations)
     }
 
     def sampleSingleIteration(): Unit
