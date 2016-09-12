@@ -10,20 +10,50 @@ import scala.io.Source
 
 case class WordConcept(word: String, concept: String)
 
-
 class TopicModelResult(val model: ParallelTopicModel) {
     // for using bags
     implicit val m1 = mutable.Bag.configuration.compact[Int]
 
     def save(fileName: String): Unit = {
         model.write(new File(fileName))
-        val documentTopics = model.getDocumentTopics(true, true)
+        val documentTopics = getDocumentTopics(true, true)
         val pw = new PrintWriter(fileName + ".document-topics")
         for (topicDistribution <- documentTopics) {
             pw.println(topicDistribution.mkString(" "))
         }
         pw.close()
     }
+
+    def getDocumentTopics(normalized: Boolean, smoothed: Boolean): Array[Array[Double]] = {
+        val data = model.getData
+        val result = Array.ofDim[Double](data.size, 1 + model.numTopics)
+        for (doc <- 0 until data.size) {
+            val topics = data.get(doc).topicSequence.getFeatures
+            for (position <- 0 until topics.length) {
+                result(doc)(1 + topics(position)) += 1
+            }
+            if (smoothed) {
+                for (topic <- 0 until model.numTopics) {
+                    result(doc)(1 + topic) += model.alpha(topic)
+                }
+            }
+            if (normalized) {
+                var sum = 0.0
+                for (topic <- 0 until model.numTopics) {
+                    sum += result(doc)(1 + topic)
+                }
+                val normalizer = 1.0 / sum
+                for (topic <- 0 until model.numTopics) {
+                    result(doc)(1 + topic) *= normalizer
+                }
+            }
+            result(doc)(0) = data.get(doc).instance.getTarget.asInstanceOf[Double]
+        }
+        result
+    }
+
+
+
 
     // The data alphabet maps word IDs to strings
     val dataAlphabet = model.alphabet
