@@ -52,6 +52,8 @@ class TopicModelResult(val model: ParallelTopicModel) {
             } catch {
                 case e: ClassCastException =>
                     result(doc)(0) = -1
+                case e: NullPointerException =>
+                    result(doc)(0) = -1
             }
         }
         result

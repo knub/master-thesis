@@ -103,10 +103,11 @@ object Main {
     def run(args: Args): Unit = {
         args.mode match {
             case "topic-model-create" =>
-                /*
-                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
-                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
-                        val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500" +
+                for (alpha <- List(0.02)) {
+                    for (beta <- List(0.02)) {
+//                for (alpha <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+//                    for (beta <- List(0.002, 0.005, 0.01, 0.02, 0.05, 0.1)) {
+                        val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500" +
                             s".alpha-${alpha.toString.replace('.', '-')}" +
                             s".beta-${beta.toString.replace('.', '-')}"
                         println(folder)
@@ -129,19 +130,18 @@ object Main {
                         }
                     }
                 }
-                */
 
-                val startTime = System.currentTimeMillis()
-                val res = trainAndSaveNewModel(args)
-                val endTime = System.currentTimeMillis()
-                val duration = (endTime - startTime) / 1000
-                println(s"Learning took $duration s")
-                println("Write vocabulary")
-                writeVocabulary(res, args)
-                println("Top words")
-                writeTopWordsToTextFile(res, args)
-                println(res.displayTopWords(10))
-                FileUtils.writeStringToFile(new File(args.modelFileName + ".runtime"), duration.toString)
+//                val startTime = System.currentTimeMillis()
+//                val res = trainAndSaveNewModel(args)
+//                val endTime = System.currentTimeMillis()
+//                val duration = (endTime - startTime) / 1000
+//                println(s"Learning took $duration s")
+//                println("Write vocabulary")
+//                writeVocabulary(res, args)
+//                println("Top words")
+//                writeTopWordsToTextFile(res, args)
+//                println(res.displayTopWords(10))
+//                FileUtils.writeStringToFile(new File(args.modelFileName + ".runtime"), duration.toString)
             case "topic-model-load" =>
                 val res = loadExistingModel(args.modelFileName)
                 analyzeResult(res, args)
