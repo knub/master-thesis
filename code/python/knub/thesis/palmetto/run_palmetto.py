@@ -3,31 +3,8 @@ from datetime import datetime
 import numpy as np
 import re
 import subprocess
-import os
 
-
-def parse_params(s):
-    dirname = os.path.basename(os.path.dirname(s))
-    basename = os.path.basename(s)
-
-    name_parts_dir = dirname.split(".")
-    name_parts_file = basename.split(".")
-    params = []
-    for part in name_parts_dir + name_parts_file:
-        split = part.split("-")
-        if len(split) == 2:
-            try:
-                params.append(split[1])
-            except ValueError:
-                pass
-        elif len(split) == 3:
-            try:
-                v = float(".".join(split[-2:]))
-                params.append(v)
-            except ValueError:
-                pass
-    params = [str(p) for p in params]
-    return "\t".join(params)
+from knub.thesis.util import *
 
 
 def parse_topic_coherence(stdout):
@@ -107,7 +84,7 @@ def main():
     print now.strftime("%a, %Y-%m-%d %H:%M")
 
     for topic_file in args.topic_files:
-        params_str = parse_params(topic_file)
+        params_str = "\t".join(parse_params(topic_file).values())
         topic_coherences = calculate_topic_coherences(topic_file)
         if params_str:
             print "%s\t%s\t%.3f\t%.3f" % (topic_file, params_str, np.mean(topic_coherences), np.std(topic_coherences))
