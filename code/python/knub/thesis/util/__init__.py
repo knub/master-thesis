@@ -2,7 +2,30 @@ import gensim
 import pandas as pnd
 from sklearn.decomposition import RandomizedPCA
 from sklearn.manifold import TSNE
+from collections import OrderedDict
 import os
+
+def parse_params(s):
+    dirname = os.path.basename(os.path.dirname(s))
+    basename = os.path.basename(s)
+
+    name_parts_dir = dirname.split(".")
+    name_parts_file = basename.split(".")
+    params = OrderedDict()
+    for part in name_parts_dir + name_parts_file:
+        split = part.split("-")
+        if len(split) == 2 and split[0] != "skip" and split[0] != "50":
+            try:
+                params[split[0]] = split[1]
+            except ValueError:
+                pass
+        elif len(split) == 3:
+            try:
+                v = float(".".join(split[-2:]))
+                params[split[0]] = str(v)
+            except ValueError:
+                pass
+    return params
 
 
 def pca(embeddings, n=2):
