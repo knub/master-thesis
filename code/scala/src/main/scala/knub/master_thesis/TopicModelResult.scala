@@ -47,7 +47,12 @@ class TopicModelResult(val model: ParallelTopicModel) {
                     result(doc)(1 + topic) *= normalizer
                 }
             }
-            result(doc)(0) = data.get(doc).instance.getTarget.asInstanceOf[Integer].toDouble
+            try {
+                result(doc)(0) = data.get(doc).instance.getTarget.asInstanceOf[Integer].toDouble
+            } catch {
+                case e: ClassCastException =>
+                    result(doc)(0) = -1
+            }
         }
         result
     }
@@ -151,6 +156,7 @@ class TopicModelResult(val model: ParallelTopicModel) {
 
     /**
       * Returns the set of the best words from all topics
+      *
       * @param numWords How many words for each topic
       * @return Set of the highest scoring words from all topics
       */

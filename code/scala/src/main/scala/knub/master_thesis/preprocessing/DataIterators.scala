@@ -63,8 +63,15 @@ object DataIterators {
 
         val instances = files.flatMap { folder =>
             folder.list().map { document =>
-                val content = FileUtils.readFileToString(new File(s"$folder/$document"))
-                new Instance(content, folder, document, null)
+                val origLines = FileUtils.readLines(new File(s"$folder/$document")).asScala.toList
+                val lines = origLines.dropWhile(_.length < 5)
+
+                val title = lines.head
+                val content = lines.dropWhile(!_.toLowerCase.contains("abstract")).drop(1)
+
+                val text = title + content.mkString("\n")
+//                val content = FileUtils.readFileToString(new File())
+                new Instance(text, folder.getName, folder + "/" + document, text)
             }
         }
         scala.util.Random.shuffle(instances.toList).iterator.asJava
