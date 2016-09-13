@@ -58,14 +58,31 @@ def create_palmetto_file(topic_file):
 
 def calculate_topic_coherences(f):
     palmetto_file = create_palmetto_file(f)
-    p = subprocess.Popen(
-        ["java",
-         "-jar",
-         "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar",
-         "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd",
-         "C_V",
-         palmetto_file],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    local_palmetto = "/home/knub/Repositories/Palmetto/target/Palmetto-jar-with-dependencies.jar"
+    remote_palmetto = "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar"
+    local_wikidata = "/home/knub/Repositories/Palmetto/wikipedia_bd"
+    remote_wikidata = "/data/wikipedia/2016-06-21/palmetto/wikipedia_bd"
+    if os.path.exists(local_palmetto):
+        p = subprocess.Popen(
+            ["java",
+             "-jar",
+             local_palmetto,
+             local_wikidata,
+             "C_V",
+             palmetto_file],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    elif os.path.exists(remote_palmetto):
+        p = subprocess.Popen(
+            ["java",
+             "-jar",
+             remote_palmetto,
+             remote_wikidata,
+             "C_V",
+             palmetto_file],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        raise Exception("Palmetto not found")
+
 
     stdout, stderr = p.communicate()
     os.remove(palmetto_file)
