@@ -36,21 +36,38 @@ object DataIterators {
     }
 
     def restrictedCorpus(dataFolderName: String): java.util.Iterator[cc.mallet.types.Instance] = {
-        val vocabulary = Source.fromFile(dataFolderName + ".vocab").getLines.toArray
-        val classes = Source.fromFile(dataFolderName + ".classes").getLines.toList
-        val corpus = CorpusReader.readCorpus(dataFolderName)
+        if (new File(dataFolderName + ".classes").exists()) {
+            val vocabulary = Source.fromFile(dataFolderName + ".vocab").getLines.toArray
+            val classes = Source.fromFile(dataFolderName + ".classes").getLines.toList
+            val corpus = CorpusReader.readCorpus(dataFolderName)
 
-        val documents = corpus.documents.asScala.map { doc =>
-            val sb = new StringBuilder
-            doc.iterator().asScala.foreach { i =>
-                sb.append(s" ${vocabulary(i.value)}")
+            val documents = corpus.documents.asScala.map { doc =>
+                val sb = new StringBuilder
+                doc.iterator().asScala.foreach { i =>
+                    sb.append(s" ${vocabulary(i.value)}")
+                }
+                sb.toString()
             }
-            sb.toString()
+            assert(documents.length == classes.length)
+            documents.zip(classes).map { case (document, clazz) =>
+                new Instance(document, clazz.toInt, null, null)
+            }.iterator.asJava
+        } else {
+            val vocabulary = Source.fromFile(dataFolderName + ".vocab").getLines.toArray
+            val corpus = CorpusReader.readCorpus(dataFolderName)
+
+            val documents = corpus.documents.asScala.map { doc =>
+                val sb = new StringBuilder
+                doc.iterator().asScala.foreach { i =>
+                    sb.append(s" ${vocabulary(i.value)}")
+                }
+                sb.toString()
+            }
+            documents.map { case document =>
+                new Instance(document, null, null, null)
+            }.iterator.asJava
+
         }
-        assert(documents.length == classes.length)
-        documents.zip(classes).map { case (document, clazz) =>
-            new Instance(document, clazz.toInt, null, null)
-        }.iterator.asJava
     }
 
     def nips(dataFolderName: String): java.util.Iterator[Instance] = {
