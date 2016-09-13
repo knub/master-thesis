@@ -2,31 +2,46 @@ import gensim
 import pandas as pnd
 from sklearn.decomposition import RandomizedPCA
 from sklearn.manifold import TSNE
+import os
+
 
 def pca(embeddings, n=2):
     pca = RandomizedPCA(n_components=n)
     return pca.fit_transform(embeddings)
 
+
 def tsne(embeddings, n=2):
     tsne = TSNE(n_components=n)
     return tsne.fit_transform(embeddings)
+
 
 def tsne_with_init_pca(embeddings, n=2):
     tsne = TSNE(n_components=n, init="pca")
     return tsne.fit_transform(embeddings)
 
 
+def find_files(folder, *filters):
+    l = os.listdir(folder)
+    l = [f for f in l if all([filter in f for filter in filters])]
+    l = [folder + "/" + f for f in l]
+    return l
+
+
 SKIP_GRAM_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/embedding-models/dim-200.skip-gram.embedding"
 WORD2VEC_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/embedding-models/google.embedding"
+
 
 def load_embedding_model(model):
     return gensim.models.Word2Vec.load_word2vec_format(model, binary=True)
 
+
 def load_skip_gram():
     return gensim.models.Word2Vec.load_word2vec_format(SKIP_GRAM_VECTOR_FILE, binary=True)
 
+
 def load_word2vec():
     return gensim.models.Word2Vec.load_word2vec_format(WORD2VEC_VECTOR_FILE, binary=True)
+
 
 class TopicModelLoader:
 
