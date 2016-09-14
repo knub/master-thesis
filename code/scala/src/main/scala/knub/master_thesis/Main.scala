@@ -163,7 +163,7 @@ object Main {
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
                 val distanceFunc = List("cos")
                 val embeddings = List(
-                    "/san2/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
+//                    "/san2/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
                     "/san2/data/wikipedia/2016-06-21/embedding-models/google.embedding"
                 )
                 val cases = for (embedding <- embeddings; lambda <- lambdas; distanceFunc <- distanceFunc)
