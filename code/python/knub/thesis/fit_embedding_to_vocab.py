@@ -29,9 +29,6 @@ if __name__ == "__main__":
                     word = word.capitalize()
                 elif word.upper() in word2vec:
                     word = word.upper()
-                try:
-                    output.write(" ".join(map(str, word2vec[word])))
-                except KeyError:
-                    print word
-                    output.write(" ".join(map(str, word2vec["house"])))
+
+                output.write(" ".join(map(str, word2vec[word])))
                 output.write("\n")
