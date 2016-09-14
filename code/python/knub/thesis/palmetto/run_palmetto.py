@@ -3,6 +3,7 @@ from datetime import datetime
 import numpy as np
 import re
 import subprocess
+import sys
 
 from knub.thesis.util import *
 
@@ -82,6 +83,10 @@ def main():
     now = datetime.now()
 
     print now.strftime("%a, %Y-%m-%d %H:%M")
+
+    for topic_file in args.topic_files:
+        if not os.path.isfile(topic_file):
+            print "WARN: file <%s> does not exist" % str(topic_file)
 
     for topic_file in args.topic_files:
         params_str = "\t".join(parse_params(topic_file).values())
