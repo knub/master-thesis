@@ -29,7 +29,7 @@ case class Args(
     conceptCategorizationFileName: String = "../../data/concept-categorization/battig_concept-categorization.tsv",
     inspectionFolder: String = "NOT SET",
     numThreads: Int = 2,
-    numTopics: Int = 256,
+    numTopics: Int = -1,
     numIterations: Int = 50,
     numDocuments: Int = -1,
     alpha: Double = 0.01,
