@@ -48,7 +48,6 @@ def bigrams():
     #             print "%s_%s %f = %s" % (word_a, word_b, score, str(is_bigram))
 
 
-
 def trigrams():
     logging.info("Training trigrams")
     sentences = LineSentence(args.sentences + ".bigram")
@@ -62,8 +61,8 @@ def trigrams():
 def word2vec():
     logging.info("Training word2vec")
     sentences = LineSentence(args.sentences)
-    model = Word2Vec(sentences, size=args.dimensions, window=5, min_count=10, workers=args.threads, sg=True, hs=0,
-                     negative=10, sample=0.001, iter=5)
+    model = Word2Vec(sentences, size=args.dimensions, window=5, min_count=5, workers=args.threads, sg=True, hs=0,
+                     negative=10, sample=0.001, iter=20)
     model.save_word2vec_format(args.model, binary=True, fvocab=args.model + ".counts")
     logging.info("Finished training word2vec")
     logging.info(model.most_similar(positive=['woman', 'king'], negative=['man']))
