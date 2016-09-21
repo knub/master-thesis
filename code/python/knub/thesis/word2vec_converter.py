@@ -34,9 +34,9 @@ if __name__ == "__main__":
                     try:
                         output.write(word + " ")
                         output.write(" ".join(map(str, model[word])))
-                    except KeyError:
+                    except KeyError as e:
                         print word + " not in embedding model"
-                        pass
+                        raise e
                     output.write("\n")
 
     logging.info(model.most_similar(positive=['woman', 'king'], negative=['man']))
