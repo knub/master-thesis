@@ -8,9 +8,11 @@ import java.util.regex.Pattern
 import cc.mallet.pipe.CharSequence2TokenSequence
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.TokenSequence
+import etomica.math.SpecialFunctions
+import knub.master_thesis.math.Bessel
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
-import knub.master_thesis.welda.{GaussianWELDA, SimpleSimBasedReplacementWELDA}
+import knub.master_thesis.welda.{GaussianWELDA, SimpleSimBasedReplacementWELDA, VmfWELDA}
 import org.apache.commons.io.FileUtils
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
@@ -55,7 +57,7 @@ object Main {
         List("topic-model-create", "topic-model-load",
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
-            "welda-gaussian", "inspect-topic-evolution",
+            "welda-gaussian", "welda-vmf", "inspect-topic-evolution",
             "20news-test", "20news-document-classification"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
@@ -161,34 +163,50 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
+//                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
+//                val embeddings = List(
+////                    "/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
+//                    "/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding"
+////                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
+//                )
+//                val cases = for (embedding <- embeddings; lambda <- lambdas)
+//                    yield (lambda, embedding)
+//
+//                cases.foreach(println)
+//
+//                cases.foreach { case (lambda, embedding) =>
+//                    println(s"Starting lambda = $lambda, embedding = $embedding")
+//                    try {
+//                        val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, embeddingFileName = embedding))
+//                        weldaGaussian.init()
+//                        weldaGaussian.inference()
+//                        println(s"Finshed lambda = $lambda, embedding = $embedding")
+//                    } catch {
+//                        case e: Exception =>
+//                            println(s"Failed lambda = $lambda, embedding = $embedding")
+//                            println(e)
+//                    }
+//                }
+                val weldaGaussian = new GaussianWELDA(args)
+                weldaGaussian.init()
+                weldaGaussian.inference()
+            case "welda-vmf" =>
+//                for ((x, n) <- List((5, 2.0), (5, 3.0), (5, 4.0), (5, 5.0))) {
+//                    println(s"x = $x, n = $n")
+//                    println(SpecialFunctions.besselI(x, n))
+//                    println(Bessel.bessi(x, n))
+//                }
+//                val weldaVmf = new VmfWELDA(args)
+//                weldaVmf.init()
+//                weldaVmf.inference()
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
-                val embeddings = List(
-//                    "/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
-                    "/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding"
-//                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
-                )
-                val cases = for (embedding <- embeddings; lambda <- lambdas)
-                    yield (lambda, embedding)
-
-                cases.foreach(println)
-
-                cases.foreach { case (lambda, embedding) =>
-                    println(s"Starting lambda = $lambda, embedding = $embedding")
-                    try {
-                        val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, embeddingFileName = embedding))
-                        weldaGaussian.init()
-                        weldaGaussian.inference()
-                        println(s"Finshed lambda = $lambda, embedding = $embedding")
-                    } catch {
-                        case e: Exception =>
-                            println(s"Failed lambda = $lambda, embedding = $embedding")
-                            println(e)
-                    }
+                lambdas.foreach { lambda =>
+                    println(s"Starting lambda = $lambda")
+                    val weldaVmf = new VmfWELDA(args.copy(lambda = lambda))
+                    weldaVmf.init()
+                    weldaVmf.inference()
+                    println(s"Finshed lambda = $lambda")
                 }
-//                val weldaGaussian = new GaussianWELDA()
-//                weldaGaussian.init()
-//                weldaGaussian.inference()
-
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>
