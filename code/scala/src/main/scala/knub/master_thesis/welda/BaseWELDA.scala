@@ -22,6 +22,7 @@ abstract class BaseWELDA(val p: Args) {
     var beta: Double = .0
     var betaSum: Double = .0
     var alphaSum: Double = .0
+    var numTopics: Int = -1
 
     var vocabularySize: Int = _
 
@@ -42,17 +43,18 @@ abstract class BaseWELDA(val p: Args) {
         alpha = info.alpha
         beta = info.beta
         betaSum = info.betaSum
+        numTopics = info.numTopics
         alphaSum = alpha.sum
 
         vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.vocab").getLines().size
         println(s"Topic model loaded, vocabularySize = $vocabularySize")
 
-        docTopicCount = Array.ofDim[Int](p.numDocuments, p.numTopics)
+        docTopicCount = Array.ofDim[Int](p.numDocuments, numTopics)
         docWordCount = new Array[Int](p.numDocuments)
-        topicWordCountLDA = Array.ofDim[Int](p.numTopics, vocabularySize)
-        sumTopicWordCountLDA = new Array[Int](p.numTopics)
+        topicWordCountLDA = Array.ofDim[Int](numTopics, vocabularySize)
+        sumTopicWordCountLDA = new Array[Int](numTopics)
 
-        multiPros = new Array[Double](p.numTopics)
+        multiPros = new Array[Double](numTopics)
 
         corpusWords = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
         corpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
@@ -66,7 +68,7 @@ abstract class BaseWELDA(val p: Args) {
         val alph = tm.getAlphabet
         val vocabSize = alph.size()
         val betaSum = vocabSize * beta
-        new TopicModelInfo (tm.alpha, tm.beta, betaSum)
+        new TopicModelInfo (tm.alpha, tm.beta, betaSum, tm.numTopics)
     }
 
 

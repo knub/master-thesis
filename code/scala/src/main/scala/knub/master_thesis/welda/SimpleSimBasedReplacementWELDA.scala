@@ -78,7 +78,7 @@ class SimpleSimBasedReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 topicWordCountLDA(topicId)(wordId) -= 1
                 sumTopicWordCountLDA(topicId) -= 1
 
-                for (tIndex <- 0 until p.numTopics) {
+                for (tIndex <- 0 until numTopics) {
                     multiPros(tIndex) =
                         (docTopicCount(docIdx)(tIndex) + alpha(tIndex)) * (topicWordCountLDA(tIndex)(wordId) + beta) /
                             (sumTopicWordCountLDA(tIndex) + betaSum)
