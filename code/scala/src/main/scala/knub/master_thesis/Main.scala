@@ -163,8 +163,9 @@ object Main {
             case "welda-gaussian" =>
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
                 val embeddings = List(
-                    "/san2/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding"
-//                    "/san2/data/wikipedia/2016-06-21/embedding-models/google.embedding"
+//                    "/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
+                    "/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding"
+//                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
                 )
                 val cases = for (embedding <- embeddings; lambda <- lambdas)
                     yield (lambda, embedding)
