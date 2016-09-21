@@ -37,7 +37,8 @@ case class Args(
     lambda: Double = -1.0,
     saveStep: Int = 50,
     inspectFileContains: String = "###",
-    gaussianWELDADistanceFunction: String = "") {
+    weldaDistanceFunction: String = "cos") {
+
     def getPrintWriterFor(extension: String): PrintWriter = {
         val modelFile = new File(modelFileName)
         val modelTextFile = new File(modelFile.getCanonicalPath + extension)
@@ -161,32 +162,29 @@ object Main {
                 }
             case "welda-gaussian" =>
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
-                val distanceFunc = List("cos")
                 val embeddings = List(
-//                    "/san2/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
-                    "/san2/data/wikipedia/2016-06-21/embedding-models/google.embedding"
+                    "/san2/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding"
+//                    "/san2/data/wikipedia/2016-06-21/embedding-models/google.embedding"
                 )
-                val cases = for (embedding <- embeddings; lambda <- lambdas; distanceFunc <- distanceFunc)
-                    yield (lambda, distanceFunc, embedding)
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield (lambda, embedding)
 
                 cases.foreach(println)
 
-                val parCases = cases//.par
-//                parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(4))
-                parCases.foreach { case (lambda, distanceFunction, embedding) =>
-                    println(s"Starting lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+                cases.foreach { case (lambda, embedding) =>
+                    println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
-                        val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, gaussianWELDADistanceFunction = distanceFunction, embeddingFileName = embedding))
+                        val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, embeddingFileName = embedding))
                         weldaGaussian.init()
                         weldaGaussian.inference()
-                        println(s"Finshed lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+                        println(s"Finshed lambda = $lambda, embedding = $embedding")
                     } catch {
                         case e: Exception =>
-                            println(s"Failed lambda = $lambda, distanceFunction = $distanceFunction, embedding = $embedding")
+                            println(s"Failed lambda = $lambda, embedding = $embedding")
                             println(e)
                     }
                 }
-//                val weldaGaussian = new GaussianWELDA(args.copy(gaussianWELDADistanceFunction = "cos"))
+//                val weldaGaussian = new GaussianWELDA()
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
 

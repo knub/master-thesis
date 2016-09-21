@@ -30,7 +30,7 @@ class GaussianWELDA(p: Args) extends BaseWELDA(p) {
     // value sets, over how many top words the gaussians are calculated
     // how often to sample from the gaussians
     val LAMBDA = p.lambda
-    val DISTANCE_FUNCTION = p.gaussianWELDADistanceFunction
+    val DISTANCE_FUNCTION = p.weldaDistanceFunction
 
     println(s"LAMBDA is set to ${LAMBDA.toString}")
     println(s"Distance Function is set to $DISTANCE_FUNCTION")
