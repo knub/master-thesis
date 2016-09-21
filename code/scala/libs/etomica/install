@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=etomica.jar -DgroupId=etomica -DartifactId=etomica -Dversion=0.0.1 -Dpackaging=jar
