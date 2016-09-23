@@ -91,8 +91,8 @@ class TopicModelWriter(private val model: BaseWELDA) {
     def write(it: Int) {
         val name = f"iteration-$it%03d"
         writeTopTopicalWords(name)
+        writeDocTopicProbs(name)
         if (it == model.p.numIterations) {
-            writeDocTopicProbs(name)
             writeTopicAssignments(name)
             writeTopicWordPros(name)
         }
