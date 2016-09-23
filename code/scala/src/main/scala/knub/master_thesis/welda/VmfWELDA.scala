@@ -50,11 +50,17 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
             val Rsquared = R * R
 
             val kappa = R * (PCA_DIMENSIONS - Rsquared) / (1 - Rsquared)
-            val kappa1 = refineKappa(R, kappa)
-            val kappa2 = refineKappa(R, kappa1) * KAPPA_FACTOR_FOR_MORE_CONCENTRATION
-
-            println(s"kappa = $kappa, kappa1 = $kappa1, kappa2 = $kappa2")
-            Vmf(kappa2, mu)
+            val finalKappa = try {
+                val kappa1 = refineKappa(R, kappa)
+                val kappa2 = refineKappa(R, kappa1)
+                kappa2
+//                println(s"kappa = $kappa, kappa1 = $kappa1, kappa2 = $kappa2")
+            } catch {
+                case e: RuntimeException =>
+                    kappa
+            }
+            val concentratedKappa = finalKappa * KAPPA_FACTOR_FOR_MORE_CONCENTRATION
+            Vmf(concentratedKappa, mu)
         }
     }
 
