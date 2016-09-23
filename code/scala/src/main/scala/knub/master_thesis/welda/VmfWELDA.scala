@@ -20,6 +20,7 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override val PCA_DIMENSIONS = 10
     override val DISTRIBUTION_ESTIMATION_SAMPLES = 20
+    val KAPPA_FACTOR_FOR_MORE_CONCENTRATION = 100
 
     val vmfDim = PCA_DIMENSIONS - 1
     val betaDist = new BetaDistribution(vmfDim / 2.0, vmfDim / 2.0)
@@ -50,8 +51,9 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
             val kappa = R * (PCA_DIMENSIONS - Rsquared) / (1 - Rsquared)
             val kappa1 = refineKappa(R, kappa)
-            val kappa2 = refineKappa(R, kappa1)
+            val kappa2 = refineKappa(R, kappa1) * KAPPA_FACTOR_FOR_MORE_CONCENTRATION
 
+            println(s"kappa = $kappa, kappa1 = $kappa1, kappa2 = $kappa2")
             Vmf(kappa2, mu)
         }
     }
@@ -108,7 +110,10 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override def sampleFromDistribution(topicId: Int): DenseVector[Double] = {
         val Vmf(kappa, mu) = vmfs(topicId)
-        rvMF(kappa, mu)
+        val sample = rvMF(kappa, mu)
+//        if (topicId == 0)
+//            println(s"Sample: $sample")
+        sample
     }
 
     override def fileBaseName: String = s"$folder/welda"
