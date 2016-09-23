@@ -5,3 +5,4 @@ papers/
 data/
 */.ipynb_checkpoints/*
 models/
+*.bin
