@@ -1,4 +1,4 @@
-package de.uni_potsdam.hpi.coheel.util
+package knub.master_thesis.util
 
 import org.slf4j.Logger
 

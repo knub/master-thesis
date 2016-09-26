@@ -7,13 +7,13 @@ import java.util.regex.Pattern
 
 import cc.mallet.pipe.CharSequence2TokenSequence
 import cc.mallet.topics.ParallelTopicModel
-import cc.mallet.types.TokenSequence
-import etomica.math.SpecialFunctions
-import knub.master_thesis.math.Bessel
+import cc.mallet.types.{FeatureSequence, TokenSequence}
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
+import knub.master_thesis.util.Word2VecUtils
 import knub.master_thesis.welda.{GaussianWELDA, SimpleSimBasedReplacementWELDA, VmfWELDA}
 import org.apache.commons.io.FileUtils
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
@@ -58,7 +58,8 @@ object Main {
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf", "inspect-topic-evolution",
-            "20news-test", "20news-document-classification"
+            "20news-test", "20news-document-classification",
+            "avg-embedding"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
@@ -213,6 +214,41 @@ object Main {
                 run20NewsTest(args)
             case "20news-document-classification" =>
                 run20NewsDocumentClassification(args)
+            case "avg-embedding" =>
+                val embeddingName = new File(args.embeddingFileName).getName
+                val word2Vec = WordVectorSerializer.loadTxtVectors(
+                    new File(s"${args.modelFileName.replaceAll("/model$", "/")}$embeddingName.restricted.vocab.embedding.txt"))
+                val embeddingDimensions = word2Vec.getWordVector("house").length
+                val tm = ParallelTopicModel.read(new File(args.modelFileName))
+                val pw = new PrintWriter(s"${args.modelFileName}.$embeddingName.avg-embedding")
+
+                val data = tm.getData
+                data.foreach { doc =>
+                    val avgVector = new Array[Double](embeddingDimensions)
+                    val wordFeatures = doc.instance.getData.asInstanceOf[FeatureSequence]
+                    val alph = doc.instance.getDataAlphabet
+
+                    var nrWordsWithVectors = 0
+                    wordFeatures.getFeatures.foreach { wordId =>
+                        try {
+                            val word = alph.lookupObject(wordId).asInstanceOf[String]
+                            val actualWord = Word2VecUtils.findActualWord(word2Vec, word)
+                            val wordVector = word2Vec.getWordVector(actualWord)
+                            for (i <- 0 until embeddingDimensions) {
+                                avgVector(i) += wordVector(i)
+                            }
+                            nrWordsWithVectors += 1
+                        } catch {
+                            case e: RuntimeException =>
+                        }
+                    }
+                    for (i <- 0 until embeddingDimensions) {
+                        avgVector(i) /= nrWordsWithVectors
+                    }
+                    val clazz = doc.instance.getTarget
+                    pw.println(s"$clazz ${avgVector.mkString(" ")}")
+                }
+                pw.close()
         }
     }
 

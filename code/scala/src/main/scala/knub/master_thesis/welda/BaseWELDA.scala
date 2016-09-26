@@ -6,8 +6,8 @@ import java.util.Date
 
 import cc.mallet.topics.ParallelTopicModel
 import com.carrotsearch.hppc.IntArrayList
-import knub.master_thesis.Args
-import knub.master_thesis.util.TopicModelWriter
+import knub.master_thesis.{Args, util}
+import util.TopicModelWriter
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
