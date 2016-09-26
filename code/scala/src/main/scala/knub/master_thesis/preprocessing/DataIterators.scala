@@ -2,10 +2,10 @@ package knub.master_thesis.preprocessing
 
 import java.io.File
 import java.nio.file.{Files, Path, Paths}
-import java.util
 
 import cc.mallet.types.Instance
-import knub.master_thesis.util.CorpusReader
+import knub.master_thesis
+import master_thesis.util.CorpusReader
 import org.apache.commons.io.FileUtils
 
 import scala.collection.JavaConverters._

@@ -5,11 +5,12 @@ import java.util
 
 import be.tarsos.lsh.{CommandLineInterface, LSH, Vector}
 import breeze.linalg.{DenseMatrix, DenseVector}
-import de.uni_potsdam.hpi.coheel.util.Timer
+import knub.master_thesis
 import knub.master_thesis.Args
-import knub.master_thesis.util.Sampler
+import master_thesis.util.{Sampler, Timer, Word2VecUtils}
 import org.apache.commons.lang3.text.WordUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -49,15 +50,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         val embeddingsList = new mutable.ArrayBuffer[Array[Double]](word2IdVocabulary.size)
         val vocabulary: Array[String] = word2IdVocabulary.keys.toArray
         vocabulary.foreach { word =>
-            val actualWord =
-                if (word2Vec.hasWord(word))
-                    word
-                else if (word2Vec.hasWord(WordUtils.capitalize(word)))
-                    WordUtils.capitalize(word)
-                else if (word2Vec.hasWord(word.toUpperCase))
-                    word.toUpperCase()
-                else
-                    throw new RuntimeException(word)
+            val actualWord = Word2VecUtils.findActualWord(word2Vec, word)
             val embeddingDimensions = word2Vec.getWordVector(actualWord)
             if (embeddingDimensions == null) {
                 throw new RuntimeException(word)
