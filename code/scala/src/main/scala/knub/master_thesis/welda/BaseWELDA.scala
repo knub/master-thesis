@@ -144,7 +144,7 @@ abstract class BaseWELDA(val p: Args) {
     def inference(): Unit = {
         for (iter <- 0 until p.numIterations) {
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
-                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
+//                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
                 writer.write(iter)
             }
             if (iter % TOPIC_OUTPUT_EVERY == 0) {

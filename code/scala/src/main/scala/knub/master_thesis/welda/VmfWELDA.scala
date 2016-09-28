@@ -20,7 +20,7 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override val PCA_DIMENSIONS = 10
     override val DISTRIBUTION_ESTIMATION_SAMPLES = 20
-    val KAPPA_FACTOR_FOR_MORE_CONCENTRATION = 100
+    val KAPPA_FACTOR_FOR_MORE_CONCENTRATION = 5
 
     val vmfDim = PCA_DIMENSIONS - 1
     val betaDist = new BetaDistribution(vmfDim / 2.0, vmfDim / 2.0)
