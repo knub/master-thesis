@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import re
 import subprocess
-import sys
+from multiprocessing import Pool
 
 from knub.thesis.util import *
 
@@ -75,8 +75,22 @@ def calculate_topic_coherences(f):
         return topic_coherences
 
 
+def calculate_line(topic_file):
+    params_str = "\t".join(parse_params(topic_file).values())
+    topic_coherences = calculate_topic_coherences(topic_file)
+    if params_str:
+        line = "%s\t%s\t%.3f\t%.3f" % (topic_file, params_str, np.mean(topic_coherences), np.std(topic_coherences))
+        print line
+        return line
+    else:
+        line = "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.std(topic_coherences))
+        print line
+        return line
+
+
 def main():
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
+    parser.add_argument("threads", type=int)
     parser.add_argument("topic_files", type=str, nargs="+")
     args = parser.parse_args()
 
@@ -88,13 +102,13 @@ def main():
         if not os.path.isfile(topic_file):
             print "WARN: file <%s> does not exist" % str(topic_file)
 
-    for topic_file in args.topic_files:
-        params_str = "\t".join(parse_params(topic_file).values())
-        topic_coherences = calculate_topic_coherences(topic_file)
-        if params_str:
-            print "%s\t%s\t%.3f\t%.3f" % (topic_file, params_str, np.mean(topic_coherences), np.std(topic_coherences))
-        else:
-            print "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.std(topic_coherences))
+    try:
+        p = Pool(args.threads)
+        p.map(calculate_line, args.topic_files)
+    finally:
+        p.close()
+    # for topic_file in args.topic_files:
+    #     calculate_line(topic_file)
 
 
 if __name__ == "__main__":
