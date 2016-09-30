@@ -184,7 +184,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             }
             Timer.printAll()
         }
-        println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
+//        println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
     }
 
     def pca(m: DenseMatrix[Double], numDimensions: Int): DenseMatrix[Double] = {

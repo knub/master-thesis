@@ -147,7 +147,7 @@ abstract class BaseWELDA(val p: Args) {
                 writer.write(iter)
             }
             if (iter % TOPIC_OUTPUT_EVERY == 0) {
-                println(s"\tWELDA sampling iteration ${iter + 1} at ${new Date}")
+                println(s"\tWELDA sampling iteration ${iter + 1} at ${new Date} (lambda=${p.lambda}, embedding=${p.embeddingFileName})")
             }
             sampleSingleIteration()
         }
