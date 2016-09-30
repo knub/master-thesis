@@ -174,8 +174,10 @@ object Main {
                     yield (lambda, embedding)
 
                 cases.foreach(println)
+                val parCases = cases.par
+                parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(12))
 
-                cases.foreach { case (lambda, embedding) =>
+                parCases.foreach { case (lambda, embedding) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
                         val weldaGaussian = new GaussianWELDA(
