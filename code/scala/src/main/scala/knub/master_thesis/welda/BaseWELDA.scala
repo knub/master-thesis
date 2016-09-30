@@ -71,7 +71,6 @@ abstract class BaseWELDA(val p: Args) {
         new TopicModelInfo (tm.alpha, tm.beta, betaSum, tm.numTopics)
     }
 
-
     private def buildId2WordVocabulary(word2IdVocabulary: mutable.Map[String, Int]): mutable.Map[Int, String] = {
         val result = mutable.Map[Int, String]()
         for ((key, value) <- word2IdVocabulary) {

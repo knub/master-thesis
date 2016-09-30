@@ -8,10 +8,7 @@ import breeze.linalg.{DenseMatrix, DenseVector}
 import knub.master_thesis
 import knub.master_thesis.Args
 import master_thesis.util.{Sampler, Timer, Word2VecUtils}
-import org.apache.commons.lang3.text.WordUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
-import org.deeplearning4j.models.embeddings.wordvectors.WordVectors
-
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 
@@ -40,6 +37,17 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     var lsh: LSH = _
 
     var folder: String = _
+
+    val newStopwords = List(
+        "1", "2", "also", "anyone", "article", "back", "believe", "ca", "'d", "even",
+        "find", "first", "get", "go", "going", "good", "got", "know", "last", "like",
+        "'ll", "'m", "make", "many", "may", "much", "never", "new", "one", "people",
+        "'re", "really", "right", "'s", "said", "say", "see", "since", "someone", "something",
+        "still", "sure", "take", "think", "time", "two", "us", "use", "used", "using",
+        "'ve", "want", "way", "well", "without", "work", "would", "writes"
+    )
+
+    var newStopwordIds: Set[Int] = _
 
     override def init(): Unit = {
         super.init()
@@ -98,6 +106,14 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 println(s"Sample: $nearestWordLsh")
             }
         }
+
+        newStopwordIds = newStopwords.flatMap { word =>
+            val id = word2IdVocabulary.get(word)
+            if (id.isEmpty)
+                println(word)
+
+            id
+        }.toSet
     }
 
     def transformVector(a: Array[Double]): Array[Double]
@@ -109,30 +125,31 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             for (wIndex <- 0 until docSize) {
                 // determine topic first
                 val topicId = corpusTopics(docIdx).get(wIndex)
+                val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(LAMBDA)) {
+                val wordId = if (Sampler.nextCoinFlip(LAMBDA) || newStopwordIds.contains(originalWordId)) {
                     // sample a vector from the multivariate gaussian
                     // use vector form here to get nearest word to a sampled vector
                     val vectorSample = sampleFromDistribution(topicId)
-                    //                    Timer.start("FINDING WORD2VEC")
-                    //                    val sample = new NDArray(Array(vectorSample.data))
-                    //                    val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
-                    //                    Timer.end("FINDING WORD2VEC")
-                    //                    Timer.start("FINDING LSH")
+//                    Timer.start("FINDING WORD2VEC")
+//                    val sample = new NDArray(Array(vectorSample.data))
+//                    val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
+//                    Timer.end("FINDING WORD2VEC")
+//                    Timer.start("FINDING LSH")
                     val nearestNeighbours = lsh.query(new Vector("", vectorSample.data), 1)
                     val nearestWordLsh = if (nearestNeighbours.isEmpty) "<NULL>" else nearestNeighbours.get(0).getKey
-                    //                    Timer.end("FINDING LSH")
-                    //                    println(s"$nearestWordLsh -- $nearestWordWord2Vec")
+//                    Timer.end("FINDING LSH")
+//                    println(s"$nearestWordLsh -- $nearestWordWord2Vec")
                     nrReplacedWordsTries += 1
                     word2IdVocabulary.get(nearestWordLsh) match {
                         case Some(id) =>
                             nrReplacedWordsSuccessful += 1
                             id
                         case None =>
-                            corpusWords(docIdx).get(wIndex)
+                            originalWordId
                     }
                 } else {
-                    corpusWords(docIdx).get(wIndex)
+                    originalWordId
                 }
 
                 docTopicCount(docIdx)(topicId) -= 1
