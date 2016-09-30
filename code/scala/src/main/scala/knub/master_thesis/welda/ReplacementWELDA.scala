@@ -118,6 +118,30 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     def transformVector(a: Array[Double]): Array[Double]
 
+    def sampleAndFindWord(topicId: Int): String = {
+        val maxTries = 10
+        var currentTry = 0
+        while (currentTry < maxTries) {
+            currentTry += 1
+            // sample a vector from the multivariate gaussian
+            // use vector form here to get nearest word to a sampled vector
+            val vectorSample = sampleFromDistribution(topicId)
+//            Timer.start("FINDING WORD2VEC")
+//            val sample = new NDArray(Array(vectorSample.data))
+//            val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
+//            Timer.end("FINDING WORD2VEC")
+//            Timer.start("FINDING LSH")
+            val nearestNeighbours = lsh.query(new Vector("", vectorSample.data), 1)
+//            Timer.end("FINDING LSH")
+//            println(s"$nearestWordLsh -- $nearestWordWord2Vec")
+
+            if (!nearestNeighbours.isEmpty)
+                return nearestNeighbours.get(0).getKey
+        }
+        println("WARNING: Exceeded tries")
+        "NONE"
+    }
+
     override def sampleSingleIteration(): Unit = {
         estimateDistributionParameters()
         for (docIdx <- 0 until p.numDocuments) {
@@ -128,20 +152,9 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
                 val wordId = if (Sampler.nextCoinFlip(LAMBDA) || newStopwordIds.contains(originalWordId)) {
-                    // sample a vector from the multivariate gaussian
-                    // use vector form here to get nearest word to a sampled vector
-                    val vectorSample = sampleFromDistribution(topicId)
-//                    Timer.start("FINDING WORD2VEC")
-//                    val sample = new NDArray(Array(vectorSample.data))
-//                    val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
-//                    Timer.end("FINDING WORD2VEC")
-//                    Timer.start("FINDING LSH")
-                    val nearestNeighbours = lsh.query(new Vector("", vectorSample.data), 1)
-                    val nearestWordLsh = if (nearestNeighbours.isEmpty) "<NULL>" else nearestNeighbours.get(0).getKey
-//                    Timer.end("FINDING LSH")
-//                    println(s"$nearestWordLsh -- $nearestWordWord2Vec")
+                    val sampledWord = sampleAndFindWord(topicId)
                     nrReplacedWordsTries += 1
-                    word2IdVocabulary.get(nearestWordLsh) match {
+                    word2IdVocabulary.get(sampledWord) match {
                         case Some(id) =>
                             nrReplacedWordsSuccessful += 1
                             id
@@ -170,7 +183,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 // update topic
                 corpusTopics(docIdx).set(wIndex, newTopicId)
             }
-            //            println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
+//            println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
             Timer.printAll()
         }
 
