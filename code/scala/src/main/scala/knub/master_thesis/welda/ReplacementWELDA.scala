@@ -136,12 +136,14 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             if (!nearestNeighbours.isEmpty)
                 return nearestNeighbours.get(0).getKey
         }
-        println(s"WARNING: Exceeded tries in topic $topicId")
+//        println(s"WARNING: Exceeded tries in topic $topicId")
         "NONE"
     }
 
     override def sampleSingleIteration(): Unit = {
         estimateDistributionParameters()
+        nrReplacedWordsTries = 0
+        nrReplacedWordsSuccessful = 0
         for (docIdx <- 0 until p.numDocuments) {
             val docSize = corpusWords(docIdx).size
             for (wIndex <- 0 until docSize) {
@@ -180,10 +182,9 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 // update topic
                 corpusTopics(docIdx).set(wIndex, newTopicId)
             }
-            println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
             Timer.printAll()
         }
-
+        println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
     }
 
     def pca(m: DenseMatrix[Double], numDimensions: Int): DenseMatrix[Double] = {
