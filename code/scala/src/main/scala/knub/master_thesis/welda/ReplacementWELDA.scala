@@ -100,10 +100,8 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         for (j <- 0 until numTopics) {
             println(s"Topic: ${topWords(j)}")
             for (i <- 0 until NR_SAMPLES) {
-                val v = sampleFromDistribution(j)
-                val nearestNeighbours = lsh.query(new Vector("", v.data), 1)
-                val nearestWordLsh = if (nearestNeighbours.isEmpty) "<NULL>" else nearestNeighbours.get(0).getKey
-                println(s"Sample: $nearestWordLsh")
+                val word = sampleAndFindWord(j)
+                println(s"Sample: $word")
             }
         }
 
@@ -154,12 +152,11 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 val wordId = if (Sampler.nextCoinFlip(LAMBDA) || newStopwordIds.contains(originalWordId)) {
                     val sampledWord = sampleAndFindWord(topicId)
                     nrReplacedWordsTries += 1
-                    word2IdVocabulary.get(sampledWord) match {
-                        case Some(id) =>
-                            nrReplacedWordsSuccessful += 1
-                            id
-                        case None =>
-                            originalWordId
+                    if (sampledWord == "NONE") {
+                        originalWordId
+                    } else {
+                        nrReplacedWordsSuccessful += 1
+                        word2IdVocabulary(sampledWord)
                     }
                 } else {
                     originalWordId
@@ -183,7 +180,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 // update topic
                 corpusTopics(docIdx).set(wIndex, newTopicId)
             }
-//            println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
+            println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
             Timer.printAll()
         }
 
