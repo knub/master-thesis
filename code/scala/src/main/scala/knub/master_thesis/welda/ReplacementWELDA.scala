@@ -138,7 +138,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             if (!nearestNeighbours.isEmpty)
                 return nearestNeighbours.get(0).getKey
         }
-        println("WARNING: Exceeded tries")
+        println(s"WARNING: Exceeded tries in topic $topicId")
         "NONE"
     }
 
