@@ -102,11 +102,15 @@ def main():
         if not os.path.isfile(topic_file):
             print "WARN: file <%s> does not exist" % str(topic_file)
 
-    try:
+    if args.threads == 1:
+        for topic_file in args.topic_files:
+            calculate_line(topic_file)
+    else:
         p = Pool(args.threads)
-        p.map(calculate_line, args.topic_files)
-    finally:
-        p.close()
+        try:
+            p.map(calculate_line, args.topic_files)
+        finally:
+            p.close()
     # for topic_file in args.topic_files:
     #     calculate_line(topic_file)
 
