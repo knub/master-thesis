@@ -166,8 +166,8 @@ object Main {
             case "welda-gaussian" =>
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
                 val embeddings = List(
-                    "/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding",
-                    "/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding"
+                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
+                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
 //                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
                 )
                 val cases = for (embedding <- embeddings; lambda <- lambdas)
@@ -178,7 +178,8 @@ object Main {
                 cases.foreach { case (lambda, embedding) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
-                        val weldaGaussian = new GaussianWELDA(args.copy(lambda = lambda, embeddingFileName = embedding))
+                        val weldaGaussian = new GaussianWELDA(
+                            args.copy(lambda = lambda, embeddingFileName = embedding._1, numDocuments = embedding._2))
                         weldaGaussian.init()
                         weldaGaussian.inference()
                         println(s"Finshed lambda = $lambda, embedding = $embedding")
