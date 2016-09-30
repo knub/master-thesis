@@ -192,22 +192,17 @@ object Main {
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
             case "welda-vmf" =>
-//                for ((x, n) <- List((5, 2.0), (5, 3.0), (5, 4.0), (5, 5.0))) {
-//                    println(s"x = $x, n = $n")
-//                    println(SpecialFunctions.besselI(x, n))
-//                    println(Bessel.bessi(x, n))
+                val weldaVmf = new VmfWELDA(args)
+                weldaVmf.init()
+                weldaVmf.inference()
+//                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
+//                lambdas.foreach { lambda =>
+//                    println(s"Starting lambda = $lambda")
+//                    val weldaVmf = new VmfWELDA(args.copy(lambda = lambda))
+//                    weldaVmf.init()
+//                    weldaVmf.inference()
+//                    println(s"Finshed lambda = $lambda")
 //                }
-//                val weldaVmf = new VmfWELDA(args)
-//                weldaVmf.init()
-//                weldaVmf.inference()
-                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
-                lambdas.foreach { lambda =>
-                    println(s"Starting lambda = $lambda")
-                    val weldaVmf = new VmfWELDA(args.copy(lambda = lambda))
-                    weldaVmf.init()
-                    weldaVmf.inference()
-                    println(s"Finshed lambda = $lambda")
-                }
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>
