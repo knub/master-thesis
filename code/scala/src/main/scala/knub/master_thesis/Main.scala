@@ -202,17 +202,45 @@ object Main {
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
             case "welda-vmf" =>
-                val weldaVmf = new VmfWELDA(args)
-                weldaVmf.init()
-                weldaVmf.inference()
-//                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
-//                lambdas.foreach { lambda =>
-//                    println(s"Starting lambda = $lambda")
-//                    val weldaVmf = new VmfWELDA(args.copy(lambda = lambda))
-//                    weldaVmf.init()
-//                    weldaVmf.inference()
-//                    println(s"Finshed lambda = $lambda")
-//                }
+                val THREADS = 18
+                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
+                val embeddings = List(
+                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
+                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
+                    //                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
+                )
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield (lambda, embedding)
+
+                cases.foreach(println)
+                val parCases = if (THREADS == 1) {
+                    cases
+                } else {
+                    val parCases = cases.par
+                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
+                    parCases
+                }
+
+                parCases.foreach { case (lambda, embedding) =>
+                    println(s"Starting lambda = $lambda, embedding = $embedding")
+                    try {
+                        val weldaVmf = new VmfWELDA(
+                            args.copy(lambda = lambda, embeddingFileName = embedding._1, numDocuments = embedding._2)
+                        )
+                        weldaVmf.init()
+                        weldaVmf.inference()
+
+                        println(s"Finshed lambda = $lambda, embedding = $embedding")
+                    } catch {
+                        case e: Exception =>
+                            println(s"Failed lambda = $lambda, embedding = $embedding")
+                            println(e)
+                    }
+                }
+//                val weldaVmf = new VmfWELDA(args)
+//                weldaVmf.init()
+//                weldaVmf.inference()
+
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "20news-test" =>
