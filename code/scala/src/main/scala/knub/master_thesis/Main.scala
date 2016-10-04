@@ -38,6 +38,7 @@ case class Args(
     beta: Double = 0.02,
     alpha0Boost: Double = 1.0,
     lambda: Double = -1.0,
+    kappaFactor: Double = 5.0,
     saveStep: Int = 50,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
@@ -251,15 +252,16 @@ object Main {
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
             case "welda-vmf" =>
-                val THREADS = 18
+                val THREADS = 10
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
+                val kappaFactors = List(1, 2, 3, 5, 10, 20, 50, 100)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
                     ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
                     //                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
                 )
-                val cases = for (embedding <- embeddings; lambda <- lambdas)
-                    yield (lambda, embedding)
+                val cases = for (embedding <- embeddings; lambda <- lambdas; kappaFactor <- kappaFactors)
+                    yield (lambda, embedding, kappaFactor)
 
                 cases.foreach(println)
                 val parCases = if (THREADS == 1) {
@@ -270,11 +272,14 @@ object Main {
                     parCases
                 }
 
-                parCases.foreach { case (lambda, embedding) =>
+                parCases.foreach { case (lambda, embedding, kappaFactor) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
                         val weldaVmf = new VmfWELDA(
-                            args.copy(lambda = lambda, embeddingFileName = embedding._1, numDocuments = embedding._2)
+                            args.copy(lambda = lambda,
+                                embeddingFileName = embedding._1,
+                                numDocuments = embedding._2,
+                                kappaFactor = kappaFactor)
                         )
                         weldaVmf.init()
                         weldaVmf.inference()
