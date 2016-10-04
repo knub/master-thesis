@@ -102,6 +102,8 @@ def main():
         if not os.path.isfile(topic_file):
             print "WARN: file <%s> does not exist" % str(topic_file)
 
+    args.topic_files = [f for f in args.topic_files if os.path.isfile(f)]
+
     if args.threads == 1:
         for topic_file in args.topic_files:
             calculate_line(topic_file)
