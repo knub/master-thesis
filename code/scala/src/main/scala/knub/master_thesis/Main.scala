@@ -164,9 +164,9 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-                val THREADS = 1
+                val THREADS = 18
 //                val lambdas = List(0.0)
-                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
+                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
                     ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
