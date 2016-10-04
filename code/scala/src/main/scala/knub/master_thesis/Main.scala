@@ -34,8 +34,9 @@ case class Args(
     numTopics: Int = -1,
     numIterations: Int = 50,
     numDocuments: Int = -1,
-    alpha: Double = 0.01,
-    beta: Double = 0.01,
+    alpha: Double = 0.02,
+    beta: Double = 0.02,
+    alpha0Boost: Double = 1.0,
     lambda: Double = -1.0,
     saveStep: Int = 50,
     inspectFileContains: String = "###",
@@ -55,6 +56,7 @@ object Main {
         head("topic-models", "0.0.1")
 
         List("topic-model-create", "topic-model-load",
+            "topic-model-experiment",
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf", "inspect-topic-evolution",
@@ -149,6 +151,53 @@ object Main {
             case "topic-model-load" =>
                 val res = loadExistingModel(args.modelFileName)
                 analyzeResult(res, args)
+            case "topic-model-experiment" =>
+                val alpha = 0.02
+                val beta = 0.02
+
+                val alpha0Boosts = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50, 100, 200, 300, 400)
+                val THREADS = alpha0Boosts.size
+                val alpha0BoostsPar = if (THREADS == 1) {
+                    alpha0Boosts
+                } else {
+                    val par = alpha0Boosts.par
+                    par.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
+                    par
+                }
+
+                alpha0BoostsPar.foreach { alpha0Boost =>
+                    val folder = s"/data/wikipedia/2016-06-21/topic-models/topic.20news.experiment.50-1500" +
+                        s".alpha-${alpha.toString.replace('.', '-')}" +
+                        s".beta-${beta.toString.replace('.', '-')}" +
+                        f".alphazero-$alpha0Boost%03d"
+                    println(folder)
+                    new File(folder).mkdir()
+                    if (!new File(s"$folder/model.ssv").exists()) {
+                        val startTime = System.currentTimeMillis()
+                        val newArgs = args.copy(alpha = alpha, beta = beta, alpha0Boost = alpha0Boost,
+                            modelFileName = s"$folder/model")
+                        val res = trainAndSaveNewModel(newArgs)
+                        val documentTopics = res.model.getDocumentTopics(true, false)
+
+                        val topic0AvailableCount = documentTopics.count { doc => doc(0) > 0.0 }
+                        val topic0Available = topic0AvailableCount.toDouble / documentTopics.length
+                        val topic0Average = documentTopics.map(_(0)).sum / documentTopics.length
+
+                        val topic0 = res.displayTopWords(50).lines.slice(1, 2).next
+                        println(f"alpha0Boost = $alpha0Boost% 4d, " +
+                            f"topic available: $topic0AvailableCount% 6d/${documentTopics.length} = $topic0Available%.2f, " +
+                            f"topic average: $topic0Average%.5f, $topic0")
+
+                        val endTime = System.currentTimeMillis()
+                        val duration = (endTime - startTime) / 1000
+                        println(s"Learning took $duration s")
+                        writeVocabulary(res, newArgs)
+                        writeTopWordsToTextFile(res, newArgs)
+                        FileUtils.writeStringToFile(new File(newArgs.modelFileName + ".runtime"), duration.toString)
+                    } else {
+                        println(s"$folder results already exist")
+                    }
+                }
             case "text-preprocessing" =>
                 writeArticlesTextFile(args)
             case "word-similarity" =>
@@ -289,7 +338,7 @@ object Main {
         val (instancesIterator, stopWordsFileName) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val tp = new TopicModel(args, args.alpha, args.beta, instancesIterator)
         println(s"Using stopword list from $stopWordsFileName")
-        val res = tp.run(stopWordsFileName)
+        val res = tp.run(stopWordsFileName, args.alpha0Boost)
         res.save(args.modelFileName)
         res
     }
