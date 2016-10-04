@@ -164,6 +164,8 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
+                val THREADS = 1
+//                val lambdas = List(0.0)
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.0)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
@@ -174,8 +176,13 @@ object Main {
                     yield (lambda, embedding)
 
                 cases.foreach(println)
-                val parCases = cases.par
-                parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(12))
+                val parCases = if (THREADS == 1) {
+                    cases
+                } else {
+                    val parCases = cases.par
+                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
+                    parCases
+                }
 
                 parCases.foreach { case (lambda, embedding) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
