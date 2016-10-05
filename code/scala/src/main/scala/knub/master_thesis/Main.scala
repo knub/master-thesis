@@ -252,7 +252,7 @@ object Main {
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
             case "welda-vmf" =>
-                val THREADS = 20
+                val THREADS = 30
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
                 val kappaFactors = List(1, 2, 3, 5, 10, 20, 50, 100)
                 val embeddings = List(
