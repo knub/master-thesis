@@ -38,7 +38,7 @@ case class Args(
     beta: Double = 0.02,
     alpha0Boost: Double = 1.0,
     lambda: Double = -1.0,
-    kappaFactor: Double = 5.0,
+    kappaFactor: Int = 5,
     saveStep: Int = 50,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
