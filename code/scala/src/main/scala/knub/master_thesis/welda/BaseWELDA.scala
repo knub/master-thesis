@@ -47,7 +47,7 @@ abstract class BaseWELDA(val p: Args) {
         alphaSum = alpha.sum
 
         vocabularySize = Source.fromFile(s"${p.modelFileName}.$embeddingName.restricted.vocab").getLines().size
-        println(s"Topic model loaded, vocabularySize = $vocabularySize")
+//        println(s"Topic model loaded, vocabularySize = $vocabularySize")
 
         docTopicCount = Array.ofDim[Int](p.numDocuments, numTopics)
         docWordCount = new Array[Int](p.numDocuments)
@@ -90,12 +90,11 @@ abstract class BaseWELDA(val p: Args) {
             line = brAlphabet.readLine()
         }
         brAlphabet.close()
-        println(s"Finished reading vocabulary, ${result.size} words")
+//        println(s"Finished reading vocabulary, ${result.size} words")
         result
     }
 
     private def readCorpus(modelFileName: String, embeddingFileName: String) {
-        println("Reading corpus")
         var docId = 0
         word2IdVocabulary = readWord2IdVocabulary(modelFileName)
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
