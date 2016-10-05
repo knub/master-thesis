@@ -13,7 +13,6 @@ import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
-    println("Removing LSH cache")
     new File(".").listFiles().filter(_.getName.contains("be.tarsos")).foreach { f => println(f); f.delete() }
 
     // dimensions to sample embeddings down to, so we can estimate the parameters of the distribution from a few samples only
@@ -25,8 +24,6 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     val LAMBDA = p.lambda
     val DISTANCE_FUNCTION = p.weldaDistanceFunction
 
-    println(s"LAMBDA is set to ${LAMBDA.toString}")
-    println(s"Distance Function is set to $DISTANCE_FUNCTION")
     assert(LAMBDA >= 0.0, "lambda must be at least zero")
     assert(LAMBDA <= 1.0, "lambda must be at most one")
 
@@ -52,7 +49,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     override def init(): Unit = {
         super.init()
         val word2Vec = WordVectorSerializer.loadTxtVectors(new File(s"${p.modelFileName.replaceAll("/model$", "/")}$embeddingName.restricted.vocab.embedding.txt"))
-        println(s"Loaded vectors have ${word2Vec.getWordVector("house").length} dimensions")
+//        println(s"Loaded vectors have ${word2Vec.getWordVector("house").length} dimensions")
         pcaVectors = mutable.Map()
 
         val embeddingsList = new mutable.ArrayBuffer[Array[Double]](word2IdVocabulary.size)
@@ -67,7 +64,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         }
         val rows = embeddingsList.toArray
         val M = DenseMatrix(rows: _*)
-        println(s"Dimensions of embedding matrix = ${M.rows}, ${M.cols}")
+//        println(s"Dimensions of embedding matrix = ${M.rows}, ${M.cols}")
 
         val pcaM = pca(M, PCA_DIMENSIONS)
 
@@ -78,7 +75,8 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             new Vector(word, vec)
         }
 
-        println(s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
+//        println(s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
+        assert(word2Vec.vocab().numWords() == lshVectors.size, s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
 
         val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
         lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
@@ -104,14 +102,13 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 //                println(s"Sample: $word")
 //            }
 //        }
-//
-//        newStopwordIds = newStopwords.flatMap { word =>
-//            val id = word2IdVocabulary.get(word)
+
+        newStopwordIds = newStopwords.flatMap { word =>
+            val id = word2IdVocabulary.get(word)
 //            if (id.isEmpty)
 //                println(word)
-//
-//            id
-//        }.toSet
+            id
+        }.toSet
     }
 
     def transformVector(a: Array[Double]): Array[Double]

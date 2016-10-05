@@ -287,8 +287,7 @@ object Main {
                         println(s"Finshed lambda = $lambda, embedding = $embedding")
                     } catch {
                         case e: Exception =>
-                            println(s"Failed lambda = $lambda, embedding = $embedding, e: ${e.getMessage}")
-                            println(e)
+                            println(s"Failed lambda = $lambda, embedding = $embedding, $e: ${e.getMessage}")
                     }
                 }
 //                val weldaVmf = new VmfWELDA(args)

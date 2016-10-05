@@ -30,7 +30,7 @@ object CorpusReader {
                     topics = new IntArrayList()
                     docNr += 1
                     if (docNr % 100000 == 0) {
-                        println(docNr)
+//                        println(docNr)
                     }
                 } else {
                     println("Empty document at line " + lineNr)
@@ -52,7 +52,7 @@ object CorpusReader {
             }
             line = brDocument.readLine()
         }
-        println("Finished reading corpus with " + corpus.size + " documents.")
+//        println("Finished reading corpus with " + corpus.size + " documents.")
         Corpus(corpus, topicAssignments)
     }
 }
