@@ -91,27 +91,27 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
 
         /*
-         * Give an intuiton about sampling
+         * Give an intuition about sampling
          */
-        val topWords = getTopTopicWords()
-        estimateDistributionParameters()
-
-        val NR_SAMPLES = 3
-        for (j <- 0 until numTopics) {
-            println(s"Topic: ${topWords(j)}")
-            for (i <- 0 until NR_SAMPLES) {
-                val word = sampleAndFindWord(j)
-                println(s"Sample: $word")
-            }
-        }
-
-        newStopwordIds = newStopwords.flatMap { word =>
-            val id = word2IdVocabulary.get(word)
-            if (id.isEmpty)
-                println(word)
-
-            id
-        }.toSet
+//        val topWords = getTopTopicWords()
+//        estimateDistributionParameters()
+//
+//        val NR_SAMPLES = 3
+//        for (j <- 0 until numTopics) {
+//            println(s"Topic: ${topWords(j)}")
+//            for (i <- 0 until NR_SAMPLES) {
+//                val word = sampleAndFindWord(j)
+//                println(s"Sample: $word")
+//            }
+//        }
+//
+//        newStopwordIds = newStopwords.flatMap { word =>
+//            val id = word2IdVocabulary.get(word)
+//            if (id.isEmpty)
+//                println(word)
+//
+//            id
+//        }.toSet
     }
 
     def transformVector(a: Array[Double]): Array[Double]
