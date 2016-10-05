@@ -157,7 +157,7 @@ object Main {
                 val beta = 0.02
 
                 val alpha0Boosts = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 40, 50, 100, 200, 300, 400)
-                val THREADS = alpha0Boosts.size
+                val THREADS = 5
                 val alpha0BoostsPar = if (THREADS == 1) {
                     alpha0Boosts
                 } else {
