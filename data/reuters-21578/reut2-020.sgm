@@ -1,4 +1,4 @@
-<!DOCTYPE lewis SYSTEM "lewis.dtd">
+<DOCUMENTS>
 <REUTERS TOPICS="YES" LEWISSPLIT="TEST" CGISPLIT="TRAINING-SET" OLDID="20596" NEWID="20001">
 <DATE>19-OCT-1987 23:49:31.45</DATE>
 <TOPICS><D>money-fx</D></TOPICS>
@@ -28548,3 +28548,4 @@ which the CCR board could support an Intercep tender offer.
  Reuter
 &#3;</BODY></TEXT>
 </REUTERS>
+</DOCUMENTS>

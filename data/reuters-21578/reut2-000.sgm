@@ -1,4 +1,4 @@
-<!DOCTYPE lewis SYSTEM "lewis.dtd">
+<DOCUMENTS>
 <REUTERS TOPICS="YES" LEWISSPLIT="TRAIN" CGISPLIT="TRAINING-SET" OLDID="5544" NEWID="1">
 <DATE>26-FEB-1987 15:01:01.79</DATE>
 <TOPICS><D>cocoa</D></TOPICS>
@@ -32719,3 +32719,4 @@ preferred to be included was raised 25 cts to 7.75 dlrs.
  Reuter
 &#3;</BODY></TEXT>
 </REUTERS>
+</DOCUMENTS>

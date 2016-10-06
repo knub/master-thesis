@@ -1,4 +1,4 @@
-<!DOCTYPE lewis SYSTEM "lewis.dtd">
+<DOCUMENTS>
 <REUTERS TOPICS="YES" LEWISSPLIT="TRAIN" CGISPLIT="TRAINING-SET" OLDID="13522" NEWID="8001">
 <DATE>20-MAR-1987 16:54:10.55</DATE>
 <TOPICS><D>earn</D></TOPICS>
@@ -34166,3 +34166,4 @@ the company's management strategy and financial plans.
  Reuter
 &#3;</BODY></TEXT>
 </REUTERS>
+</DOCUMENTS>

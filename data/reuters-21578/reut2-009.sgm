@@ -1,4 +1,4 @@
-<!DOCTYPE lewis SYSTEM "lewis.dtd">
+<DOCUMENTS>
 <REUTERS TOPICS="NO" LEWISSPLIT="TRAIN" CGISPLIT="TRAINING-SET" OLDID="14522" NEWID="9001">
 <DATE>24-MAR-1987 15:59:17.10</DATE>
 <TOPICS></TOPICS>
@@ -32835,3 +32835,4 @@ completed early in the second quarter, Rogers said.
  Reuter
 &#3;</BODY></TEXT>
 </REUTERS>
+</DOCUMENTS>

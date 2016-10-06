@@ -1,4 +1,4 @@
-<!DOCTYPE lewis SYSTEM "lewis.dtd">
+<DOCUMENTS>
 <REUTERS TOPICS="NO" LEWISSPLIT="TRAIN" CGISPLIT="TRAINING-SET" OLDID="16321" NEWID="1001">
 <DATE> 3-MAR-1987 09:18:21.26</DATE>
 <TOPICS></TOPICS>
@@ -31434,3 +31434,4 @@ regular state programs totaled 3,014,400 in the week ended Feb
  Reuter
 &#3;</BODY></TEXT>
 </REUTERS>
+</DOCUMENTS>
