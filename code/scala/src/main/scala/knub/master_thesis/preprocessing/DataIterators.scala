@@ -9,6 +9,7 @@ import master_thesis.util.CorpusReader
 import org.apache.commons.io.FileUtils
 
 import scala.collection.JavaConverters._
+import scala.xml.XML
 import scala.io.Source
 import scala.util.matching.Regex
 
@@ -30,9 +31,23 @@ object DataIterators {
         } else if (dataFolderName.contains("20newsgroups")) {
             println("Detected 20 news corpus")
             (twentyNews(dataFolderName), "../resources/stopwords.txt")
+        } else if (dataFolderName.contains("reuters-21578")) {
+            println("Detected reuters corpus")
+            (reuters(dataFolderName), "../resources/stopwords.txt")
         } else {
             throw new Exception("No data iterator found for given data folder name.")
         }
+    }
+
+    def reuters(dataFolderName: String): java.util.Iterator[cc.mallet.types.Instance] = {
+        val xml = XML.loadFile(s"$dataFolderName/reut2-000.sgm")
+        val bodies = xml \\ "TITLE"
+        println(bodies.size)
+//        bodies.foreach { n =>
+//            println(n.text)
+//        }
+        throw new RuntimeException("Not yet implemented")
+        null
     }
 
     def restrictedCorpus(dataFolderName: String): java.util.Iterator[cc.mallet.types.Instance] = {
