@@ -11,7 +11,7 @@ import cc.mallet.types.{FeatureSequence, TokenSequence}
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
 import knub.master_thesis.util.Word2VecUtils
-import knub.master_thesis.welda.{GaussianWELDA, SimpleSimBasedReplacementWELDA, VmfWELDA}
+import knub.master_thesis.welda.{GaussianKMeansWELDA, GaussianWELDA, SimpleSimBasedReplacementWELDA, VmfWELDA}
 import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import weka.classifiers.functions.SMO
@@ -63,7 +63,8 @@ object Main {
             "topic-model-experiment",
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
-            "welda-gaussian", "welda-vmf", "inspect-topic-evolution",
+            "welda-gaussian", "welda-vmf", "welda-gaussian-kmeans",
+            "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
             "avg-embedding"
         ).foreach { mode =>
@@ -220,7 +221,6 @@ object Main {
                 }
             case "welda-gaussian" =>
                 val THREADS = 20
-//                val lambdas = List(0.0)
                 val lambdas = List(0.1, 0.5, 0.2)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
@@ -266,6 +266,45 @@ object Main {
 //                val weldaGaussian = new GaussianWELDA(args)
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
+            case "welda-gaussian-kmeans" =>
+//                val weldaGaussian = new GaussianKMeansWELDA(args)
+//                weldaGaussian.init()
+//                weldaGaussian.inference()
+                val THREADS = 15
+                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
+                val embeddings = List(
+                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
+                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
+                )
+
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield (lambda, embedding)
+
+                cases.foreach(println)
+                val parCases = if (THREADS == 1) {
+                    cases
+                } else {
+                    val parCases = cases.par
+                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
+                    parCases
+                }
+
+                parCases.foreach { case (lambda, embedding) =>
+                    println(s"Starting lambda = $lambda, embedding = $embedding")
+                    try {
+                        val weldaKmeansGaussian = new GaussianKMeansWELDA(
+                            args.copy(lambda = lambda,
+                                embeddingFileName = embedding._1,
+                                numDocuments = embedding._2))
+                        weldaKmeansGaussian.init()
+                        weldaKmeansGaussian.inference()
+                        println(s"Finshed lambda = $lambda, embedding = $embedding")
+                    } catch {
+                        case e: Exception =>
+                            println(s"Failed lambda = $lambda, embedding = $embedding")
+                            println(e)
+                    }
+                }
             case "welda-vmf" =>
                 val THREADS = 30
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
