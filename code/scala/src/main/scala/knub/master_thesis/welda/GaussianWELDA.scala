@@ -14,7 +14,8 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.gaussian." +
-            s"distance-$DISTANCE_FUNCTION." +
+            s"pca-$PCA_DIMENSIONS." +
+            s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
             s"lambda-${LAMBDA.toString.replace('.', '-')}"
     }
 
