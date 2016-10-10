@@ -1,0 +1,1 @@
+mvn install:install-file -Dfile=XMeans.jar -DgroupId=nz.ac.waikato.cms.weka -DartifactId=XMeans -Dversion=1.0.4-SNAPSHOT -Dpackaging=jar
