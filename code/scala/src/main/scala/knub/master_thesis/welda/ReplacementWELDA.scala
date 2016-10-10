@@ -35,6 +35,10 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     var folder: String = _
 
+    override def fileBaseName: String = s"$folder/welda"
+
+    def getFolderName(): String
+
     val newStopwords = List(
         "1", "2", "also", "anyone", "article", "back", "believe", "ca", "'d", "even",
         "find", "first", "get", "go", "going", "good", "got", "know", "last", "like",
@@ -109,6 +113,15 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 //                println(word)
             id
         }.toSet
+
+        folder = getFolderName()
+        val folderFile = new File(folder)
+        if (new File(s"${folderFile.getAbsolutePath}/welda.iteration-${p.numIterations}.topics").exists()) {
+            throw new RuntimeException(s"Experiment ${folderFile.getName} already existing")
+        } else {
+            folderFile.mkdir()
+            super.init()
+        }
     }
 
     def transformVector(a: Array[Double]): Array[Double]

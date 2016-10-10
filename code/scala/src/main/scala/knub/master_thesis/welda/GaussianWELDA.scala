@@ -15,10 +15,10 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
 //    override val PCA_DIMENSIONS = 5
 //    override val DISTRIBUTION_ESTIMATION_SAMPLES = 10
 
-    override def init(): Unit = {
-        super.init()
-        folder = s"${p.modelFileName}.$embeddingName.welda.gaussian.distance-$DISTANCE_FUNCTION.lambda-${LAMBDA.toString.replace('.', '-')}"
-        new File(folder).mkdir()
+    override def getFolderName(): String = {
+        s"${p.modelFileName}.$embeddingName.welda.gaussian." +
+            s"distance-$DISTANCE_FUNCTION." +
+            s"lambda-${LAMBDA.toString.replace('.', '-')}"
     }
 
     override def transformVector(a: Array[Double]): Array[Double] = a
@@ -36,7 +36,6 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
         gaussianDistributions(topicId).sample()
     }
 
-    override def fileBaseName: String = s"$folder/welda"
 
     def determineGaussianParameters(vectors: Seq[Array[Double]]): (DenseVector[Double], DenseMatrix[Double]) = {
         val mean = new Array[Double](PCA_DIMENSIONS)

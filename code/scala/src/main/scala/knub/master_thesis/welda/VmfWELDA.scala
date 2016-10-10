@@ -25,18 +25,11 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
     val vmfDim = PCA_DIMENSIONS - 1
     val betaDist = new BetaDistribution(vmfDim / 2.0, vmfDim / 2.0)
 
-    override def init(): Unit = {
-        folder = s"${p.modelFileName}.$embeddingName.welda.vmf." +
+    override def getFolderName(): String = {
+        s"${p.modelFileName}.$embeddingName.welda.vmf." +
             s"distance-$DISTANCE_FUNCTION." +
             s"lambda-${LAMBDA.toString.replace('.', '-')}." +
             s"kappafactor-$KAPPA_FACTOR_FOR_MORE_CONCENTRATION"
-        val folderFile = new File(folder)
-        if (new File(s"${folderFile.getAbsolutePath}/welda.iteration-${p.numIterations}.topics").exists()) {
-            throw new RuntimeException(s"Experiment ${folderFile.getName} already existing")
-        } else {
-            folderFile.mkdir()
-            super.init()
-        }
     }
 
     override def transformVector(a: Array[Double]): Array[Double] = {
@@ -130,5 +123,4 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
         sample
     }
 
-    override def fileBaseName: String = s"$folder/welda"
 }
