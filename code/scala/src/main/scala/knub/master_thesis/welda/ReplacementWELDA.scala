@@ -16,9 +16,9 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     new File(".").listFiles().filter(_.getName.contains("be.tarsos")).foreach { f => println(f); f.delete() }
 
     // dimensions to sample embeddings down to, so we can estimate the parameters of the distribution from a few samples only
-    val PCA_DIMENSIONS = 10
+    val PCA_DIMENSIONS = p.pcaDimensions
     // how many samples to estimate the distribution
-    val DISTRIBUTION_ESTIMATION_SAMPLES = 20
+    val DISTRIBUTION_ESTIMATION_SAMPLES = p.distributionEstimationSamples
     override val TOPIC_OUTPUT_EVERY = 1
 
     val LAMBDA = p.lambda

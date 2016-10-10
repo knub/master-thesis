@@ -18,8 +18,6 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
     var vmfs: Array[Vmf] = _
 
-    override val PCA_DIMENSIONS = 10
-    override val DISTRIBUTION_ESTIMATION_SAMPLES = 20
     val KAPPA_FACTOR_FOR_MORE_CONCENTRATION = p.kappaFactor
 
     val vmfDim = PCA_DIMENSIONS - 1
