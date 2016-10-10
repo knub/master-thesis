@@ -12,9 +12,6 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
 
     var gaussianDistributions: Array[MultivariateGaussian] = _
 
-//    override val PCA_DIMENSIONS = 5
-//    override val DISTRIBUTION_ESTIMATION_SAMPLES = 10
-
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.gaussian." +
             s"distance-$DISTANCE_FUNCTION." +

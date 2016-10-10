@@ -40,6 +40,9 @@ case class Args(
     lambda: Double = -1.0,
     kappaFactor: Int = 5,
     saveStep: Int = 50,
+    // replacement sampling
+    pcaDimensions: Int = 10,
+    distributionEstimationSamples: Int = 20,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
 
