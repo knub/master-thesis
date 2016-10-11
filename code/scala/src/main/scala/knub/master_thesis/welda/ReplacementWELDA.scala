@@ -39,6 +39,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     def getFolderName(): String
 
+    // Needs to be taken from stopword topic
     val newStopwords = List(
         "1", "2", "also", "anyone", "article", "back", "believe", "ca", "'d", "even",
         "find", "first", "get", "go", "going", "good", "got", "know", "last", "like",
@@ -161,7 +162,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 val topicId = corpusTopics(docIdx).get(wIndex)
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(LAMBDA) ||
+                val wordId = if (Sampler.nextCoinFlip(LAMBDA) || topicId == 0 ||
                     (LAMBDA != 0.0 && newStopwordIds.contains(originalWordId))) {
                     val sampledWord = sampleAndFindWord(topicId)
                     nrReplacedWordsTries += 1
