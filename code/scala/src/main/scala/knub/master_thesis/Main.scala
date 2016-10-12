@@ -220,6 +220,10 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
+                val weldaGaussian = new GaussianWELDA(args)
+                weldaGaussian.init()
+                weldaGaussian.inference()
+                System.exit(1)
                 val THREADS = 20
                 val lambdas = List(0.1, 0.5, 0.2)
                 val embeddings = List(
@@ -263,13 +267,11 @@ object Main {
                             println(e)
                     }
                 }
-//                val weldaGaussian = new GaussianWELDA(args)
-//                weldaGaussian.init()
-//                weldaGaussian.inference()
             case "welda-gaussian-kmeans" =>
-//                val weldaGaussian = new GaussianKMeansWELDA(args)
-//                weldaGaussian.init()
-//                weldaGaussian.inference()
+                val weldaGaussian = new GaussianKMeansWELDA(args)
+                weldaGaussian.init()
+                weldaGaussian.inference()
+                System.exit(1)
                 val THREADS = 15
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
                 val embeddings = List(
