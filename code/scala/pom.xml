@@ -48,6 +48,11 @@
             <version>3.8.0</version>
         </dependency>
         <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>XMeans</artifactId>
+            <version>1.0.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.carrotsearch</groupId>
             <artifactId>hppc</artifactId>
             <version>0.7.1</version>
