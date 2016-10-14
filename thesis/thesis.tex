@@ -242,9 +242,20 @@ In this thesis, we will use two particularly fast and robust implementations:
 
 
 \subsection{Evaluation of topic models}
-% TODO: Add previous methods like held-out likelihood etc, but that did not correlate very well
-A common evaluation metric for topic models is \emph{topic coherence}.
-Topic coherence measures, how well the top-words in the topics belong together and form a common theme.
+As topic modeling is an unsupervised learning technique, there is no straightforward evaluation metric available as in supervised tasks.
+The output of a topic model, the document-topic matrix and the topic-word matrix, do not lend themselves to a quantitative evaluation either.
+Still, with many different topic modeling techniques available and hyperparameters to set, there is a need to compare topic models and to be able to choose the best topic.
+
+Traditionally, topic models were evaluated using held-out likelihood of unseen documents.
+In this approach, a topic model was trained on a corpus.
+Afterwards, the likelihood of some held-out documents was calculated using the trained model.
+The intuition was, that the higher this likelihood, the better the topic model.
+However, Chang et al.~\cite{Chang2009} showed, that this held-out likelihood does not correlate with the interpretability for humans very well.
+Thus, another topic model evaluation measure was necessary.
+
+The idea of \emph{topic coherence} is to measure topic models based on the top words of all of its topics.
+This corresponds to the way, that humans interact with topic models mostly: by looking at the top words in a topic and mentally assigning an umbrella term to a topic.
+Thus, topic coherence measures, how well the top-words in the topics belong together and form a common theme.
 A good topic (examples taken from \cite{Boyd-graber2014}) is: \\
 \hspace*{1cm} \framebox[1.1\width]{trout fish fly fishing water angler stream rod flies salmon} \\
 The words in topic clearly form a narrow topic, all words belong to the common ``fishing'' theme.
@@ -254,17 +265,65 @@ On the contrary, an example for a bad topic is: \\
 The topic contains very general words, no clear common theme is recognizable.
 This topic is not useful for a human trying to understand a document collection.
 
-The goal of a topic coherence metric is to capture the this usefulness of a topic for a human user.
-Therefore, the goal of topic coherence measure is to have a high correlation with human ratings.
-The base idea for such a coherence measure was introduced by Newman et al.~\cite{Newman2010}.
-They evaluated metrics based on WordNet, Google searches and word-cooccurrences in Wikipedia articles, and found that latter provides the best metric.
-Röder et al.~\cite{Roder2015} build on this idea and evaluated a total of 237912 coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
+Boyd-Graber et al.~\cite{Boyd-graber2014} et al. identify different types of bad topics:
+\begin{itemize}
+  \item
+    \textbf{Too general topics}: As a rule of thumb, words which occur more often do not add much meaning to a document.
+    At the extreme, there are stopwords such as ``and'', ``the'', ``of'', etc., which do not provide value in terms of a good topic.
+    Topics therefore should not contain too many general words, as in the following example: \\
+    \hspace*{0cm} \framebox[1.1\width]{would one writes like think article know get time people} \\
+    On the contrary, topics should also not contain words, which occur only once or twice in the entire corpus.
+  \item
+    \textbf{Mixed topics}: A mixed topic is a topic, which contains two topics. \\
+    An example is the following topic \\
+    \hspace*{0cm} \framebox[1.1\width]{cars engine speed oil water power air light}, \\
+    which mixes a ``automobile'' topic with a ``energy'' topic.
+  \item
+    \textbf{Chained topics}: Chained topics are similar to mixed topics, in that they contain two topics.
+    They also contain a word with several meanings, which occurs in both topics, thus creating an anchor point and an explanation, why the two topics occur together.
+    In the following bad topic, the word ``windows'' constitutes such a word: \\
+    \hspace*{0cm} \framebox[1.1\width]{file folder dos windows door house built}
+  \item
+    \textbf{Nonsensical topics}:
+    Topics, which are not interpretable at all, because they contain uncommon words.
+    This often happens, because of preprocessing errors leaving fragments in the text: \\
+    \hspace*{0cm} \framebox[1.1\width]{max giz air uww fyn tct ahf fpl vmk pmf}
+\end{itemize}
 
-We will use this metric, which is called $C_V$ in the original paper, to evaluate topic coherence throughout our master thesis.
+Topic coherence can be evaluated by humans.
+Given the top words of a topic, human annotators can rate the topic on a three-point Likert scale 1-3 as either ``useless'', ``average'', or useful~\cite{Aletras2013}.
+Averaging the annotations from several annotators yields the gold standard for the topic coherence of a set of words.
+However, this an extensive and time-consuming approach in itself, and then needs to be done again for every new topic model with its own new topics.
 
-All
+The goal of a automatic topic coherence metric is to capture the usefulness of a topic for a human user automatically without depending on human annotators.
+The base idea for such a automatic measure was introduced by Newman et al.~\cite{Newman2010}.
+Just as human annotators, an automatic measure outputs a number indicating the coherence of given topic.
+Usually this yields a value between zero and one.
+The best automatic topic coherence measure is then that measure, which has the highest correlation with human ratings.
+Correlation is measured using Pearson's correlation.
+Basically, the human ratings are used as training data to decide, which automatic measure is the best.
 
-cite the care and feeding paper
+To evaluate topic coherence automatically, all measures need an external knowledge base or corpus.
+Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-cooccurrences in Wikipedia articles, and found that using Wikipedia provides the best metric.
+
+Röder et al.~\cite{Roder2015} built on this idea and developed an extensive survey to find the best method to combine the word-cooccurrences from Wikipedia into a coherence measure.
+Using previously published topic ratings~\cite{Aletras2013,Chang2009,Newman2010,Rosner2013}, they could find the topic coherence measure with the highest correlation.
+It is important to realize, that they could reuse previously published topic ratings, because the top words of a topic are independent of any topic model implementation or architecture.
+The topic coherence is solely based on the coherence of a set of words.
+Because of this, an automatic topic coherence measure can be selected based on an arbitrary set of topic ratings by human annotators and then be used for new topic models.
+
+In total, Röder et al.~\cite{Roder2015} evaluated a total of 237912 coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
+The best metric, called $C_V$ in the original paper, had a correlation of $0.731$ with human ratings.
+We will use the $C_V$ metric in this master thesis to evaluate topic coherence.
+We will now describe this $C_V$ metric in detail.
+
+At first, the number $N$ of top words to be considered for the measure must be chosen.
+We choose $N=10$, because ``the evaluation of topic quality is harder, if the number of top words $N$ is small''~\cite{Roder2015} and because it is a common choice in the literature~\cite{Roder2015,Aletras2013}.
+
+Human-interpretability
+
+
+
 
 \section{Word embeddings}
 
@@ -671,6 +730,19 @@ However, the method is not evaluated extensively and it is unclear, whether this
 
 \section{Similarity Observations}
 Foo
+\section{Topic Coherence}
+\section{Evaluating Topic Coherence}
+
+
+
+
+In this thesis, we follow the work by Röder et al.~\cite{Roder2015}.
+Their evaluation workflow worked as follows:
+They used human topic rankings provided by XXX.
+The human annotators were asked to rate topic words.
+
+
+Many approaches have been 
 \section{WELDA Experiments}
 
 Explain why we do not run WELDA from the start - run experiment!
@@ -690,6 +762,12 @@ model.google.model.welda.lambda.full-no-filtering
 Gaussian WELDA
 
 Von-Mises-Fisher WELDA
+\section{Document Classification}
+We also evaluated topic models on another commonly used task: document classification.
+In contrast to topic coherence, this allows to use topic models in an supervised setting with clear evaluation metrics.
+
+Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
+
 \chapter{Thoughts}
 \section{Bayesian Optimization}
 \begin{itemize}
