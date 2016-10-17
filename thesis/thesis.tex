@@ -314,14 +314,81 @@ Because of this, an automatic topic coherence measure can be selected based on a
 
 In total, Röder et al.~\cite{Roder2015} evaluated a total of 237912 coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
 The best metric, called $C_V$ in the original paper, had a correlation of $0.731$ with human ratings.
+This shows, that topics with high values in the $C_V$ metric can usually be easily interpreted by humans.
 We will use the $C_V$ metric in this master thesis to evaluate topic coherence.
 We will now describe this $C_V$ metric in detail.
 
 At first, the number $N$ of top words to be considered for the measure must be chosen.
 We choose $N=10$, because ``the evaluation of topic quality is harder, if the number of top words $N$ is small''~\cite{Roder2015} and because it is a common choice in the literature~\cite{Roder2015,Aletras2013}.
-
-Human-interpretability
-
+We denote the set of top words with $W$.
+The topic coherence evaluation for one set of 10 top words is calculated in four steps:
+\begin{enumerate}
+  \item \textbf{Word Segmentation}:
+    The set $W$ of top words is segmented into pairs of word-sets, for which the coherence is calculated separately in the following step.
+    The words are separated as follows:
+    \begin{equation*}
+      S = \{ (W', W^*) | W' = \{w_i\}, w_i \in W; W^* = W \}
+    \end{equation*}
+    Assuming a set $W = \{ car, automobile, fuel \}$ of $N = 3$, one tuple in $S$ would be $\{ (\{car\}, \{car, automobile, fuel\})\}$, which represents the question \emph{How well do the words ``car'', ``automobile'', and ``fuel'' support the word ``car''?}
+  \item \textbf{Probability Estimation}:
+    To estimate the probability of a word, the $C_V$ metric is based on word occurrences and co-occurrences in the English Wikipedia.
+    The probability of a word is estimated using document frequency, i.e. the number of documents a word occurs in divided by the total number of documents.
+    Similarly, the probability of a set of words is estimated as the number of documents all words in the set occur divided by the total number of documents.
+    The $C_V$ metric does not use the original Wikipedia articles as documents, but rather runs a sliding window over the Wikipedia articles.
+    The sliding window advances one token at a time and creates a new virtual document.
+    The size of the sliding window is set to $110$ tokens.
+    Using these new virtual documents has two advantages.
+    First, it creates many more documents, as the average Wikipedia article is longer than $110$ tokens.
+    Second, and more importantly, it exploits context information.
+    Only words, which occur near each other are taken into account.
+    Thus, words which occur far apart in a long document, do not increase their joint probability.
+    This approach is called \emph{Boolean sliding window}.
+  \item \textbf{Confirmation Measure}:
+    Now, the coherence of a tuple $(W', W^*)$ needs to be calculated.
+    $C_V$ uses the normalized pointwise mutual information, often referred to as NPMI, which is defined as follows:
+    \begin{equation*}
+      PMI(W_i, W_j) = \log \frac{P(W_i, W_j) + \epsilon}{P(W_i) * P(W_j)}
+    \end{equation*}
+    \begin{equation*}
+      NPMI(W_i, W_j) = \frac{PMI(W_i, W_j)}{- \log(P(W_i, W_j) + \epsilon)}
+    \end{equation*}
+    The $\epsilon$ is added to avoid a zero inside the logarithm, and is set to $\epsilon = 10^{-12}$.
+    The NPMI is used indirectly in the calculation of $C_V$.
+    Instead of evaluating it directly on a given tuple $(W', W^*)$, it used to define a context vector for each top word.
+    With the top word set $W$, the context coherence vector $\vec{v}$ of a segment set $\tilde{W}$ is defined as follows:
+    \begin{equation*}
+      \vec{v}_j(\tilde{W}) = \sum\limits_{\tilde{w} \in \tilde{W}} NPMI(\tilde{w}, w_j); j \in \{ 1, \ldots, | W | \}
+    \end{equation*}
+    For example, the vector for the word set $\{ car, fuel \}$ would be
+    \begin{equation*}
+      \vec{v}_j(\{ car, fuel \}) =
+      \begin{pmatrix}
+        NPMI(car, car) + NPMI(fuel, car) \\
+        NPMI(car, automobile) + NPMI(fuel, automobile) \\
+        NPMI(car, fuel) + NPMI(fuel, fuel) \\
+      \end{pmatrix}
+    \end{equation*}
+    The dimension of the vectors $\vec{v}$ is always equal to the number $N$ of top words.
+    Using these context coherence vectors, the coherence of a pair $(W', W^*)$ is computed using cosine similarity:
+    \begin{equation*}
+      \vec{u} = \vec{v}(W')
+    \end{equation*}
+    \begin{equation*}
+      \vec{w} = \vec{v}(W^*)
+    \end{equation*}
+    \begin{equation*}
+      coherence(\vec{u}, \vec{w}) = \frac{\vec{u} \cdot \vec{w}}{||\vec{u}|| * ||\vec{w}||}
+    \end{equation*}
+    Compared to directly using the NPMI, using an indirect measure has the advantage, that it assigns a high score also to word pairs, which occur together only rarely, but still occur in the same contexts.
+    This can be the case for products or brands in the same category~\cite{Roeder2015}.
+    While they seldom occur together, their contexts are similar, thus a high coherence score is beneficial.
+  \item \textbf{Averaging}:
+    As we have $N$ pairs of tuples $(W', W^*)$, the $coherence$ values need to be averaged.
+    $C_V$ uses arithmetic mean.
+\end{enumerate}
+% TODO: Show example best/worst topics using C_V?
+As $C_V$ outputs one coherence value for each topic, we need to average again to obtain a metric for the entire topic model.
+Again, we use arithmetic mean here.
 
 
 
