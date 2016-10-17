@@ -390,7 +390,7 @@ The topic coherence evaluation for one set of 10 top words is calculated in four
 As $C_V$ outputs one coherence value for each topic, we need to average again to obtain a metric for the entire topic model.
 Again, we use arithmetic mean here.
 
-
+We directly use the author's implementation of $C_V$ in their Palmetto\footnote{\url{https://github.com/AKSW/Palmetto}} topic quality measuring toolkit.
 
 \section{Word embeddings}
 
@@ -795,26 +795,57 @@ However, the method is not evaluated extensively and it is unclear, whether this
 %\include{chapters/future_work}
 \chapter{Main}
 
+In this chapter we will present our analysis on the spread.
+Afterwards we will present our new topic model approach, which is based on re-sampling words using information from the word embedding models.
+We call our new model WELDA (word embedding LDA).
+Afterwards we will analyze the different topic models and word embedding-enhanced topic models in two standard tasks for topic models: topic coherence and document classification.
+
 \section{Similarity Observations}
-Foo
-\section{Topic Coherence}
-\section{Evaluating Topic Coherence}
+As word embeddings and LDA topic modeling are different techniques with no inherent relationship to each other, we start with exploring how the results of one can be interpreted in the other model.
+\begin{table*}
+       \centering
+       \caption{Word similarity in topic models and word embeddings}
 
 
+% Please add the following required packages to your document preamble:
+       % \usepackage{multirow}
+       \begin{tabular}{llll}
+       \hline
+       \textbf{}                                                                                  & \textbf{} & \multicolumn{2}{l}{\textbf{Word embedding similarity}} \\
+		                                                                                   &           & Low                       & High                       \\ \hline
+	\multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}l@{}}Topic model\\ similarity\end{tabular}}} & Low       &                           &                            \\
+		                                                                                   & High      &                           &                           
+       \end{tabular}
+       % \begin{tabular}{cp{3cm}p{3cm}}
+                                              % & \multicolumn{2}{c}{\textbf{Word embedding similarity}} \\
+                                              % & Low & High \\
+              % \hline
+              % Blei et al.~\cite{Blei2003}     & \cmark &
+              % \hline
+       % \end{tabular}
+       \label{table:tm_and_we_word_similarities}
+\end{table*}
 
 
-In this thesis, we follow the work by Röder et al.~\cite{Roder2015}.
-Their evaluation workflow worked as follows:
-They used human topic rankings provided by XXX.
-The human annotators were asked to rate topic words.
+\section{WELDA}
+We base our new topic modeling technique on the observations from the last chapter.
+Word embedding models 
+
+For example, imagine 
+Two highly similar brands
+however, never occuring together
+but in very similar contexts
 
 
-Many approaches have been 
-\section{WELDA Experiments}
-
+\subsection{WELDA with the Gaussian distribution}
+\subsection{WELDA with von Mises-Fisher distribution}
+\subsection{WELDA with Average Sampling}
+\subsection{Handling general words}
+\subsection{Running LDA as a prerequisitite}
 Explain why we do not run WELDA from the start - run experiment!
+\subsection{Overfitting}
+When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
 /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
-Explain overfitting
 
 \subsection{Locality Sensitive Hashing for nearest neighbour search}
 https://www.youtube.com/watch?v=Arni-zkqMBA
@@ -829,11 +860,17 @@ model.google.model.welda.lambda.full-no-filtering
 Gaussian WELDA
 
 Von-Mises-Fisher WELDA
+
+\section{Topic Coherence}
+Topic coherence is a standard task to 
+
+\subsection{Runtime}
 \section{Document Classification}
 We also evaluated topic models on another commonly used task: document classification.
 In contrast to topic coherence, this allows to use topic models in an supervised setting with clear evaluation metrics.
-
 Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
+
+We use the document-topic matrices.
 
 \chapter{Thoughts}
 \section{Bayesian Optimization}
