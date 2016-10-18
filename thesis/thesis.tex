@@ -859,10 +859,12 @@ however, never occuring together
 but in very similar contexts
 
 \begin{algorithm}
-  \caption{My algorithm}\label{euclid}
+  \caption{Gibbs sampling algorithm for the WELDA model}\label{euclid}
   \begin{algorithmic}[1]
-    \Procedure{MyProcedure}{}
-    \State $\textit{stringlen} \gets \text{length of }\textit{string}$
+    \Procedure{Init}{}
+    \State $\textit{Initialize topic variables } z_{d_i} \textit{ by running standard LDA for } m \textit{ iterations}$
+    \Procedure{Sampling}{}
+    \State $\textit{Initialize topic variables } z_{d_i} \textit{ by running standard LDA for } m \textit{ iterations}$
     \State $i \gets \textit{patlen}$
     \BState \emph{top}:
     \If {$i > \textit{stringlen}$} \Return false
@@ -888,6 +890,7 @@ There are several configurable parameters in the algorithm, which we will detail
   \item \textbf{Number of dimensions for dimensionality reduction}:
   \item \textbf{Dimensionality reduction method}:
   \item \textbf{Number of top words for distribution estimation}:
+  \item \textbf{Distance function for the nearest neighbour search}: Euclidean or cosine
 \end{itemize}
 
 

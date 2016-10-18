@@ -72,6 +72,8 @@ def calculate_topic_coherences(f):
         return RuntimeError("Could not compute topics")
     else:
         topic_coherences = parse_topic_coherence(stdout)
+        # print stdout
+        # print map(lambda x: x[0], sorted(enumerate(topic_coherences), key=lambda x: x[1]))
         return topic_coherences
 
 
