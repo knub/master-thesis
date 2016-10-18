@@ -15,6 +15,8 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 % \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{pifont}
@@ -53,7 +55,7 @@
   linkcolor=darkred,
   urlcolor=darkblue,
   filecolor=red,
-  pdftitle={TODO},
+  pdftitle={Master Thesis},
   pdfauthor={Stefan Bunk},
   pdfpagemode={UseNone}
 }
@@ -107,6 +109,9 @@ Fachgebiet Informationssysteme \\
 Betreuung: Dr. Ralf Krestel}
 
 \pagestyle{headings}
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
 
 \begin{document}
 \maketitle
@@ -391,6 +396,21 @@ As $C_V$ outputs one coherence value for each topic, we need to average again to
 Again, we use arithmetic mean here.
 
 We directly use the author's implementation of $C_V$ in their Palmetto\footnote{\url{https://github.com/AKSW/Palmetto}} topic quality measuring toolkit.
+Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured by $C_V$ in the 20news corpus.
+\begin{table}[]
+  \centering
+  \caption{Best and worst topics in our best topic model on the 20news-corpus with 50 topics according to $C_V$}
+  \begin{tabular}{ll}
+  \hline
+  \textbf{Coherence} & \textbf{Top words} \\ \hline
+  0.79               & god, faith, moral, morality, truth, christians, religion, atheists, belief, bible \\
+  0.76               & team, hockey, players, season, game, nhl, league, teams, games, play \\
+  ...                &                    \\
+  0.33               & good, find, figuring, exciting, sure, things, anybody, mistake, hopefully, decent \\
+  0.30               & radar, detector, realizing, saturn, make, insurance, car, detectors, dealer, weight \\ \hline
+  \end{tabular}
+  \label{table:best_worst_cv_topics}
+\end{table}
 
 \section{Word embeddings}
 
@@ -826,6 +846,8 @@ As word embeddings and LDA topic modeling are different techniques with no inher
        \label{table:tm_and_we_word_similarities}
 \end{table*}
 
+\section{Self trained word2vecs}
+
 
 \section{WELDA}
 We base our new topic modeling technique on the observations from the last chapter.
@@ -835,6 +857,38 @@ For example, imagine
 Two highly similar brands
 however, never occuring together
 but in very similar contexts
+
+\begin{algorithm}
+  \caption{My algorithm}\label{euclid}
+  \begin{algorithmic}[1]
+    \Procedure{MyProcedure}{}
+    \State $\textit{stringlen} \gets \text{length of }\textit{string}$
+    \State $i \gets \textit{patlen}$
+    \BState \emph{top}:
+    \If {$i > \textit{stringlen}$} \Return false
+    \EndIf
+    \State $j \gets \textit{patlen}$
+    \BState \emph{loop}:
+    \If {$\textit{string}(i) = \textit{path}(j)$}
+    \State $j \gets j-1$.
+    \State $i \gets i-1$.
+    \State \textbf{goto} \emph{loop}.
+    \State \textbf{close};
+    \EndIf
+    \State $i \gets i+\max(\textit{delta}_1(\textit{string}(i)),\textit{delta}_2(j))$.
+    \State \textbf{goto} \emph{top}.
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+There are several configurable parameters in the algorithm, which we will detail in the following:
+\begin{itemize}
+  \item \textbf{Choice of topic distribution}:
+  \item \textbf{Resampling probability $\lambda$}:
+  \item \textbf{Number of dimensions for dimensionality reduction}:
+  \item \textbf{Dimensionality reduction method}:
+  \item \textbf{Number of top words for distribution estimation}:
+\end{itemize}
 
 
 \subsection{WELDA with the Gaussian distribution}
