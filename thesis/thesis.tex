@@ -100,12 +100,12 @@
 \includegraphics{figures/hpi_logo_cmyk_wb_sl2}
 } \subject{Masterarbeit}
 \title{English Title
-\\ \bigskip 
+\\ \bigskip
 \large{German Title}}
 \author{Stefan Bunk\\{\small{\url{stefan.bunk@student.hpi.uni-potsdam.de}}}}
 \date{Eingereicht am 23.12.2016}
 \publishers{
-Fachgebiet Informationssysteme \\ 
+Fachgebiet Informationssysteme \\
 Betreuung: Dr. Ralf Krestel}
 
 \pagestyle{headings}
@@ -391,7 +391,7 @@ The topic coherence evaluation for one set of 10 top words is calculated in four
     As we have $N$ pairs of tuples $(W', W^*)$, the $coherence$ values need to be averaged.
     $C_V$ uses arithmetic mean.
 \end{enumerate}
-% TODO: Show example best/worst topics using C_V?
+
 As $C_V$ outputs one coherence value for each topic, we need to average again to obtain a metric for the entire topic model.
 Again, we use arithmetic mean here.
 
@@ -430,7 +430,7 @@ In contrast to this, the idea of \emph{distributed representations} is to not re
 The idea of distributed representations has a long history, dating back to the mid-eighties with work from Hinton and Rumelhart~\cite{Hinton1986,Rumelhart1988}.
 Intuitively, instead of using one dimension for each atomic unit, distributed representations assign meanings to the dimensions and then recombine these meanings for a specific object.
 %For example to represent , one dimension could indicate the size of an object, another one the color.
-%With just three dimensions, one could represent small 
+%With just three dimensions, one could represent small
 %If one dimension indicates how green an object is and another dimension indicates whether an object is a flower, then one could represent a green flower with high values in both dimensions instead of requiring one dimension for red, blue, and green flowers.
 Recently, the term \emph{word embeddings} was also used to describe the approach of embedding words in a vector space.
 We will use the terms \emph{distributed representation}, \emph{word vectors} and \emph{word embeddings} interchangeably in this document.
@@ -825,60 +825,109 @@ As word embeddings and LDA topic modeling are different techniques with no inher
 \begin{table*}
        \centering
        \caption{Word similarity in topic models and word embeddings}
-
-
-% Please add the following required packages to your document preamble:
-       % \usepackage{multirow}
        \begin{tabular}{llll}
        \hline
        \textbf{}                                                                                  & \textbf{} & \multicolumn{2}{l}{\textbf{Word embedding similarity}} \\
-		                                                                                   &           & Low                       & High                       \\ \hline
-	\multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}l@{}}Topic model\\ similarity\end{tabular}}} & Low       &                           &                            \\
-		                                                                                   & High      &                           &                           
+                                                                                                  &           & Low                       & High                       \\ \hline
+       \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}l@{}}Topic model\\ similarity\end{tabular}}} & Low       &                           &                            \\
+                                                                                                  & High      &                           &
        \end{tabular}
-       % \begin{tabular}{cp{3cm}p{3cm}}
-                                              % & \multicolumn{2}{c}{\textbf{Word embedding similarity}} \\
-                                              % & Low & High \\
-              % \hline
-              % Blei et al.~\cite{Blei2003}     & \cmark &
-              % \hline
-       % \end{tabular}
        \label{table:tm_and_we_word_similarities}
 \end{table*}
 
 \section{Self trained word2vecs}
 
+We trained our own word embeddings using the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
+We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
+
+For preprocessing, we split the corpora into sentences.
+Words were not lowercased and no stopwords were removed, as both have been show to harm the performance of the resulting vectors.
+% TODO: Quote
+
+We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}.
+We evaluated using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
+The results can be seen in Table~\ref{table:word_embeddings_performance}.
+% TODO: Explain analogy reasoning
+
+\begin{table}[]
+  \centering
+  \caption{Performance}
+  \label{table:word_embeddings_performance}
+  \begin{tabular}{ll}
+  \hline
+                                                                  & \textbf{Accuracy} \\ \hline
+  \textbf{200 dimensions, trained on English Wikipedia}           & 56.5 \%           \\
+  \textbf{50-dimensions, trained on 20-news corpus}               & 11.1 \%           \\
+  \textbf{Embeddings published by Google, trained on Google News} & 74.3 \%
+  \end{tabular}
+\end{table}
+
+
 
 \section{WELDA}
 We base our new topic modeling technique on the observations from the last chapter.
-Word embedding models 
+Word embedding models
 
-For example, imagine 
+To transfer probability mass 
+For example, imagine
 Two highly similar brands
 however, never occuring together
 but in very similar contexts
 
+For each topic, we learn a multivariate probability distribution in the embedding space.
+The distribution parameters are estimated
+The choice of distribution can be varied and will be explained later.
+
 \begin{algorithm}
-  \caption{Gibbs sampling algorithm for the WELDA model}\label{euclid}
+  \caption{Initialization for the WELDA model, to be run before the Gibbs sampling}
+  \label{alg:welda_init}
   \begin{algorithmic}[1]
-    \Procedure{Init}{}
-    \State $\textit{Initialize topic variables } z_{d_i} \textit{ by running standard LDA for } m \textit{ iterations}$
+    \Procedure{Init}{array of words $words$, word embeddings $v$}
+    \For{i $\in$ \{ 1 .. $|words|$ \}}
+      \State{$embedding\_matrix[i] = v.get\_word(words[i])$}
+    \EndFor
+    \State{$embedding\_matrix \gets PCA(embedding\_matrix, n)$}
+    \State{$lsh \gets \textit{initialize LSH structure for nearest neighbour search}$}
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  \caption{Gibbs sampling algorithm for the WELDA model}
+  \label{alg:welda_gibbs_sampling}
+  \begin{algorithmic}[1]
     \Procedure{Sampling}{}
-    \State $\textit{Initialize topic variables } z_{d_i} \textit{ by running standard LDA for } m \textit{ iterations}$
-    \State $i \gets \textit{patlen}$
-    \BState \emph{top}:
-    \If {$i > \textit{stringlen}$} \Return false
-    \EndIf
-    \State $j \gets \textit{patlen}$
-    \BState \emph{loop}:
-    \If {$\textit{string}(i) = \textit{path}(j)$}
-    \State $j \gets j-1$.
-    \State $i \gets i-1$.
-    \State \textbf{goto} \emph{loop}.
-    \State \textbf{close};
-    \EndIf
-    \State $i \gets i+\max(\textit{delta}_1(\textit{string}(i)),\textit{delta}_2(j))$.
-    \State \textbf{goto} \emph{top}.
+    \State $\textit{initialize topic variables } z_{d_i} \textit{ by running standard LDA for } m \textit{ iterations}$
+    \For{$n \in \{\textit{ 1 .. N }\}$}
+      \State{\textsc{EstimateDistributionParameters()}}
+      \For{$d \in \{\textit{ 1 .. $|D|$ }\}$}
+        \For{$w\_idx \in \{\textit{ 1 .. $N_d$ }\}$}
+          \State{$word\_id \gets D[d][w\_idx]$}
+          \State{\textit{decrement doc-topic and topic-word count for old topic}}
+          \State{\textit{// sample new topic based on adapted counts}}
+          \State{$topic\_id \gets sample\_new\_topic()$}
+          \If{$coin\_flip(\lambda)\textit{ is successful}$}
+            \State{$sample \gets sample\_from\_distribution(topid\_id)$}
+            \State{$\textit{// update $word\_id$, as if we had seen another word}$}
+            \State{$word\_id = lsh.find\_nearest\_word(sample)$}
+          \EndIf
+          \State{\textit{increment doc-topic and topic-word count for new topic}}
+        \EndFor
+      \EndFor
+    \EndFor
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  \caption{Estimating distribution parameters for each topic, run before each Gibbs sampling iteration}
+  \label{alg:welda_parameter_estimation}
+  \begin{algorithmic}[1]
+    \Procedure{EstimateDistributionParameters}{}
+    \For{$topic\_id \in \{\textit{ 1 .. $K$ }\}$}
+      \State{$top\_words \gets$ \textit{Get top $TODO$ words in topic $topic\_id$}}
+      \State{\textit{Get}}
+    \EndFor
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -887,11 +936,41 @@ There are several configurable parameters in the algorithm, which we will detail
 \begin{itemize}
   \item \textbf{Choice of topic distribution}:
   \item \textbf{Resampling probability $\lambda$}:
+
+Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA.
   \item \textbf{Number of dimensions for dimensionality reduction}:
   \item \textbf{Dimensionality reduction method}:
   \item \textbf{Number of top words for distribution estimation}:
   \item \textbf{Distance function for the nearest neighbour search}: Euclidean or cosine
+  \item \textbf{Number of iterations to run LDA}:
+    We usually run $M = 1500$ iterations, as this yields stable topic assignments, and is also used in literature~\cite{Nguyen2015}.
+    TODO: Add LL-graph to show stability
 \end{itemize}
+
+\subsubsection{Vocabulary mismatch between word embeddings and topic model}
+
+Matching vocabulary is important part of preprocessing.
+TODO: Show citations
+
+\begin{algorithm}
+  \caption{Looking up words in the embedding model}
+  \label{euclid}
+  \begin{algorithmic}[1]
+    \Procedure{Word2Vec.get\_word}{word $w$}
+    \If{w exists in embeddings}
+      \State{}
+      \Return {array of floats for word w}
+    \ElsIf{w.capitalized() exists in embeddings}
+      \State{}
+      \Return {array of floats for word w.capitalized()}
+    \ElsIf{w.uppercased() exists in embeddings}
+      \State{}
+      \Return {array of floats for word w.uppercased()}
+    \EndIf
+    \State{\textbf{Exception}: Error in preprocessing}
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
 
 
 \subsection{WELDA with the Gaussian distribution}
@@ -919,7 +998,7 @@ Gaussian WELDA
 Von-Mises-Fisher WELDA
 
 \section{Topic Coherence}
-Topic coherence is a standard task to 
+Topic coherence is a standard task to
 
 \subsection{Runtime}
 \section{Document Classification}
@@ -950,7 +1029,7 @@ Make a full chapter about Topic Model Evaluation with the paper Exploring the Sp
 
 \printbibliography
 \begin{appendices}
-%\include{chapters/appendix}	
+%\include{chapters/appendix}
 \end{appendices}
 
 %\include{chapters/eigenstaendigkeit}
