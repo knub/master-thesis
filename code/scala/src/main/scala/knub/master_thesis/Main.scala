@@ -433,8 +433,8 @@ object Main {
     }
 
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
-        val pw = args.getPrintWriterFor(".ssv")
-        pw.write(res.displayTopWords(10))
+        val pw = args.getPrintWriterFor(".ssv-all")
+        pw.write(res.displayTopWords(100))
         pw.close()
     }
 
