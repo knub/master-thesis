@@ -3,7 +3,9 @@ from datetime import datetime
 import numpy as np
 import re
 import subprocess
+from functools import partial
 from multiprocessing import Pool
+import sys
 
 from knub.thesis.util import *
 
@@ -20,20 +22,20 @@ def parse_topic_coherence(stdout):
     return topic_coherences
 
 
-def create_palmetto_file(topic_file):
-    palmetto_file = topic_file + ".palmetto"
+def create_palmetto_file(topic_file, best_k):
+    palmetto_file = topic_file + "." + str(best_k) + ".palmetto"
     with open(topic_file, "r") as input:
         with open(palmetto_file, "w") as output:
             for line in input:
                 split = line.split(" ")
                 if "topic-count" not in line: # skip first line
-                    new_line = " ".join(split[-10:])
-                    output.write(new_line)
+                    new_line = " ".join(split[-100:(-100 + best_k)])
+                    output.write(new_line.rstrip() + "\n")
     return palmetto_file
 
 
-def calculate_topic_coherences(f):
-    palmetto_file = create_palmetto_file(f)
+def calculate_topic_coherences(f, best_k):
+    palmetto_file = create_palmetto_file(f, best_k)
     local_palmetto = "/home/knub/Repositories/Palmetto/target/Palmetto-jar-with-dependencies.jar"
     remote_palmetto = "/home/stefan.bunk/Palmetto/target/Palmetto-jar-with-dependencies.jar"
     local_wikidata = "/home/knub/Repositories/Palmetto/wikipedia_bd"
@@ -75,15 +77,15 @@ def calculate_topic_coherences(f):
         return topic_coherences
 
 
-def calculate_line(topic_file):
+def calculate_line(best_k, topic_file):
     params_str = "\t".join(parse_params(topic_file).values())
-    topic_coherences = calculate_topic_coherences(topic_file)
+    topic_coherences = calculate_topic_coherences(topic_file, best_k)
     if params_str:
-        line = "%s\t%s\t%.3f\t%.3f" % (topic_file, params_str, np.mean(topic_coherences), np.std(topic_coherences))
+        line = "%d\t%.3f\t%.3f" % (best_k, np.mean(topic_coherences), np.std(topic_coherences))
         print line
         return line
     else:
-        line = "%s\t%.3f\t%.3f" % (topic_file, np.mean(topic_coherences), np.std(topic_coherences))
+        line = "%d\t%.3f\t%.3f" % (best_k, np.mean(topic_coherences), np.std(topic_coherences))
         print line
         return line
 
@@ -91,30 +93,29 @@ def calculate_line(topic_file):
 def main():
     parser = argparse.ArgumentParser("Evaluating word2vec with analogy task")
     parser.add_argument("threads", type=int)
-    parser.add_argument("topic_files", type=str, nargs="+")
+    parser.add_argument("topic_file", type=str)
     args = parser.parse_args()
 
     now = datetime.now()
 
     print now.strftime("%a, %Y-%m-%d %H:%M")
 
-    for topic_file in args.topic_files:
-        if not os.path.isfile(topic_file):
-            print "WARN: file <%s> does not exist" % str(topic_file)
+    if not os.path.isfile(args.topic_file):
+        print "ERROR: file <%s> does not exist" % str(args.topic_file)
+        sys.exit(1)
 
-    args.topic_files = [f for f in args.topic_files if os.path.isfile(f)]
-
+    best_ks = range(19, 50)
     if args.threads == 1:
-        for topic_file in args.topic_files:
-            calculate_line(topic_file)
+        for r in best_ks:
+            calculate_line(r, args.topic_file)
     else:
         p = Pool(args.threads)
         try:
-            p.map(calculate_line, args.topic_files)
+            f = partial(calculate_line, topic_file=args.topic_file)
+            r = list(best_ks)
+            p.map(f, r)
         finally:
             p.close()
-    # for topic_file in args.topic_files:
-    #     calculate_line(topic_file)
 
 
 if __name__ == "__main__":
