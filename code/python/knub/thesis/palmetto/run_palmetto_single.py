@@ -23,13 +23,13 @@ def parse_topic_coherence(stdout):
 
 
 def create_palmetto_file(topic_file, best_k):
-    palmetto_file = topic_file + "." + str(best_k) + ".palmetto"
+    palmetto_file = topic_file + "." + str(best_k) + ".palmetto.sliding"
     with open(topic_file, "r") as input:
         with open(palmetto_file, "w") as output:
             for line in input:
                 split = line.split(" ")
                 if "topic-count" not in line: # skip first line
-                    new_line = " ".join(split[-100:(-100 + best_k)])
+                    new_line = " ".join(split[(-100 + best_k):(-90 + best_k)])
                     output.write(new_line.rstrip() + "\n")
     return palmetto_file
 
@@ -104,7 +104,7 @@ def main():
         print "ERROR: file <%s> does not exist" % str(args.topic_file)
         sys.exit(1)
 
-    best_ks = range(19, 50)
+    best_ks = range(50)
     if args.threads == 1:
         for r in best_ks:
             calculate_line(r, args.topic_file)
