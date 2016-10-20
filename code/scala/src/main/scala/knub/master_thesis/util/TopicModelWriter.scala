@@ -36,8 +36,12 @@ class TopicModelWriter(private val model: BaseWELDA) {
         writer.close()
     }
 
-    def writeTopTopicalWords(name: String): Unit = {
-        val writer = new BufferedWriter(new FileWriter(baseName + s".$name.topics"))
+    def writeTopTopicalWords(name: String, topWords: Int = 10): Unit = {
+        val writer = if (topWords == 10)
+            new BufferedWriter(new FileWriter(baseName + s".$name.topics"))
+        else
+            new BufferedWriter(new FileWriter(baseName + s".$name.topics.$topWords"))
+
         for (tIndex <- 0 until model.numTopics) {
             writer.write(String.valueOf(tIndex))
             val topicWordProbs = mutable.Map[Int, Double]()
@@ -48,8 +52,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
                 val pro = model.topicWordCountLDA(tIndex)(wIndex)
                 topicWordProbs(wIndex) = pro
             }
-            val TOP_WORDS = 10
-            val mostLikelyWords = topicWordProbs.toSeq.sortBy(-_._2).take(TOP_WORDS)
+            val mostLikelyWords = topicWordProbs.toSeq.sortBy(-_._2).take(topWords)
 //            topicWordProbs = FuncUtils.sortByValueDescending(topicWordProbs)
 //            val mostLikelyWords = topicWordProbs.keySet
             for (wordId <- mostLikelyWords) {
@@ -93,6 +96,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
         writeTopTopicalWords(name)
         writeDocTopicProbs(name)
         if (it == model.p.numIterations) {
+            writeTopTopicalWords(name, 100)
             writeTopicAssignments(name)
             writeTopicWordPros(name)
         }
