@@ -21,7 +21,7 @@ class GaussianKMeansWELDA(p: Args) extends GaussianWELDA(p) {
     var gaussianMixtures: Array[GaussianMixture] = _
 
     override def getFolderName(): String = {
-        s"${p.modelFileName}.$embeddingName.welda.gaussian-top." +
+        s"${p.modelFileName}.$embeddingName.welda.gaussian-top.FOO." +
             s"distance-$DISTANCE_FUNCTION." +
             s"lambda-${LAMBDA.toString.replace('.', '-')}"
     }
