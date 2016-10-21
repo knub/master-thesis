@@ -866,17 +866,27 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 
 \section{WELDA}
 We base our new topic modeling technique on the observations from the last chapter.
-Word embedding models
+Word embedding models are trained on predicting a certain,
+That means, if we look for similar words for a given word, the model predicts a word which could have been at the same position.
 
-To transfer probability mass 
+Now, to transfer probability mass more towards topic words, we resample 
+Instead of replacing every single word based on a similar word, we first try to get the general theme of the topic.
+We do this by creating 
+
+bad topic words
 For example, imagine
 Two highly similar brands
 however, never occuring together
 but in very similar contexts
 
+Often it is only a few words, which make out a topic.
+For example, the topic words TODO make out only xxx percent of the words in the documents, where this topic is the dominating one.
+
 For each topic, we learn a multivariate probability distribution in the embedding space.
 The distribution parameters are estimated
 The choice of distribution can be varied and will be explained later.
+
+We now describe the algorithm in more detail:
 
 \begin{algorithm}
   \caption{Initialization for the WELDA model, to be run before the Gibbs sampling}
@@ -946,7 +956,7 @@ There are several configurable parameters in the algorithm, which we will detail
     This parameter decides, how much extra information from the word embeddings is leaked into the topic model.
   \item \textbf{Number of top words for distribution estimation}:
     We are using the top words of each topic to estimate the distributions.
-    Usually the best 
+    Usually only the first
     TODO: Number of top words vs. topic coherence.
   \item \textbf{Number of dimensions for dimensionality reduction}:
   \item \textbf{Dimensionality reduction method}:
