@@ -11,7 +11,7 @@ import cc.mallet.types.{FeatureSequence, TokenSequence}
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
 import knub.master_thesis.util.Word2VecUtils
-import knub.master_thesis.welda.{GaussianKMeansWELDA, GaussianWELDA, SimpleSimBasedReplacementWELDA, VmfWELDA}
+import knub.master_thesis.welda._
 import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import weka.classifiers.functions.SMO
@@ -63,7 +63,8 @@ object Main {
             "topic-model-experiment",
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
-            "welda-gaussian", "welda-vmf", "welda-gaussian-kmeans",
+            "welda-gaussian", "welda-vmf",
+            "welda-gaussian-kmeans", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
             "avg-embedding"
@@ -308,6 +309,10 @@ object Main {
                             println(e)
                     }
                 }
+            case "welda-gaussian-mixture" =>
+                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(pcaDimensions = 3, distributionEstimationSamples = 20))
+                mixtureWELDA.init()
+                mixtureWELDA.inference()
             case "welda-vmf" =>
                 val THREADS = 30
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
