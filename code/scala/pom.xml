@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>jMEF</groupId>
+            <artifactId>jMEF</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <dependency>
             <groupId>etomica</groupId>
             <artifactId>etomica</artifactId>
             <version>0.0.1</version>
