@@ -2,12 +2,11 @@ package knub.master_thesis.welda
 
 import java.io.{BufferedReader, File, FileReader}
 import java.nio.file.Paths
-import java.util.Date
 
 import cc.mallet.topics.ParallelTopicModel
 import com.carrotsearch.hppc.IntArrayList
 import knub.master_thesis.{Args, util}
-import util.TopicModelWriter
+import util.{Date, TopicModelWriter}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -150,7 +149,10 @@ abstract class BaseWELDA(val p: Args) {
                 writer.write(iter)
             }
             if (iter % TOPIC_OUTPUT_EVERY == 0) {
-                println(s"\tWELDA sampling iteration ${iter + 1} at ${new Date} (lambda=${p.lambda}, embedding=${p.embeddingFileName})")
+                println(s"\t${Date.date()}: It. ${iter + 1} (lambda=${p.lambda}, " +
+                    s"embedding=${new File(p.embeddingFileName).getName}, " +
+                    s"pca=${this.asInstanceOf[ReplacementWELDA].PCA_DIMENSIONS}, " +
+                    s"samples=${this.asInstanceOf[ReplacementWELDA].DISTRIBUTION_ESTIMATION_SAMPLES})")
             }
             sampleSingleIteration()
         }

@@ -1,8 +1,6 @@
 package knub.master_thesis.welda
 
 import java.io.File
-import java.util
-import java.util.Date
 
 import breeze.linalg.{DenseMatrix, DenseVector}
 import jMEF._
@@ -12,7 +10,7 @@ import org.apache.commons.io.FileUtils
 import weka.clusterers.EM
 import weka.core.{Attribute, DenseInstance, Instance, Instances}
 import breeze.stats.distributions.MultivariateGaussian
-import knub.master_thesis.util.Sampler
+import knub.master_thesis.util.{Date, Sampler}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -111,7 +109,7 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
             mixture
         }
         val s = componentCounter.toList.sortBy(_._1).map { x => s"${x._1}->${x._2}" }.mkString(" ")
-        println(s"\t\t${new Date}: Estimation done, pca=$PCA_DIMENSIONS, samples=$DISTRIBUTION_ESTIMATION_SAMPLES in " +
+        println(s"\t\t${Date.date()}: Estimation done, pca=$PCA_DIMENSIONS, samples=$DISTRIBUTION_ESTIMATION_SAMPLES in " +
             s"${(System.currentTimeMillis() - current) / 1000} s, $s")
     }
 
