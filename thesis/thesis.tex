@@ -813,6 +813,8 @@ However, the method is not evaluated extensively and it is unclear, whether this
 %\include{chapters/search_methods}
 %\include{chapters/recommending}
 %\include{chapters/future_work}
+
+\section{Bayesian optimization}
 \chapter{Main}
 
 In this chapter we will present our analysis on the spread.
@@ -835,34 +837,6 @@ As word embeddings and LDA topic modeling are different techniques with no inher
        \label{table:tm_and_we_word_similarities}
 \end{table*}
 
-\section{Self trained word2vecs}
-
-We trained our own word embeddings using the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
-We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
-
-For preprocessing, we split the corpora into sentences.
-Words were not lowercased and no stopwords were removed, as both have been show to harm the performance of the resulting vectors.
-% TODO: Quote
-
-We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}.
-We evaluated using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
-The results can be seen in Table~\ref{table:word_embeddings_performance}.
-% TODO: Explain analogy reasoning
-
-\begin{table}[]
-  \centering
-  \caption{Performance}
-  \label{table:word_embeddings_performance}
-  \begin{tabular}{ll}
-  \hline
-                                                                  & \textbf{Accuracy} \\ \hline
-  \textbf{200 dimensions, trained on English Wikipedia}           & 56.5 \%           \\
-  \textbf{50-dimensions, trained on 20-news corpus}               & 11.1 \%           \\
-  \textbf{Embeddings published by Google, trained on Google News} & 74.3 \%
-  \end{tabular}
-\end{table}
-
-
 
 \section{WELDA}
 We base our new topic modeling technique on the observations from the last chapter.
@@ -872,6 +846,9 @@ That means, if we look for similar words for a given word, the model predicts a 
 Now, to transfer probability mass more towards topic words, we resample 
 Instead of replacing every single word based on a similar word, we first try to get the general theme of the topic.
 We do this by creating 
+
+WELDA needs a generative model of the topic space ... because we resample
+
 
 bad topic words
 For example, imagine
@@ -972,7 +949,8 @@ There are several configurable parameters in the algorithm, which we will detail
     \end{figure}
 \end{itemize}
 
-\subsubsection{Vocabulary mismatch between word embeddings and topic model}
+\subsection{Nearest neighbour search}
+\subsection{Vocabulary mismatch between word embeddings and topic model}
 
 Matching vocabulary is important part of preprocessing.
 TODO: Show citations
@@ -1032,6 +1010,41 @@ In contrast to topic coherence, this allows to use topic models in an supervised
 Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
 
 We use the document-topic matrices.
+
+\chapter{Analyzing WELDA}
+\chapter{Comparative evaluation of word-embedding-improved topic models}
+\section{Training word-embeddings}
+
+We trained our own word embeddings using the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
+We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
+
+For preprocessing, we split the corpora into sentences.
+Words were not lowercased and no stopwords were removed, as both have been show to harm the performance of the resulting vectors.
+% TODO: Quote
+
+We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}.
+We evaluated using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
+The results can be seen in Table~\ref{table:word_embeddings_performance}.
+% TODO: Explain analogy reasoning
+
+\begin{table}[]
+  \centering
+  \caption{Performance}
+  \label{table:word_embeddings_performance}
+  \begin{tabular}{ll}
+  \hline
+                                                                  & \textbf{Accuracy} \\ \hline
+  \textbf{200 dimensions, trained on English Wikipedia}           & 56.5 \%           \\
+  \textbf{50-dimensions, trained on 20-news corpus}               & 11.1 \%           \\
+  \textbf{Embeddings published by Google, trained on Google News} & 74.3 \%
+  \end{tabular}
+\end{table}
+
+
+\section{Topic coherence}
+\section{Document classification}
+\section{Word similarity}
+
 
 \chapter{Thoughts}
 \section{Bayesian Optimization}
