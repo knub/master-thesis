@@ -9,8 +9,19 @@ import knub.master_thesis
 import knub.master_thesis.Args
 import master_thesis.util.{Sampler, Timer, Word2VecUtils}
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
+import weka.core.{Attribute, DenseInstance, Instance, Instances}
+import weka.core.neighboursearch.KDTree
+
 import scala.collection.mutable
 import scala.collection.JavaConverters._
+
+
+class WordInstance(weight: Double, attValues: Array[Double], val word: String)
+    extends DenseInstance(weight, attValues) {
+    override def copy(): Instance = {
+        this
+    }
+}
 
 abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     new File(".").listFiles().filter(_.getName.contains("be.tarsos")).foreach { f => println(f); f.delete() }
@@ -32,6 +43,8 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     var nrReplacedWordsTries = 0L
 
     var lsh: LSH = _
+    var tree: KDTree = _
+    var instances: Instances = _
 
     var folder: String = _
 
@@ -116,42 +129,69 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             new Vector(word, vec)
         }
 
-        //        assert(word2Vec.vocab().numWords() == lshVectors.size, s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
-        //
-        val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
-        lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
-        DISTANCE_FUNCTION match {
-            case "cos" =>
-                lsh.buildIndex(32, 4)
-            case "l2" =>
-                lsh.buildIndex(4, 4)
+        if (PCA_DIMENSIONS <= 5) {
+            val attributes = new util.ArrayList[Attribute]()
+            val numFeatures = pcaM.cols
+
+            for (i <- 0 until numFeatures)
+                attributes.add(new Attribute(s"$i"))
+            instances = new Instances("kdtree", attributes, vocabulary.length)
+
+            for (i <- vocabulary.indices) yield {
+                val vec = transformVector(pcaM(i, ::).t.toArray)
+                val inst = new WordInstance(1.0, vec, vocabulary(i))
+                instances.add(inst)
+            }
+            tree = new KDTree
+            tree.setInstances(instances)
+        } else {
+            val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
+            lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
+            DISTANCE_FUNCTION match {
+                case "cos" =>
+                    lsh.buildIndex(32, 4)
+                case "l2" =>
+                    lsh.buildIndex(4, 4)
+            }
         }
     }
 
     def transformVector(a: Array[Double]): Array[Double]
 
     def sampleAndFindWord(topicId: Int): String = {
-        val maxTries = 10
-        var currentTry = 0
-        while (currentTry < maxTries) {
-            currentTry += 1
-            // sample a vector from the multivariate gaussian
-            // use vector form here to get nearest word to a sampled vector
-            val vectorSample = sampleFromDistribution(topicId)
-//            Timer.start("FINDING WORD2VEC")
-//            val sample = new NDArray(Array(vectorSample.data))
-//            val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
-//            Timer.end("FINDING WORD2VEC")
-//            Timer.start("FINDING LSH")
-            val nearestNeighbours = lsh.query(new Vector("", vectorSample.data), 1)
-//            Timer.end("FINDING LSH")
-//            println(s"$nearestWordLsh -- $nearestWordWord2Vec")
+        if (PCA_DIMENSIONS <= 5) {
+//            Timer.start("kdtree")
+            val sample = sampleFromDistribution(topicId)
+            val inst = new DenseInstance(1.0, sample.data)
+            inst.setDataset(instances)
+            val result = tree.nearestNeighbour(inst)
+            val word = result.asInstanceOf[WordInstance].word
+//            println(word)
+//            Timer.end("kdtree")
+            word
+        } else {
+            val maxTries = 10
+            var currentTry = 0
+            while (currentTry < maxTries) {
+                currentTry += 1
+                // sample a vector from the multivariate gaussian
+                // use vector form here to get nearest word to a sampled vector
+                val vectorSample = sampleFromDistribution(topicId)
+//                Timer.start("FINDING WORD2VEC")
+//                val sample = new NDArray(Array(vectorSample.data))
+//                val nearestWordWord2Vec = word2Vec.wordsNearest(sample, 1).iterator().next()
+//                Timer.end("FINDING WORD2VEC")
+//                Timer.start("FINDING LSH")
+                val nearestNeighbours = lsh.query(new Vector("", vectorSample.data), 1)
+//                Timer.end("FINDING LSH")
+//                println(s"$nearestWordLsh -- $nearestWordWord2Vec")
 
-            if (!nearestNeighbours.isEmpty)
-                return nearestNeighbours.get(0).getKey
+                if (!nearestNeighbours.isEmpty)
+                    return nearestNeighbours.get(0).getKey
+            }
+//            println(s"WARNING: Exceeded tries in topic $topicId")
+            "NONE"
         }
-//        println(s"WARNING: Exceeded tries in topic $topicId")
-        "NONE"
     }
 
     override def sampleSingleIteration(): Unit = {
