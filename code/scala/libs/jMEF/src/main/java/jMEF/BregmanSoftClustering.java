@@ -1,5 +1,6 @@
 package jMEF;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 import jMEF.Parameter.TYPE;
@@ -83,6 +84,7 @@ public class BregmanSoftClustering {
 	 * @return            estimated mixture model
 	 */
 	public static MixtureModel run(PVector[] pointSet, MixtureModel fL){
+		assertWeightsNotNaN(fL);
 
 		// Variables
 		int col, row;
@@ -92,7 +94,8 @@ public class BregmanSoftClustering {
 		
 		// Conversion of the mixture in expectation parameters
 		MixtureModel fH = mixtureL2H(fL);
-		
+		assertWeightsNotNaN(fH);
+
 		// Initial log likelihood
 		double logLikelihoodNew       = logLikelihood(pointSet, fH);
 		double logLikelihoodThreshold = Math.abs(logLikelihoodNew) * 0.01;
@@ -112,7 +115,15 @@ public class BregmanSoftClustering {
 			for (row=0; row<m; row++){
 				double sum = 0;
 				for (col=0; col<n; col++){
-					double tmp  = fH.weight[col] * Math.exp( fL.EF.G(fH.param[col]) +  fL.EF.t(pointSet[row]).Minus(fH.param[col]).InnerProduct(fL.EF.gradG(fH.param[col])) );
+					assertWeightsNotNaN(fH);
+					double w = fH.weight[col];
+					double g = fL.EF.G(fH.param[col]);
+					Parameter t = fL.EF.t(pointSet[row]);
+					Parameter g2 = fL.EF.gradG(fH.param[col]);
+					double innerProduct = t.Minus(fH.param[col]).InnerProduct(g2);
+					double tmp = w * Math.exp(g + innerProduct);
+					assertNotNaN(tmp);
+					assertWeightsNotNaN(fH);
 					p[row][col] = tmp;
 					sum        += tmp;
 				}
@@ -128,7 +139,9 @@ public class BregmanSoftClustering {
 					sum          += p[row][col];
 					fH.param[col] = fH.param[col].Plus( fL.EF.t(pointSet[row]).Times(p[row][col]) );
 				}
+				assertWeightsNotNaN(fH);
 				fH.weight[col]     = sum / m;
+				assertWeightsNotNaN(fH);
 				fH.param[col]      = fH.param[col].Times(1./sum);
 				fH.param[col].type = TYPE.EXPECTATION_PARAMETER;
 			}
@@ -143,11 +156,27 @@ public class BregmanSoftClustering {
 		}while ( iterations<MAX_ITERATIONS && Math.abs(logLikelihoodOld-logLikelihoodNew)>logLikelihoodThreshold );
 		
 		// Conversion of mixture in source parameters
-		return mixtureH2L(fH);
+		MixtureModel res = mixtureH2L(fH);
+		assertWeightsNotNaN(res);
+		return res;
 		
 	}
 
-	
+	private static void assertWeightsNotNaN(MixtureModel mm) {
+		assertWeightsNotNaN(mm.weight);
+	}
+	private static void assertWeightsNotNaN(double[] weights) {
+		for (double weight : weights) {
+			assertNotNaN(weight);
+		}
+	}
+	private static void assertNotNaN(double d) {
+		if (Double.isNaN(d)) {
+			throw new RuntimeException("value is NaN in");
+		}
+	}
+
+
 	/**
 	 * Converts a mixture model from source parameters to expectation parameters.
 	 * @param   fL  mixture model in source parameters

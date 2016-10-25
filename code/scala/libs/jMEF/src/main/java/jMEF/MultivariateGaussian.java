@@ -69,7 +69,14 @@ public final class MultivariateGaussian extends ExponentialFamily<PVector, PVect
 	 * @return     \f$ G(\mathbf{H}) = - \frac{1}{2} \log \left( 1 + \eta^T H^{-1} \eta \right) - \frac{1}{2} \log \det (-H) - \frac{d}{2} \log (2 \pi e) \f$
 	 */
 	public double G(PVectorMatrix H){
-		return	-0.5d * Math.log( 1.0d + H.v.InnerProduct(H.M.Inverse().MultiplyVectorRight(H.v)) ) - 0.5d * Math.log( H.M.Times(-1.0d).Determinant() ) - H.v.dim*0.5d*Math.log(2*Math.PI*Math.E);
+		double inLog1 = 1.0d + H.v.InnerProduct(H.M.Inverse().MultiplyVectorRight(H.v));
+		double inLog2 =  H.M.Times(-1.0d).Determinant();
+		double inLog3 = 2*Math.PI*Math.E;
+		double res = -0.5d * Math.log(inLog1) - 0.5d * Math.log(inLog2) - H.v.dim*0.5d*Math.log(inLog3);
+		if (Double.isNaN(res)) {
+			throw new RuntimeException("isNaN");
+		}
+		return	res;
 	}
 
 
