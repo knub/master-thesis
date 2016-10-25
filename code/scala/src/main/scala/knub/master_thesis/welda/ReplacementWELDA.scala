@@ -235,6 +235,19 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         topTopicVectors
     }
 
+    def getTopTopicVectorsWithWords(): Array[Seq[(String, Array[Double])]] = {
+        val topTopicWords = getTopTopicWords()
+        val topTopicVectors = topTopicWords.map { topWords =>
+            topWords.flatMap { topWord =>
+                if (pcaVectors.contains(topWord))
+                    Some((topWord, pcaVectors(topWord)))
+                else
+                    None
+            }
+        }
+        topTopicVectors
+    }
+
     def estimateDistributionParameters(): Unit
     def sampleFromDistribution(topicId: Int): DenseVector[Double]
 
