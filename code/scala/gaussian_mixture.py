@@ -1,3 +1,4 @@
+import os
 import sys
 import warnings
 
@@ -47,7 +48,7 @@ def create_gmm_output(gmm, X, file_name):
         nr_components = gmm.n_components
         # noinspection PyUnboundLocalVariable
         f.write(str(nr_components) + "\n")
-        f.write(gmm.covariance_type)
+        f.write(gmm.covariance_type + "\n")
         matrices = []
         covs = gmm.covariances_
         if gmm.covariance_type == "diag":
@@ -89,9 +90,9 @@ def create_plot(gmm, word_vector_pairs, X, file_name):
     plt.scatter(X[:, 0], X[:, 1], .8)
     for word, vector in word_vector_pairs:
         plt.text(vector[0], vector[1], word, size=6, horizontalalignment='center', verticalalignment='top')
-    plt.title('n_components=%d, cov_type=%s' % (gmm.n_components, gmm.covariance_type))
+    plt.title('topic=%s n_components=%d, cov_type=%s' % (os.path.basename(file_name), gmm.n_components, gmm.covariance_type))
     plt.savefig(file_name + ".png", dpi=300)
-    plt.show()
+    # plt.show()
 
 
 def main():
@@ -101,7 +102,6 @@ def main():
         sys.exit(1)
 
     file_name = args[1]
-    # file_name = "/home/knub/Repositories/master-thesis/code/scala/folder/0/0"
     word_vector_pairs = read_vectors(file_name)
 
     vectors = [vector for _, vector in word_vector_pairs]

@@ -310,7 +310,7 @@ object Main {
                     }
                 }
             case "welda-gaussian-mixture" =>
-                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(pcaDimensions = 3, distributionEstimationSamples = 40))
+                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(pcaDimensions = 2, distributionEstimationSamples = 40))
                 mixtureWELDA.init()
                 mixtureWELDA.inference()
             case "welda-vmf" =>
