@@ -139,8 +139,12 @@ abstract class BaseWELDA(val p: Args) {
     }
 
     val TOPIC_OUTPUT_EVERY = 50
+
+    var currentIteration: Int = 0
+
     def inference(): Unit = {
         for (iter <- 0 until p.numIterations) {
+            currentIteration = iter
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
 //                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
                 writer.write(iter)
