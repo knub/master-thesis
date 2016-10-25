@@ -73,24 +73,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
         val pcaM = pca(M, PCA_DIMENSIONS)
 
-        val lshVectors = for (i <- vocabulary.indices) yield {
-            val vec = transformVector(pcaM(i, ::).t.toArray)
-            val word = vocabulary(i)
-            pcaVectors(word) = vec
-            new Vector(word, vec)
-        }
-
-//        println(s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
-        assert(word2Vec.vocab().numWords() == lshVectors.size, s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
-
-        val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
-        lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
-        DISTANCE_FUNCTION match {
-            case "cos" =>
-                lsh.buildIndex(32, 4)
-            case "l2" =>
-                lsh.buildIndex(4, 4)
-        }
+        initNearestNeighbourSearch(vocabulary, pcaM)
 
 
         /*
@@ -122,6 +105,26 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         } else {
             folderFile.mkdir()
             super.init()
+        }
+    }
+
+    def initNearestNeighbourSearch(vocabulary: Array[String], pcaM: DenseMatrix[Double]): Unit = {
+        val lshVectors = for (i <- vocabulary.indices) yield {
+            val vec = transformVector(pcaM(i, ::).t.toArray)
+            val word = vocabulary(i)
+            pcaVectors(word) = vec
+            new Vector(word, vec)
+        }
+
+        //        assert(word2Vec.vocab().numWords() == lshVectors.size, s"Words in vocabulary: ${word2Vec.vocab().numWords()}, words in LSH: ${lshVectors.size} (should be equal)")
+        //
+        val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
+        lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
+        DISTANCE_FUNCTION match {
+            case "cos" =>
+                lsh.buildIndex(32, 4)
+            case "l2" =>
+                lsh.buildIndex(4, 4)
         }
     }
 
