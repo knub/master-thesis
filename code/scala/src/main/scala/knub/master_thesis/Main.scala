@@ -310,9 +310,55 @@ object Main {
                     }
                 }
             case "welda-gaussian-mixture" =>
-                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(pcaDimensions = 2, distributionEstimationSamples = 40))
-                mixtureWELDA.init()
-                mixtureWELDA.inference()
+//                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(pcaDimensions = 10, distributionEstimationSamples = 20))
+//                mixtureWELDA.init()
+//                mixtureWELDA.inference()
+//                System.exit(1)
+                val THREADS = 15
+
+                val lambdas = List(0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1.0)
+
+                val samplingParams = List(
+                    (2, 10), (2, 20), (2, 30), (2, 40), (2, 50), (2, 100),
+                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 50), (3, 100)
+//                    (4, 10), (4, 20), (4, 30), (4, 40), (4, 50), (4, 100),
+//                    (5, 10), (5, 20), (5, 30), (5, 40), (5, 50), (5, 100),
+//                    (8, 20), (8, 30), (8, 40), (8, 50), (8, 100),
+//                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100)
+                )
+                val embeddings = List(
+                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
+                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
+                )
+
+                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
+                    yield (lambda, embedding, samplingParam)
+
+                val parCases = if (THREADS == 1) {
+                    cases
+                } else {
+                    val parCases = cases.par
+                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
+                    parCases
+                }
+
+                parCases.foreach { case (lambda, embedding, samplingParam) =>
+                    println(s"Starting lambda = $lambda, embedding = $embedding")
+                    try {
+                        val mixtureWELDA = new GaussianMixtureWELDA(args.copy(
+                            lambda = lambda,
+                            embeddingFileName = embedding._1,
+                            numDocuments = embedding._2,
+                            pcaDimensions = samplingParam._1,
+                            distributionEstimationSamples = samplingParam._2))
+                        mixtureWELDA.init()
+                        mixtureWELDA.inference()
+                        println(s"Finshed lambda = $lambda, embedding = $embedding")
+                    } catch {
+                        case e: Exception =>
+                            println(s"Failed lambda = $lambda, embedding = $embedding, $e: ${e.getMessage}")
+                    }
+                }
             case "welda-vmf" =>
                 val THREADS = 30
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)

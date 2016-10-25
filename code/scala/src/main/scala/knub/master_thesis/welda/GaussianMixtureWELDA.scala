@@ -15,6 +15,7 @@ import breeze.stats.distributions.MultivariateGaussian
 import knub.master_thesis.util.Sampler
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.io.Source
 
 class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
@@ -62,6 +63,7 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
         iterationFolder.mkdir()
 
         val topTopicVectors = getTopTopicVectorsWithWords()
+        val componentCounter = mutable.Map[Int, Int]().withDefaultValue(0)
         mixtureModels = topTopicVectors.zipWithIndex.map { case (topVectors, idx) =>
             val topicFile = new File(s"${iterationFolder.getAbsolutePath}/$idx")
             val linesInFile = topVectors.map { case (w, v) =>
@@ -86,6 +88,7 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
             }
 
             val nrComponents = lines.next().toInt
+            componentCounter(nrComponents) += 1
             val covType = lines.next()
             val weights = toDoubleArray(lines.next())
             val means = (0 until nrComponents).map { _ =>
@@ -107,7 +110,9 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
 //            println(gaussians.deep)
             mixture
         }
-        println(s"\t\t${new Date}: Estimated distribution parameters in ${(System.currentTimeMillis() - current) / 1000} s")
+        val s = componentCounter.toList.sortBy(_._1).map { x => s"${x._1}->${x._2}" }.mkString(" ")
+        println(s"\t\t${new Date}: Estimation done, pca=$PCA_DIMENSIONS, samples=$DISTRIBUTION_ESTIMATION_SAMPLES in " +
+            s"${(System.currentTimeMillis() - current) / 1000} s, $s")
     }
 
     override def sampleFromDistribution(topicId: Int): DenseVector[Double] = {
