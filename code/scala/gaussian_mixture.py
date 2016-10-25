@@ -25,7 +25,7 @@ def read_vectors(file_name):
 
 def determine_best_gmm(X):
     lowest_bic = np.infty
-    n_components_range = range(1, 7)
+    n_components_range = range(1, 5)
     cv_types = ['spherical', 'tied', 'diag', 'full']
     for cv_type in cv_types:
         for n_components in n_components_range:
