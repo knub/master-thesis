@@ -3,15 +3,17 @@ package knub.master_thesis.welda
 import java.io.File
 import java.util
 
-import breeze.linalg.DenseVector
+import breeze.linalg.{DenseMatrix, DenseVector}
 import jMEF._
 import knub.master_thesis.Args
 import org.apache.commons.exec.{CommandLine, DefaultExecutor}
 import org.apache.commons.io.FileUtils
 import weka.clusterers.EM
 import weka.core.{Attribute, DenseInstance, Instance, Instances}
+import breeze.stats.distributions.MultivariateGaussian
 
 import scala.collection.JavaConverters._
+import scala.io.Source
 
 class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
 
@@ -58,7 +60,7 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
         iterationFolder.mkdir()
 
         val topTopicVectors = getTopTopicVectorsWithWords()
-        topTopicVectors.zipWithIndex.map { case (topVectors, idx) =>
+        mixtureModels = topTopicVectors.zipWithIndex.map { case (topVectors, idx) =>
             val topicFile = new File(s"${iterationFolder.getAbsolutePath}/$idx")
             println(topicFile.getAbsolutePath)
             val linesInFile = topVectors.map { case (w, v) =>
@@ -74,22 +76,35 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
             exec.setExitValue(0)
             exec.execute(cl)
 
-//            val points = topVectors.map { case (w, v) =>
-//                val pVector = new PVector(v.length)
-//                pVector.array = v
-//                pVector
-//            }.toArray
-//            val clusters = KMeans.run(points, 2)
-//            var gaussians = BregmanSoftClustering.initialize(clusters, new MultivariateGaussian)
-//            gaussians = BregmanSoftClustering.run(points, gaussians)
-//            //            points.foreach { point =>
-//            //                println(gaussians.mixtureNumber(point))
-//            //            }
-//            gaussians.param
-//            gaussians
-            null
+            Source.fromFile(s"${topicFile.getAbsolutePath}.output").getLines().foreach(println)
+            val lines = Source.fromFile(s"${topicFile.getAbsolutePath}.output").getLines()
+
+            def toDoubleArray(s: String): Array[Double] = {
+                s.split('\t').map(_.toDouble)
+            }
+
+
+            val nrComponents = lines.next().toInt
+            val covType = lines.next()
+            val weights = toDoubleArray(lines.next())
+            val means = (0 until nrComponents).map { _ =>
+                toDoubleArray(lines.next())
+            }.toArray
+            val covs = (0 until nrComponents).map { _ =>
+                (0 until PCA_DIMENSIONS).map { _ =>
+                    toDoubleArray(lines.next())
+                }.toArray.flatten
+            }.toArray
+
+            val gaussians = means.zip(covs).map { case (mean, cov) =>
+                new MultivariateGaussian(new DenseVector(mean), new DenseMatrix[Double](PCA_DIMENSIONS, PCA_DIMENSIONS, cov))
+            }
+
+            val mixture = GaussianMixture(weights, gaussians)
+            println(weights.deep)
+            println(gaussians.deep)
+            mixture
         }
-        System.exit(1)
     }
 
     override def sampleFromDistribution(topicId: Int): DenseVector[Double] = {
