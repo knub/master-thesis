@@ -18,7 +18,7 @@ def read_vectors(file_name):
             word = split[0]
             vector = [float(s) for s in split[1:]]
 
-            word_vector_pairs.append((word, vector[:2]))
+            word_vector_pairs.append((word, vector))
 
     return word_vector_pairs
 
@@ -110,7 +110,8 @@ def main():
 
     create_gmm_output(gmm, X, file_name)
 
-    create_plot(gmm, word_vector_pairs, X, file_name)
+    if X.shape[1] == 2:
+        create_plot(gmm, word_vector_pairs, X, file_name)
 
 if __name__ == "__main__":
     main()
