@@ -1,6 +1,7 @@
 package knub.master_thesis.welda
 
 import java.io.File
+import java.util
 
 import breeze.linalg.{DenseMatrix, DenseVector}
 import jMEF._
@@ -10,13 +11,17 @@ import org.apache.commons.io.FileUtils
 import weka.clusterers.EM
 import weka.core.{Attribute, DenseInstance, Instance, Instances}
 import breeze.stats.distributions.MultivariateGaussian
-import knub.master_thesis.util.{Date, Sampler}
+import knub.master_thesis.util.{Date, Sampler, Timer}
+import weka.core.neighboursearch.KDTree
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.io.Source
 
 class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
+
+    var tree: KDTree = _
+    var instances: Instances = _
 
     override def transformVector(a: Array[Double]): Array[Double] = a
 
@@ -50,6 +55,33 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
 //            null
 //        }
 //    }
+
+    class WordInstance(weight: Double, attValues: Array[Double], val word: String)
+        extends DenseInstance(weight, attValues) {
+        override def copy(): Instance = {
+            this
+        }
+    }
+    override def initNearestNeighbourSearch(vocabulary: Array[String], pcaM: DenseMatrix[Double]): Unit = {
+//        super.initNearestNeighbourSearch(vocabulary, pcaM)
+
+        val attributes = new util.ArrayList[Attribute]()
+        val numFeatures = pcaM.cols
+
+        for (i <- 0 until numFeatures)
+            attributes.add(new Attribute(s"$i"))
+        instances = new Instances("kdtree", attributes, vocabulary.length)
+
+        for (i <- vocabulary.indices) yield {
+            val vec = transformVector(pcaM(i, ::).t.toArray)
+            val inst = new WordInstance(1.0, vec, vocabulary(i))
+            instances.add(inst)
+        }
+        tree = new KDTree
+        tree.setInstances(instances)
+    }
+
+
     /**
       * WITH scikit
       */
@@ -111,6 +143,24 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
         val s = componentCounter.toList.sortBy(_._1).map { x => s"${x._1}->${x._2}" }.mkString(" ")
         println(s"\t\t${Date.date()}: Estimation done, pca=$PCA_DIMENSIONS, samples=$DISTRIBUTION_ESTIMATION_SAMPLES in " +
             s"${(System.currentTimeMillis() - current) / 1000} s, $s")
+    }
+
+    override def sampleAndFindWord(topicId: Int): String = {
+//        Timer.start("lsh")
+//        val wordLsh = super.sampleAndFindWord(topicId)
+//        Timer.end("lsh")
+
+//        Timer.start("kdtree")
+        val sample = sampleFromDistribution(topicId)
+        val inst = new DenseInstance(1.0, sample.data)
+        inst.setDataset(instances)
+        val result = tree.nearestNeighbour(inst)
+        val word = result.asInstanceOf[WordInstance].word
+        println(word)
+//        Timer.end("kdtree")
+//        Timer.printAll()
+
+        word
     }
 
     override def sampleFromDistribution(topicId: Int): DenseVector[Double] = {
