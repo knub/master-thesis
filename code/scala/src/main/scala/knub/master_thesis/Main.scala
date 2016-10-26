@@ -314,11 +314,12 @@ object Main {
 //                mixtureWELDA.init()
 //                mixtureWELDA.inference()
 //                System.exit(1)
-                val THREADS = 15
+                val THREADS = 20
 
-                val lambdas = List(0.05, 0.1, 0.2)
+                val lambdas = List(0.1, 0.3, 0.5, 0.7, 1.0)
 
                 val samplingParams = List(
+                    (2, 10), (2, 30), (2, 40), (2, 100),
                     (3, 10), (3, 30), (3, 40), (3, 100)
 //                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 50), (3, 100)
 //                    (4, 10), (4, 20), (4, 30), (4, 40), (4, 50), (4, 100),
@@ -331,8 +332,11 @@ object Main {
                     ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
                 )
 
-                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
+                val foo = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
                     yield (lambda, embedding, samplingParam)
+                val cases = (0.0, embeddings(0), samplingParams(0)) :: ((0.0, embeddings(1), samplingParams(0))
+                    :: foo)
+
 
                 val parCases = if (THREADS == 1) {
                     cases
