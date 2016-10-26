@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm
 from sklearn import mixture
+import mkl
 
 warnings.filterwarnings("ignore", module="matplotlib")
 
@@ -96,6 +97,7 @@ def create_plot(gmm, word_vector_pairs, X, file_name):
 
 
 def main():
+    mkl.set_num_threads(1)
     args = sys.argv
     if len(args) != 2:
         print "Need exactly one argument, exiting"
