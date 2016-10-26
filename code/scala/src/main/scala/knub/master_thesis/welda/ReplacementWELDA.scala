@@ -237,7 +237,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 // update topic
                 corpusTopics(docIdx).set(wIndex, newTopicId)
             }
-            Timer.printAll()
+//            Timer.printAll()
         }
 //        println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
     }

@@ -65,23 +65,31 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
 
         val topTopicVectors = getTopTopicVectorsWithWords()
         val componentCounter = mutable.Map[Int, Int]().withDefaultValue(0)
-        mixtureModels = topTopicVectors.zipWithIndex.map { case (topVectors, idx) =>
+        val topicFiles = topTopicVectors.zipWithIndex.map { case (topVectors, idx) =>
             val topicFile = new File(s"${iterationFolder.getAbsolutePath}/$idx")
             val linesInFile = topVectors.map { case (w, v) =>
                 s"$w\t${v.mkString("\t")}"
             }
             FileUtils.writeLines(topicFile, "UTF-8", linesInFile.asJava)
+            topicFile
+        }
 
-            val fileName = List("/home/stefan.bunk/anaconda2/envs/py27/bin/python","/opt/anaconda3/envs/py27/bin/python")
-                .find(new File(_).exists()).get
-            val cl = new CommandLine(fileName)
-            cl.addArgument("gaussian_mixture.py")
-            cl.addArgument(topicFile.getAbsolutePath)
+        val pythonExec = List("/home/stefan.bunk/anaconda2/envs/py27/bin/python","/opt/anaconda3/envs/py27/bin/python")
+            .find(new File(_).exists()).get
 
-            val exec = new DefaultExecutor
-            exec.setExitValue(0)
-            exec.execute(cl)
 
+        val cl = new CommandLine(pythonExec)
+        cl.addArgument("gaussian_mixture.py")
+        topicFiles.foreach { f => cl.addArgument(f.getAbsolutePath) }
+
+//        Timer.start("exec")
+        val exec = new DefaultExecutor
+        exec.setExitValue(0)
+        exec.execute(cl)
+//        Timer.end("exec")
+//        Timer.printAll()
+
+        mixtureModels = topicFiles.map { topicFile =>
             val lines = Source.fromFile(s"${topicFile.getAbsolutePath}.output").getLines()
 
             def toDoubleArray(s: String): Array[Double] = {

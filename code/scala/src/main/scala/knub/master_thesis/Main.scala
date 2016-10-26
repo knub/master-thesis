@@ -310,11 +310,11 @@ object Main {
                     }
                 }
             case "welda-gaussian-mixture" =>
-//                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(pcaDimensions = 2, distributionEstimationSamples = 20))
+//                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(lambda = 0.1, pcaDimensions = 2, distributionEstimationSamples = 20))
 //                mixtureWELDA.init()
 //                mixtureWELDA.inference()
 //                System.exit(1)
-                val THREADS = 10
+                val THREADS = 15
 
                 val lambdas = List(0.05, 0.1, 0.2)
 
