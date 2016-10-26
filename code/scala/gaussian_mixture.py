@@ -6,11 +6,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LogNorm
 from sklearn import mixture
+import time
 import mkl
 
 warnings.filterwarnings("ignore", module="matplotlib")
 
 
+def timing(f):
+    TIMING = False
+    if TIMING:
+        def wrap(*args):
+            time1 = time.time()
+            ret = f(*args)
+            time2 = time.time()
+            print '%s function took %0.3f ms' % (f.func_name, (time2 - time1) * 1000.0)
+            return ret
+        return wrap
+    else:
+        return f
+
+
+@timing
 def read_vectors(file_name):
     word_vector_pairs = []
     with open(file_name, "r") as f:
@@ -24,12 +40,14 @@ def read_vectors(file_name):
     return word_vector_pairs
 
 
+@timing
 def determine_best_gmm(X):
+
     lowest_bic = np.infty
-    n_components_range = range(1, 5)
-    cv_types = ['spherical', 'tied', 'diag', 'full']
-    for cv_type in cv_types:
-        for n_components in n_components_range:
+    n_components_range = range(1, 4)
+    cv_types = ['diag', 'full']
+    for n_components in n_components_range:
+        for cv_type in cv_types:
             # Fit a Gaussian mixture with EM
             gmm = mixture.GaussianMixture(n_components=n_components,
                                           covariance_type=cv_type)
@@ -43,6 +61,7 @@ def determine_best_gmm(X):
     return best_model
 
 
+@timing
 def create_gmm_output(gmm, X, file_name):
     with open(file_name + ".output", "w") as f:
         nr_features = X.shape[1]
@@ -77,6 +96,7 @@ def create_gmm_output(gmm, X, file_name):
                 f.write("\n")
 
 
+@timing
 def create_plot(gmm, word_vector_pairs, X, file_name):
     x = np.linspace(-2., 2.)
     y = np.linspace(-2., 2.)
@@ -95,25 +115,21 @@ def create_plot(gmm, word_vector_pairs, X, file_name):
     plt.savefig(file_name + ".png", dpi=300)
     # plt.show()
 
-
 def main():
     mkl.set_num_threads(1)
-    args = sys.argv
-    if len(args) != 2:
-        print "Need exactly one argument, exiting"
-        sys.exit(1)
+    args = sys.argv[1:]
 
-    file_name = args[1]
-    word_vector_pairs = read_vectors(file_name)
+    for file_name in args:
+        word_vector_pairs = read_vectors(file_name)
 
-    vectors = [vector for _, vector in word_vector_pairs]
-    X = np.array(vectors)
-    gmm = determine_best_gmm(X)
+        vectors = [vector for _, vector in word_vector_pairs]
+        X = np.array(vectors)
+        gmm = determine_best_gmm(X)
 
-    create_gmm_output(gmm, X, file_name)
+        create_gmm_output(gmm, X, file_name)
 
-    if X.shape[1] == 2:
-        create_plot(gmm, word_vector_pairs, X, file_name)
+        # if X.shape[1] == 2:
+        #     create_plot(gmm, word_vector_pairs, X, file_name)
 
 if __name__ == "__main__":
     main()
