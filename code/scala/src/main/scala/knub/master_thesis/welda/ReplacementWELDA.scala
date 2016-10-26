@@ -205,7 +205,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 val topicId = corpusTopics(docIdx).get(wIndex)
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(LAMBDA) || topicId == 0 ||
+                val wordId = if (Sampler.nextCoinFlip(LAMBDA) ||
                     (LAMBDA != 0.0 && newStopwordIds.contains(originalWordId))) {
                     val sampledWord = sampleAndFindWord(topicId)
                     nrReplacedWordsTries += 1
