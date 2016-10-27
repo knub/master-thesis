@@ -334,7 +334,7 @@ object Main {
 
                 val foo = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
                     yield (lambda, embedding, samplingParam)
-                val cases = (0.0, embeddings(0), samplingParams(0)) :: ((0.0, embeddings(1), samplingParams(0)) :: Nil)
+                val cases = (0.0, embeddings(0), samplingParams(2)) :: ((0.0, embeddings(1), samplingParams(2)) :: Nil)
 //                    :: foo)
 
 
