@@ -98,6 +98,7 @@ def create_gmm_output(gmm, X, file_name):
 
 @timing
 def create_plot(gmm, word_vector_pairs, X, file_name):
+    plt.figure()
     x = np.linspace(-2., 2.)
     y = np.linspace(-2., 2.)
     X_grid, Y_grid = np.meshgrid(x, y)
