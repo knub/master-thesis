@@ -334,8 +334,8 @@ object Main {
 
                 val foo = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
                     yield (lambda, embedding, samplingParam)
-                val cases = (0.0, embeddings(0), samplingParams(0)) :: ((0.0, embeddings(1), samplingParams(0))
-                    :: foo)
+                val cases = (0.0, embeddings(0), samplingParams(0)) :: ((0.0, embeddings(1), samplingParams(0)) :: Nil)
+//                    :: foo)
 
 
                 val parCases = if (THREADS == 1) {
