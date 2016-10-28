@@ -200,6 +200,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         estimateDistributionParameters()
         var wordsInIteration = 0L
         var topic0Count = 0
+        var topic1Count = 0
         var nrReplacedWordsSuccessful = 0
         for (docIdx <- 0 until p.numDocuments) {
             val docSize = corpusWords(docIdx).size
@@ -207,11 +208,13 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 wordsInIteration += 1
                 // determine topic first
                 val topicId = corpusTopics(docIdx).get(wIndex)
+                if (topicId == 1)
+                    topic1Count += 1
                 if (topicId == 0)
                     topic0Count += 1
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(p.lambda) || (p.lambda != 0.0 && p.topic0Sampling && topicId == 0) ||
+                val wordId = if (Sampler.nextCoinFlip(p.lambda) || (p.lambda != 0.0 && p.topic0Sampling && topicId == 1) ||
                     (p.lambda != 0.0 && newStopwordIds.contains(originalWordId))) {
                     val sampledWord = sampleAndFindWord(topicId)
                     if (sampledWord == "NONE") {
@@ -247,7 +250,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         totalReplaced += nrReplacedWordsSuccessful
         totalWords += wordsInIteration
         if (p.diagnosisMode)
-            println(s"Given lambda: ${p.lambda}, actual lambda: ${nrReplacedWordsSuccessful.toDouble / wordsInIteration}, topic0 = ${topic0Count.toDouble / wordsInIteration}")
+            println(s"Given lambda: ${p.lambda}, actual lambda: ${nrReplacedWordsSuccessful.toDouble / wordsInIteration}, topic0 = ${topic0Count.toDouble / wordsInIteration}, topic1 = ${topic1Count.toDouble / wordsInIteration}")
     }
 
     def pca(m: DenseMatrix[Double], numDimensions: Int): DenseMatrix[Double] = {
