@@ -25,8 +25,8 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.vmf." +
-            s"distance-$DISTANCE_FUNCTION." +
-            s"lambda-${LAMBDA.toString.replace('.', '-')}." +
+            s"distance-${p.weldaDistanceFunction}." +
+            s"lambda-${p.lambda.toString.replace('.', '-')}." +
             s"kappafactor-$KAPPA_FACTOR_FOR_MORE_CONCENTRATION"
     }
 
