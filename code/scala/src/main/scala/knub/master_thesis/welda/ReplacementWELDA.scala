@@ -9,6 +9,7 @@ import breeze.linalg.{DenseMatrix, DenseVector}
 import knub.master_thesis
 import knub.master_thesis.Args
 import master_thesis.util.{Sampler, Timer, Word2VecUtils}
+import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import weka.core.{Attribute, DenseInstance, Instance, Instances}
 import weka.core.neighboursearch.KDTree
@@ -115,8 +116,13 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
         folder = getFolderName()
         val folderFile = new File(folder)
-        if (new File(s"${folderFile.getAbsolutePath}/welda.iteration-${p.numIterations}.topics").exists()) {
-            throw new RuntimeException(s"Experiment ${folderFile.getName} already existing")
+        val parentFolderFile = folderFile.getParentFile
+        val existingFolder = parentFolderFile.listFiles().find { f =>
+            f.isDirectory && f.getAbsolutePath.startsWith(folderFile.getAbsolutePath)
+        }
+
+        if (existingFolder.nonEmpty && new File(f"${existingFolder.get.getAbsolutePath}/welda.iteration-${p.numIterations}%03d.topics").exists()) {
+            throw new RuntimeException(s"Experiment ${existingFolder.get.getName} already existing")
         } else {
             folderFile.mkdir()
             super.init()
@@ -305,9 +311,18 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         val f = Paths.get(folder)
         val actualLambda = Math.round(totalReplaced * 100.0 / totalWords) / 100.0
         println(s"actualLambda = $actualLambda")
-        val newFolderName = folder.replaceAll("lambda-\\d-\\d+", s"lambda-${actualLambda.toString.replace('.', '-')}")
-        println(s"Rename ${new File(folder).getName} to ${new File(newFolderName).getName}")
-        Files.move(Paths.get(folder), Paths.get(newFolderName))
+        val newFolderName = folder + s".lambdaact-${actualLambda.toString.replace('.', '-')}"
+        println(s"Rename \n${new File(folder).getName} to \n${new File(newFolderName).getName}")
+
+        if (new File(newFolderName).exists()) {
+            FileUtils.deleteDirectory(new File(newFolderName))
+        }
+        try {
+            Files.move(Paths.get(folder), Paths.get(newFolderName))
+        } catch {
+            case e: java.nio.file.FileAlreadyExistsException =>
+                println(s"ERROR: File $newFolderName already exists, keeping $folder")
+        }
     }
 
     def estimateDistributionParameters(): Unit
