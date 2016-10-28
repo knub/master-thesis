@@ -102,6 +102,8 @@ object Main {
             c.copy(beta = x) }
         opt[Double]("lambda").action { (x, c) =>
             c.copy(lambda = x) }
+        opt[Boolean]("topic0").action { (x, c) =>
+            c.copy(topic0Sampling = x) }
         opt[String]("inspect-file-contains").action { (x, c) =>
             c.copy(inspectFileContains = x) }
     }
@@ -223,7 +225,7 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-                val weldaGaussian = new GaussianWELDA(args.copy(diagnosisMode = true))
+                val weldaGaussian = new GaussianWELDA(args.copy(diagnosisMode = true, topic0Sampling = true))
                 weldaGaussian.init()
                 weldaGaussian.inference()
                 System.exit(0)
