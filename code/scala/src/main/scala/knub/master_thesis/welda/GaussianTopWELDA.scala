@@ -14,15 +14,15 @@ import scala.collection.mutable
 
 case class GaussianMixture(mixture: Array[Double], gaussians: Array[MultivariateGaussian])
 
-class GaussianKMeansWELDA(p: Args) extends GaussianWELDA(p) {
-
-    override val PCA_DIMENSIONS = 6
+class GaussianTopWELDA(p: Args) extends GaussianWELDA(p) {
 
     var gaussianMixtures: Array[GaussianMixture] = _
 
     override def getFolderName(): String = {
-        s"${p.modelFileName}.$embeddingName.welda.gaussian-top.FOO." +
-            s"distance-${p.weldaDistanceFunction}." +
+        s"${p.modelFileName}.$embeddingName.welda.gaussian-top." +
+            (if (p.topic0Sampling) "topic0-yes." else "topic0-no.") +
+            s"pca-$PCA_DIMENSIONS." +
+            s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
             s"lambda-${p.lambda.toString.replace('.', '-')}"
     }
 
@@ -36,7 +36,7 @@ class GaussianKMeansWELDA(p: Args) extends GaussianWELDA(p) {
                 (vector, sumDistance)
             }.sortBy(_._2)
             words
-                .take(10)
+                .take(p.distributionEstimationSamples / 2)
                 .map(_._1)
         }
     }
@@ -83,24 +83,24 @@ class GaussianKMeansWELDA(p: Args) extends GaussianWELDA(p) {
 //                clusterCount.toList.sortBy(_._1).map { case (clusters, count) => s"$clusters cluster/s: $count"}.mkString(", "))
 //    }
 
-    def clusterWords(topicVectors: Seq[Array[Double]]): (XMeans, Instances) = {
-        val attributes = new util.ArrayList[Attribute]()
-        for (i <- 0 until PCA_DIMENSIONS) {
-            attributes.add(new Attribute(i.toString))
-        }
-        val instances = new Instances("vectors", attributes, DISTRIBUTION_ESTIMATION_SAMPLES)
-        topicVectors.foreach { vector =>
-            val inst = new DenseInstance(1.0, vector)
-            instances.add(inst)
-        }
-        val xmeans = new XMeans()
-        xmeans.setMaxIterations(10)
-        xmeans.setMinNumClusters(1)
-        xmeans.setMaxNumClusters(4)
-        xmeans.buildClusterer(instances)
-
-        (xmeans, instances)
-    }
+//    def clusterWords(topicVectors: Seq[Array[Double]]): (XMeans, Instances) = {
+//        val attributes = new util.ArrayList[Attribute]()
+//        for (i <- 0 until PCA_DIMENSIONS) {
+//            attributes.add(new Attribute(i.toString))
+//        }
+//        val instances = new Instances("vectors", attributes, DISTRIBUTION_ESTIMATION_SAMPLES)
+//        topicVectors.foreach { vector =>
+//            val inst = new DenseInstance(1.0, vector)
+//            instances.add(inst)
+//        }
+//        val xmeans = new XMeans()
+//        xmeans.setMaxIterations(10)
+//        xmeans.setMinNumClusters(1)
+//        xmeans.setMaxNumClusters(4)
+//        xmeans.buildClusterer(instances)
+//
+//        (xmeans, instances)
+//    }
 
 //    override def sampleFromDistribution(topicId: Int): DenseVector[Double] = {
 //        val gaussianMixture = gaussianMixtures(topicId)
