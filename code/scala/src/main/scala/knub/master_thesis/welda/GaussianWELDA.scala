@@ -14,9 +14,10 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.gaussian." +
+            (if (p.topic0Sampling) "topic0-yes" else "topic0-n0") +
             s"pca-$PCA_DIMENSIONS." +
             s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
-            s"lambda-${LAMBDA.toString.replace('.', '-')}"
+            s"lambda-${p.lambda.toString.replace('.', '-')}"
     }
 
     override def transformVector(a: Array[Double]): Array[Double] = a
