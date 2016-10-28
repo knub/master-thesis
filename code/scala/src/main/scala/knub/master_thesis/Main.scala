@@ -42,6 +42,7 @@ case class Args(
     saveStep: Int = 50,
     // replacement sampling
     pcaDimensions: Int = 10,
+    diagnosisMode: Boolean = false,
     distributionEstimationSamples: Int = 20,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
@@ -310,10 +311,14 @@ object Main {
                     }
                 }
             case "welda-gaussian-mixture" =>
-//                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(lambda = 0.1, pcaDimensions = 2, distributionEstimationSamples = 20))
-//                mixtureWELDA.init()
-//                mixtureWELDA.inference()
-//                System.exit(1)
+                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(
+                    lambda = 0.1,
+                    pcaDimensions = 2,
+                    distributionEstimationSamples = 20,
+                    diagnosisMode = true))
+                mixtureWELDA.init()
+                mixtureWELDA.inference()
+                System.exit(1)
                 val THREADS = 25
 
                 val lambdas = List(0.05, 0.1, 0.3, 0.4, 0.5, 0.7, 1.0)

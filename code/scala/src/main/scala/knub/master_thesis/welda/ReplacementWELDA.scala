@@ -1,6 +1,7 @@
 package knub.master_thesis.welda
 
 import java.io.File
+import java.nio.file.{Files, Path, Paths}
 import java.util
 
 import be.tarsos.lsh.{CommandLineInterface, LSH, Vector}
@@ -39,12 +40,13 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     assert(LAMBDA <= 1.0, "lambda must be at most one")
 
     var pcaVectors: mutable.Map[String, Array[Double]] = _
-    var nrReplacedWordsSuccessful = 0L
-    var nrReplacedWordsTries = 0L
 
     var lsh: LSH = _
     var tree: KDTree = _
     var instances: Instances = _
+
+    var totalWords: Long = 0L
+    var totalReplaced: Long = 0L
 
     var folder: String = _
 
@@ -196,19 +198,22 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     override def sampleSingleIteration(): Unit = {
         estimateDistributionParameters()
-        nrReplacedWordsTries = 0
-        nrReplacedWordsSuccessful = 0
+        var wordsInIteration = 0L
+        var topic0Count = 0
+        var nrReplacedWordsSuccessful = 0
         for (docIdx <- 0 until p.numDocuments) {
             val docSize = corpusWords(docIdx).size
             for (wIndex <- 0 until docSize) {
+                wordsInIteration += 1
                 // determine topic first
                 val topicId = corpusTopics(docIdx).get(wIndex)
+                if (topicId == 0)
+                    topic0Count += 1
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(LAMBDA) || (LAMBDA != 0.0 && topicId == 0) |
+                val wordId = if (Sampler.nextCoinFlip(LAMBDA) || (LAMBDA != 0.0 && topicId == 0) ||
                     (LAMBDA != 0.0 && newStopwordIds.contains(originalWordId))) {
                     val sampledWord = sampleAndFindWord(topicId)
-                    nrReplacedWordsTries += 1
                     if (sampledWord == "NONE") {
                         originalWordId
                     } else {
@@ -239,7 +244,10 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             }
 //            Timer.printAll()
         }
-//        println(s"How often does replacing work: ${nrReplacedWordsSuccessful.toDouble / nrReplacedWordsTries}")
+        totalReplaced += nrReplacedWordsSuccessful
+        totalWords += wordsInIteration
+        if (p.diagnosisMode)
+            println(s"Given lambda: $LAMBDA, actual lambda: ${nrReplacedWordsSuccessful.toDouble / wordsInIteration}, topic0 = ${topic0Count.toDouble / wordsInIteration}")
     }
 
     def pca(m: DenseMatrix[Double], numDimensions: Int): DenseMatrix[Double] = {
@@ -289,6 +297,17 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             }
         }
         topTopicVectors
+    }
+
+
+    override def inference(): Unit = {
+        super.inference()
+        val f = Paths.get(folder)
+        val actualLambda = Math.round(totalReplaced * 100.0 / totalWords) / 100.0
+        println(s"actualLambda = $actualLambda")
+        val newFolderName = folder.replaceAll("lambda-\\d-\\d+", s"lambda-${actualLambda.toString.replace('.', '-')}")
+        println(s"Rename ${new File(folder).getName} to ${new File(newFolderName).getName}")
+        Files.move(Paths.get(folder), Paths.get(newFolderName))
     }
 
     def estimateDistributionParameters(): Unit
