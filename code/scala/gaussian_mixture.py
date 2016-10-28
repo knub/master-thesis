@@ -129,8 +129,8 @@ def main():
 
         create_gmm_output(gmm, X, file_name)
 
-        if X.shape[1] == 2 and os.path.basename(os.path.dirname(file_name)) == "0":
-            create_plot(gmm, word_vector_pairs, X, file_name)
+        # if X.shape[1] == 2 and os.path.basename(os.path.dirname(file_name)) == "0":
+        #     create_plot(gmm, word_vector_pairs, X, file_name)
 
 if __name__ == "__main__":
     main()
