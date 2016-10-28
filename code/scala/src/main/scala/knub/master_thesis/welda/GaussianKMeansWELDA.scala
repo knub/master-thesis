@@ -22,8 +22,8 @@ class GaussianKMeansWELDA(p: Args) extends GaussianWELDA(p) {
 
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.gaussian-top.FOO." +
-            s"distance-$DISTANCE_FUNCTION." +
-            s"lambda-${LAMBDA.toString.replace('.', '-')}"
+            s"distance-${p.weldaDistanceFunction}." +
+            s"lambda-${p.lambda.toString.replace('.', '-')}"
     }
 
     override def getTopTopicVectors(): Array[Seq[Array[Double]]] = {
