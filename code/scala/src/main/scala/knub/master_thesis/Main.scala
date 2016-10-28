@@ -66,7 +66,7 @@ object Main {
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf",
-            "welda-gaussian-kmeans", "welda-gaussian-mixture",
+            "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
             "avg-embedding"
@@ -273,21 +273,22 @@ object Main {
                             println(e)
                     }
                 }
-            case "welda-gaussian-kmeans" =>
-                val weldaGaussian = new GaussianKMeansWELDA(args)
-                weldaGaussian.init()
-                weldaGaussian.inference()
-                println("Exiting")
-                System.exit(1)
-                val THREADS = 10
+            case "welda-gaussian-top" =>
+//                val weldaGaussianTop = new GaussianTopWELDA(args)
+//                weldaGaussianTop.init()
+//                weldaGaussianTop.inference()
+//                println("Exiting")
+//                System.exit(1)
+                val THREADS = 20
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
                     ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
                 )
+                val topic0Samplings = List(true, false)
 
-                val cases = for (embedding <- embeddings; lambda <- lambdas)
-                    yield (lambda, embedding)
+                val cases = for (embedding <- embeddings; lambda <- lambdas; topic0Sampling <- topic0Samplings)
+                    yield (lambda, embedding, topic0Sampling)
 
                 cases.foreach(println)
                 val parCases = if (THREADS == 1) {
@@ -298,11 +299,13 @@ object Main {
                     parCases
                 }
 
-                parCases.foreach { case (lambda, embedding) =>
+                parCases.foreach { case (lambda, embedding, topic0Sampling) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
-                        val weldaKmeansGaussian = new GaussianKMeansWELDA(
+                        val weldaKmeansGaussian = new GaussianTopWELDA(
                             args.copy(lambda = lambda,
+                                topic0Sampling = topic0Sampling,
+                                pcaDimensions = 6,
                                 embeddingFileName = embedding._1,
                                 numDocuments = embedding._2))
                         weldaKmeansGaussian.init()
