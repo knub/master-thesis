@@ -225,7 +225,7 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-                val weldaGaussian = new GaussianWELDA(args.copy(diagnosisMode = true, topic0Sampling = true))
+                val weldaGaussian = new GaussianWELDA(args.copy(lambda = 0.7, diagnosisMode = true, topic0Sampling = false))
                 weldaGaussian.init()
                 weldaGaussian.inference()
                 System.exit(0)
