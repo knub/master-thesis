@@ -26,7 +26,7 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
         s"${p.modelFileName}.$embeddingName.welda.gaussian-mixture.0-rep." +
             s"pca-$PCA_DIMENSIONS." +
             s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
-            s"lambda-${LAMBDA.toString.replace('.', '-')}"
+            s"lambda-${p.lambda.toString.replace('.', '-')}"
     }
 
     /**

@@ -34,12 +34,6 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
     val DISTRIBUTION_ESTIMATION_SAMPLES = p.distributionEstimationSamples
     override val TOPIC_OUTPUT_EVERY = 1
 
-    val LAMBDA = p.lambda
-    val DISTANCE_FUNCTION = p.weldaDistanceFunction
-
-    assert(LAMBDA >= 0.0, "lambda must be at least zero")
-    assert(LAMBDA <= 1.0, "lambda must be at most one")
-
     var pcaVectors: mutable.Map[String, Array[Double]] = _
 
     var lsh: LSH = _
@@ -153,9 +147,9 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             tree = new KDTree
             tree.setInstances(instances)
         } else {
-            val hashFamily = CommandLineInterface.getHashFamily(0.0, DISTANCE_FUNCTION, PCA_DIMENSIONS)
+            val hashFamily = CommandLineInterface.getHashFamily(0.0, p.weldaDistanceFunction, PCA_DIMENSIONS)
             lsh = new LSH(new util.ArrayList(lshVectors.asJava), hashFamily)
-            DISTANCE_FUNCTION match {
+            p.weldaDistanceFunction match {
                 case "cos" =>
                     lsh.buildIndex(32, 4)
                 case "l2" =>
@@ -217,8 +211,8 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                     topic0Count += 1
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(LAMBDA) || (LAMBDA != 0.0 && topicId == 0) ||
-                    (LAMBDA != 0.0 && newStopwordIds.contains(originalWordId))) {
+                val wordId = if (Sampler.nextCoinFlip(p.lambda) || (p.lambda != 0.0 && topicId == 0) ||
+                    (p.lambda != 0.0 && newStopwordIds.contains(originalWordId))) {
                     val sampledWord = sampleAndFindWord(topicId)
                     if (sampledWord == "NONE") {
                         originalWordId
@@ -253,7 +247,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         totalReplaced += nrReplacedWordsSuccessful
         totalWords += wordsInIteration
         if (p.diagnosisMode)
-            println(s"Given lambda: $LAMBDA, actual lambda: ${nrReplacedWordsSuccessful.toDouble / wordsInIteration}, topic0 = ${topic0Count.toDouble / wordsInIteration}")
+            println(s"Given lambda: ${p.lambda}, actual lambda: ${nrReplacedWordsSuccessful.toDouble / wordsInIteration}, topic0 = ${topic0Count.toDouble / wordsInIteration}")
     }
 
     def pca(m: DenseMatrix[Double], numDimensions: Int): DenseMatrix[Double] = {
