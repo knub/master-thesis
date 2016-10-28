@@ -43,6 +43,7 @@ case class Args(
     // replacement sampling
     pcaDimensions: Int = 10,
     diagnosisMode: Boolean = false,
+    topic0Sampling: Boolean = false,
     distributionEstimationSamples: Int = 20,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
