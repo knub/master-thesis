@@ -1078,11 +1078,44 @@ We again choose $(\alpha=0.02, \beta=0.02)$ and start with a topic coherence bas
 
 \subsection{Gaussian WELDA}
 
+We will start with the analysis of our basic algorithm, which uses a Gaussian distribution to estimate the topic-word distribution in the embedding space.
+Only then we will evaluate the more complex von Mises-Fisher distribution and the Gaussian mixtures.
+Unless noted otherwise, all our experiments are run with $1500$ standard LDA iterations and then $200$ following WELDA iterations.
+
 \subsubsection{Influence of the resampling parameter $\lambda$}
+We started the evaluation with the influence of the $\lambda$ parameter.
+It must be noted, that the $\lambda$ parameter the algorithm is configured with, is not the final $\lambda$ parameter.
+This is because we always resample corpus-specific stop words, that we identified from the background topic.
+The plots in the following always use the actual $\lambda_{act}$, i.e. how often was a word replaced during sampling, either because it was a stop word or because the coin toss was successful.
+
+
 \subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
 \subsubsection{Influence of the background topic}
 \subsubsection{Running LDA as a prerequisite}
+Normally, we run standard LDA before we start with WELDA algorithm for further topic refining.
+This is because the topic distributions are estimated on the top words of each topic.
+If we run WELDA from the first iteration, with topics assigned randomly and uniformly before the first iteration, the distributions are not well spread over the embedding space.
+For example, here are the top ten words of the three most-occurring topics after random initialization: \\
+\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
+\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
+\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article people like max know also think} \\
+
+These are the words the distributions are estimated on.
+Instead of improving clearly defined topics by sampling new words near the well-spread topic means, we end up actually generating more overly general, low information words for all topics.
+To prove this thought experiment, we run WELDA with randomly initialized topics for $1500$ iterations on the \textsc{20News} corpus with $\lambda = 0.2$ and $\lambda = 0.5$.
+The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
+As expected, TODO
+
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/standard_lda_alpha_beta.png}
+       \caption{TODO.}
+       \label{fig:standard_lda_as_prerequisite}
+\end{figure}
+
+
+
 \subsubsection{Choice of word embeddings}
 \subsubsection{Top word selection}
 
