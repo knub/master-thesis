@@ -43,7 +43,7 @@ case class Args(
     // replacement sampling
     pcaDimensions: Int = 10,
     diagnosisMode: Boolean = false,
-    topic0Sampling: Boolean = false,
+    topic0Sampling: Boolean = true,
     distributionEstimationSamples: Int = 20,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
@@ -225,26 +225,26 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-                val weldaGaussian = new GaussianWELDA(args.copy(lambda = 0.7, diagnosisMode = true, topic0Sampling = false))
-                weldaGaussian.init()
-                weldaGaussian.inference()
-                System.exit(0)
+//                val weldaGaussian = new GaussianWELDA(args.copy(lambda = 0.7, diagnosisMode = true, topic0Sampling = false))
+//                weldaGaussian.init()
+//                weldaGaussian.inference()
+//                System.exit(0)
 
-                val THREADS = 20
-                val lambdas = List(0.1, 0.5, 0.2)
+                val THREADS = 24
+                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
                     ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
 //                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
                 )
-                val samplingParams = List(
-                    (2, 3), (2, 5), (2, 10), (2, 20), (2, 50),
-                    (3, 6), (3, 10),(3, 20), (3, 50),
-                    (5, 10), (5, 20), (5, 30), (5, 50),
-                    (10, 50))
+//                val samplingParams = List(
+//                    (2, 3), (2, 5), (2, 10), (2, 20), (2, 50),
+//                    (3, 6), (3, 10),(3, 20), (3, 50),
+//                    (5, 10), (5, 20), (5, 30), (5, 50),
+//                    (10, 50))
 
-                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
-                    yield (lambda, embedding, samplingParam)
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield (lambda, embedding)
 
                 cases.foreach(println)
                 val parCases = if (THREADS == 1) {
@@ -255,15 +255,13 @@ object Main {
                     parCases
                 }
 
-                parCases.foreach { case (lambda, embedding, samplingParam) =>
+                parCases.foreach { case (lambda, embedding) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
                         val weldaGaussian = new GaussianWELDA(
                             args.copy(lambda = lambda,
                                 embeddingFileName = embedding._1,
-                                numDocuments = embedding._2,
-                                pcaDimensions = samplingParam._1,
-                                distributionEstimationSamples = samplingParam._2))
+                                numDocuments = embedding._2))
                         weldaGaussian.init()
                         weldaGaussian.inference()
                         println(s"Finshed lambda = $lambda, embedding = $embedding")
