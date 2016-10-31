@@ -324,6 +324,11 @@ The best metric, called $C_V$ in the original paper, had a correlation of $0.731
 This shows, that topics with high values in the $C_V$ metric can usually be easily interpreted by humans.
 We will use the $C_V$ metric in this master thesis to evaluate topic coherence.
 
+Another possibility to evaluate topic models, is to use topic models for further, more end-user oriented tasks.
+One example is document classification.
+When using topic models for this, the document-topic proportions are used as features, i.e. the number of features is the number of topics.
+Then, using a standard machine learning algorithm like support vector machines, a model can be trained and applied to new, unseen documents.
+We will also use this method in our evaluation.
 
 
 \section{Word embeddings}
@@ -729,6 +734,16 @@ However, the method is not evaluated extensively and it is unclear, whether this
 %\include{chapters/future_work}
 
 \section{Bayesian optimization}
+\begin{itemize}
+  \item Good for noisy black-box functions, when evaluations are costly, no derivative and the problem is non convex
+  \item Builds a statistical model for the function from the hyperparameter space to the evaluation function
+  \item By using the information of all previous runs, the framework can suggest a new point to which provides max information
+  \item balances \emph{exploration} (checking previously unknown points in the hyperparameter space) vs. \emph{exploitation} (using the current best values to check nearby points in the hyperparameter space)
+  \item $\Rightarrow$ fewer experiments are necessary
+  \item \url{https://github.com/HIPS/Spearmint}
+\end{itemize}
+
+
 \chapter{Word embeddings in topic models}
 
 In this chapter we will present our analysis on the spread.
@@ -929,16 +944,18 @@ Explain why we do not run WELDA from the start - run experiment!
 
 \section{Topic Coherence}
 Topic coherence is a standard task to
+\subsection{Experiment setup}
+\subsubsection{Data Sets}
+\subsubsection{Topic coherence evaluation}
 
-\section{Experiment setup}
-\subsection{Topic coherence evaluation}
-
-We will now describe this $C_V$ metric in detail.
+We will use topic coherence as a metric to evaluate the quality of our topics.
+As a topic coherence metric, we use the $C_V$ metric from Röder et al.~\cite{Roder2015}, which did an extensive survey on topic coherence metrics.
+Their $C_V$ metric had the highest correlation with human annotators ($r_{Pearson} = 0.731$).
 
 At first, the number $N$ of top words to be considered for the measure must be chosen.
 We choose $N=10$, because ``the evaluation of topic quality is harder, if the number of top words $N$ is small''~\cite{Roder2015} and because it is a common choice in the literature~\cite{Roder2015,Aletras2013}.
 We denote the set of top words with $W$.
-The topic coherence evaluation for one set of 10 top words is calculated in four steps:
+The topic coherence evaluation for one set of ten top words is calculated in four steps:
 \begin{enumerate}
   \item \textbf{Word Segmentation}:
     The set $W$ of top words is segmented into pairs of word-sets, for which the coherence is calculated separately in the following step.
@@ -1024,7 +1041,25 @@ Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured 
   \label{table:best_worst_cv_topics}
 \end{table}
 
-\section{Results}
+\subsubsection{Preprocessing}
+
+For the topic models, the entire corpus was lowercased and tokenized.
+A token was each sequence of letter or punctuation characters not divided by a whitespace character.
+Trailing punctuation at the end of a token was removed.
+We then removed stop words, using the stop words list from the Python nltk~\cite{Bird2009} toolkit.
+The list contains 150 general English stop words.
+With this preprocessing each document was represented as a bag-of-words, i.e. multiple occurrences of the same word were taken into account.
+
+TODO: Word embeddings?
+
+\subsection{Results}
+
+\subsubsection{Standard LDA as baseline}
+As a baseline, we started with evaluating the topic coherence of the standard LDA algorithm.
+We also used this to determine good values for the LDA parameters $\alpha$ and $\beta$.
+We ran a grid search using $[0.002, 0.005, 0.01, 0.02, 0.05]$ as possible values for $\alpha$ and $[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]$ as possible values for $\beta$.
+Interestingly, there is no clear trend visible
+
 \subsubsection{Overfitting with high lambda}
 When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
 /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
@@ -1038,8 +1073,8 @@ Given a set of documents, which belong to different semantic groups, the task of
 
 We use the document-topic matrices.
 
-
-
+\subsection{Experiment setup}
+\subsection{Results}
 
 \chapter{Comparative evaluation of word-embedding-improved topic models}
 \section{Training word-embeddings}
@@ -1080,17 +1115,7 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 \chapter{Conclusion and future work}
 
 \chapter{Thoughts}
-\section{Bayesian Optimization}
-\begin{itemize}
-  \item Good for noisy black-box functions, when evaluations are costly, no derivative and the problem is non convex
-  \item Builds a statistical model for the function from the hyperparameter space to the evaluation function
-  \item By using the information of all previous runs, the framework can suggest a new point to which provides max information
-  \item balances \emph{exploration} (checking previously unknown points in the hyperparameter space) vs. \emph{exploitation} (using the current best values to check nearby points in the hyperparameter space)
-  \item $\Rightarrow$ fewer experiments are necessary
-  \item \url{https://github.com/HIPS/Spearmint}
-\end{itemize}
 \section{Other notes}
-Using the nltk stop words list
 
 Make a full chapter about Topic Model Evaluation with the paper Exploring the Space of Topic Coherence Measures
 
