@@ -862,11 +862,11 @@ There are several configurable parameters in the algorithm, which we will detail
     With $\lambda = 1.0$, no single word is taken from the text, rather all words are sampled from the embedding space.
     Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA.
     This parameter decides, how much extra information from the word embeddings is leaked into the topic model.
-  \item \textbf{Number of top words for distribution estimation}:
+  \item \textbf{Number of top words for distribution estimation $N_{top}$}:
     We are using the top words of each topic to estimate the distributions.
     Usually only the first
     TODO: Number of top words vs. topic coherence.
-  \item \textbf{Number of dimensions for dimensionality reduction}:
+  \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$}:
   \item \textbf{Dimensionality reduction method}:
   \item \textbf{Distance function for the nearest neighbour search}: Euclidean or cosine
   \item \textbf{Number of iterations to run LDA}:
@@ -1052,13 +1052,39 @@ With this preprocessing each document was represented as a bag-of-words, i.e. mu
 
 TODO: Word embeddings?
 
-\subsection{Results}
 
 \subsubsection{Standard LDA as baseline}
 As a baseline, we started with evaluating the topic coherence of the standard LDA algorithm.
 We also used this to determine good values for the LDA parameters $\alpha$ and $\beta$.
 We ran a grid search using $[0.002, 0.005, 0.01, 0.02, 0.05]$ as possible values for $\alpha$ and $[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]$ as possible values for $\beta$.
-Interestingly, there is no clear trend visible
+Interestingly, there is no clear trend visible.
+The best topic coherence results were achieved with $(\alpha=0.01,\beta=0.02)$, $(\alpha=0.005,\beta=0.005)$, and $(\alpha=0.02,\beta=0.1)$.
+However, all results were in a very close range, with a standard deviation of all results of $0.006$.
+This impression is further strengthened by Figure~\ref{fig:standard_lda_alpha_beta}, where we plot the average TC coherence for a fixed $\alpha$ or $\beta$.
+Again, no trend is recognizable.
+Because of this, we base our following experiments on the values $(\alpha=0.02, \beta=0.02)$, as setting the parameters to $1/K$ is a common setting in the literature.
+%TODO: Cite
+The baseline topic coherence score for this is $TC = 0.424$.
+
+The results are similar for the \textsc{Nips} corpus.
+We again choose $(\alpha=0.02, \beta=0.02)$ and start with a topic coherence baseline of $TC = 0.406$.
+
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/standard_lda_alpha_beta.png}
+       \caption{Average topic coherence for a fixed $\alpha$ and $\beta$ after the grid search.}
+       \label{fig:standard_lda_alpha_beta}
+\end{figure}
+
+\subsection{Gaussian WELDA}
+
+\subsubsection{Influence of the resampling parameter $\lambda$}
+\subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
+\subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
+\subsubsection{Influence of the background topic}
+\subsubsection{Running LDA as a prerequisite}
+\subsubsection{Choice of word embeddings}
+\subsubsection{Top word selection}
 
 \subsubsection{Overfitting with high lambda}
 When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
@@ -1106,6 +1132,7 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 
 
 \section{Topic coherence}
+\subsection{Raw-WE topic model}
 \section{Document classification}
 \section{Word similarity}
 
