@@ -96,7 +96,7 @@ def main():
 
     now = datetime.now()
 
-    print now.strftime("%a, %Y-%m-%d %H:%M")
+    print now.strftime("%a, %Y-%m-%d %H:%M; " + str(len(args.topic_files)) + " topic files")
 
     for topic_file in args.topic_files:
         if not os.path.isfile(topic_file):
