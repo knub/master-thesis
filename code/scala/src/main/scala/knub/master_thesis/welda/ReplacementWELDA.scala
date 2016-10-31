@@ -112,7 +112,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
         val folderFile = new File(folder)
         val parentFolderFile = folderFile.getParentFile
         val existingFolder = parentFolderFile.listFiles().find { f =>
-            f.isDirectory && f.getAbsolutePath.startsWith(folderFile.getAbsolutePath)
+            f.isDirectory && f.getAbsolutePath.startsWith(folderFile.getAbsolutePath + ".")
         }
 
         if (existingFolder.nonEmpty && new File(f"${existingFolder.get.getAbsolutePath}/welda.iteration-${p.numIterations}%03d.topics").exists()) {
@@ -214,7 +214,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                     topic0Count += 1
                 val originalWordId = corpusWords(docIdx).get(wIndex)
                 // now determine the word we "observe"
-                val wordId = if (Sampler.nextCoinFlip(p.lambda) || (p.lambda != 0.0 && p.topic0Sampling && topicId == 1) ||
+                val wordId = if (Sampler.nextCoinFlip(p.lambda) || (p.lambda != 0.0 && p.topic0Sampling && topicId == 0) ||
                     (p.lambda != 0.0 && newStopwordIds.contains(originalWordId))) {
                     val sampledWord = sampleAndFindWord(topicId)
                     if (sampledWord == "NONE") {
