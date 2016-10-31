@@ -40,6 +40,7 @@ case class Args(
     lambda: Double = -1.0,
     kappaFactor: Int = 5,
     saveStep: Int = 50,
+    randomTopicInitialization: Boolean = false,
     // replacement sampling
     pcaDimensions: Int = 10,
     diagnosisMode: Boolean = false,
@@ -225,13 +226,15 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-//                val weldaGaussian = new GaussianWELDA(args.copy(lambda = 0.7, diagnosisMode = true, topic0Sampling = false))
+//                val weldaGaussian = new GaussianWELDA(args.copy(
+//                    diagnosisMode = true))
 //                weldaGaussian.init()
 //                weldaGaussian.inference()
 //                System.exit(0)
 
-                val THREADS = 24
-                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+                val THREADS = 4
+//                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+                val lambdas = List(0.2, 0.5)
                 val embeddings = List(
                     ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
                     ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
@@ -260,6 +263,8 @@ object Main {
                     try {
                         val weldaGaussian = new GaussianWELDA(
                             args.copy(lambda = lambda,
+                                numIterations = 1500,
+                                randomTopicInitialization = true,
                                 embeddingFileName = embedding._1,
                                 numDocuments = embedding._2))
                         weldaGaussian.init()

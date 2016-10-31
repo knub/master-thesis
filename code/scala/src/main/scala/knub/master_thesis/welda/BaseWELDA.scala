@@ -11,6 +11,7 @@ import util.{Date, TopicModelWriter}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
+import scala.util.Random
 
 abstract class BaseWELDA(val p: Args) {
     val embeddingName = Paths.get(p.embeddingFileName).getFileName.toString
@@ -94,6 +95,7 @@ abstract class BaseWELDA(val p: Args) {
     }
 
     private def readCorpus(modelFileName: String, embeddingFileName: String) {
+        val r = new Random(21011991)
         var docId = 0
         word2IdVocabulary = readWord2IdVocabulary(modelFileName)
         id2WordVocabulary = buildId2WordVocabulary(word2IdVocabulary)
@@ -117,7 +119,11 @@ abstract class BaseWELDA(val p: Args) {
             } else {
                 try {
                     val wordId = java.lang.Integer.parseInt(line.substring(0, 6))
-                    val topicId = java.lang.Integer.parseInt(line.substring(7, 13))
+                    val topicId = if (p.randomTopicInitialization) {
+                        r.nextInt(numTopics)
+                    } else {
+                        java.lang.Integer.parseInt(line.substring(7, 13))
+                    }
                     topicWordCountLDA(topicId)(wordId) += 1
                     sumTopicWordCountLDA(topicId) += 1
                     docTopicCount(docId)(topicId) += 1
