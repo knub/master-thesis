@@ -46,6 +46,7 @@ case class Args(
     pcaDimensions: Int = 10,
     distributionEstimationSamples: Int = 20,
     topic0Sampling: Boolean = false,
+    stopWordSampling: Boolean = true,
     diagnosisMode: Boolean = false,
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
@@ -271,6 +272,17 @@ object Main {
                         numIterations = 1500,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
+                        topic0Sampling = false)
+                runCases(cases, 4, new GaussianWELDA(_))
+            case "welda-gaussian-background-topic" =>
+                val lambdas = List(0.2, 0.5)
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        stopWordSampling = false,
                         topic0Sampling = false)
                 runCases(cases, 4, new GaussianWELDA(_))
             case "welda-gaussian-pca-samples" =>
