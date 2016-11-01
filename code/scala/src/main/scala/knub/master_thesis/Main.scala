@@ -70,7 +70,7 @@ object Main {
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf",
             "welda-gaussian-lambda", "welda-gaussian-random-init",
-            "welda-gaussian-pca-samples",
+            "welda-gaussian-pca-samples", "welda-gaussian-nips",
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
@@ -261,7 +261,7 @@ object Main {
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2
                     )
-                runCases(cases, 20, new GaussianWELDA(_))
+                runCases(cases, 15, new GaussianWELDA(_))
             case "welda-gaussian-random-init" =>
                 val lambdas = List(0.2, 0.5)
                 val cases = for (embedding <- embeddings; lambda <- lambdas)
