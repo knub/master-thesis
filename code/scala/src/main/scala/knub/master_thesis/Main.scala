@@ -14,7 +14,6 @@ import knub.master_thesis.util.Word2VecUtils
 import knub.master_thesis.welda._
 import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
-import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.cpu.nativecpu.NDArray
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
@@ -34,14 +33,14 @@ case class Args(
     inspectionFolder: String = "NOT SET",
     numThreads: Int = 2,
     numTopics: Int = -1,
-    numIterations: Int = 50,
+    numIterations: Int = 200,
     numDocuments: Int = -1,
     alpha: Double = 0.02,
     beta: Double = 0.02,
     alpha0Boost: Double = 1.0,
     lambda: Double = -1.0,
     kappaFactor: Int = 5,
-    saveStep: Int = 50,
+    saveStep: Int = 20,
     randomTopicInitialization: Boolean = false,
     // replacement sampling
     pcaDimensions: Int = 10,
@@ -69,6 +68,7 @@ object Main {
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf",
+            "welda-gaussian-lambda",
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
@@ -228,12 +228,26 @@ object Main {
                     weldaSim.inference()
                 }
             case "welda-gaussian" =>
-//                val weldaGaussian = new GaussianWELDA(args.copy(
-//                    diagnosisMode = true))
-//                weldaGaussian.init()
-//                weldaGaussian.inference()
-//                System.exit(0)
-
+                val weldaGaussian = new GaussianWELDA(args.copy(
+                    diagnosisMode = true))
+                weldaGaussian.init()
+                weldaGaussian.inference()
+            case "welda-gaussian-random-init" =>
+            case "welda-gaussian-lambda" =>
+                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+                val embeddings = List(
+                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
+                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
+                )
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        topic0Sampling = false)
+                runCases(cases, 20, new GaussianWELDA(_))
+            case "welda-gaussian-nips" =>
                 val THREADS = 20
                 val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
 //                val lambdas = List(0.2, 0.5)
@@ -254,37 +268,14 @@ object Main {
                 val topic0Samplings = List(true, false)
 
                 val cases = for (embedding <- embeddings; lambda <- lambdas; topic0Sampling <- topic0Samplings)
-                    yield (lambda, embedding, topic0Sampling)
+                    yield args.copy(
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        topic0Sampling = topic0Sampling)
 
-                cases.foreach(println)
-                val parCases = if (THREADS == 1) {
-                    cases
-                } else {
-                    val parCases = cases.par
-                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
-                    parCases
-                }
+                runCases(cases, THREADS, new GaussianWELDA(_))
 
-                parCases.foreach { case (lambda, embedding, topic0Sampling) =>
-                    println(s"Starting lambda = $lambda, embedding = $embedding")
-                    try {
-                        val weldaGaussian = new GaussianWELDA(
-                            args.copy(lambda = lambda,
-                                embeddingFileName = embedding._1,
-                                numDocuments = embedding._2,
-                                topic0Sampling = topic0Sampling
-//                                pcaDimensions = samplingParam._1,
-//                                distributionEstimationSamples = samplingParam._2
-                            ))
-                        weldaGaussian.init()
-                        weldaGaussian.inference()
-                        println(s"Finshed lambda = $lambda, embedding = $embedding")
-                    } catch {
-                        case e: Exception =>
-                            println(s"Failed lambda = $lambda, embedding = $embedding")
-                            println(e)
-                    }
-                }
             case "welda-gaussian-top" =>
 //                val weldaGaussianTop = new GaussianTopWELDA(args)
 //                weldaGaussianTop.init()
@@ -504,6 +495,34 @@ object Main {
         }
     }
 
+    def runCases(cases: Seq[Args], threads: Int, f: Args => ReplacementWELDA): Unit = {
+        val parCases = if (threads == 1) {
+            cases
+        } else {
+            val parCases = cases.par
+            parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(threads))
+            parCases
+        }
+
+        parCases.foreach { case arg =>
+            val paramString = s"lambda=${arg.lambda}, " +
+                s"embedding=${new File(arg.embeddingFileName).getName}, " +
+                s"topic0Sampling=${arg.topic0Sampling}, " +
+                s"pcaDim=${arg.pcaDimensions}, " +
+                s"samples=${arg.distributionEstimationSamples}"
+            println(s"Starting $paramString")
+            try {
+                val welda = f(arg)
+                welda.init()
+                welda.inference()
+                println(s"Finished $paramString")
+            } catch {
+                case e: Exception =>
+                    println(s"Failed $paramString")
+                    println(e)
+            }
+        }
+    }
     def trainAndSaveNewModel(args: Args): TopicModelResult = {
         val (instancesIterator, stopWordsFileName) = DataIterators.getIteratorForDataFolderName(args.dataFolderName)
         val tp = new TopicModel(args, args.alpha, args.beta, instancesIterator)
