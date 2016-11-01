@@ -235,24 +235,26 @@ object Main {
 //                System.exit(0)
 
                 val THREADS = 20
-//                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
-                val lambdas = List(0.2, 0.5)
+                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+//                val lambdas = List(0.2, 0.5)
                 val embeddings = List(
-                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
-                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
-//                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
+//                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
+//                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
+                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 1740),
+                    ("/data/wikipedia/2016-06-21/embedding-models/nips.dim-50.skip-gram.embedding", 1740)
                 )
-                val samplingParams = List(
-                    (2, 20), (2, 30), (2, 40), (2, 50), (2, 100), (2, 200), (2, 400),
-                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100), (10, 200), (10, 400),
-                    (50, 100), (50, 200), (50, 400), (50, 1000)
+//                val samplingParams = List(
+//                    (2, 20), (2, 30), (2, 40), (2, 50), (2, 100), (2, 200), (2, 400),
+//                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100), (10, 200), (10, 400),
+//                    (50, 100), (50, 200), (50, 400), (50, 1000)
 //                    (3, 6), (3, 10),(3, 20), (3, 50),
 //                    (5, 10), (5, 20), (5, 30), (5, 50),
 //                    (10, 50)
-                )
+//                )
+                val topic0Samplings = List(true, false)
 
-                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
-                    yield (lambda, embedding, samplingParam)
+                val cases = for (embedding <- embeddings; lambda <- lambdas; topic0Sampling <- topic0Samplings)
+                    yield (lambda, embedding, topic0Sampling)
 
                 cases.foreach(println)
                 val parCases = if (THREADS == 1) {
@@ -263,15 +265,16 @@ object Main {
                     parCases
                 }
 
-                parCases.foreach { case (lambda, embedding, samplingParam) =>
+                parCases.foreach { case (lambda, embedding, topic0Sampling) =>
                     println(s"Starting lambda = $lambda, embedding = $embedding")
                     try {
                         val weldaGaussian = new GaussianWELDA(
                             args.copy(lambda = lambda,
                                 embeddingFileName = embedding._1,
                                 numDocuments = embedding._2,
-                                pcaDimensions = samplingParam._1,
-                                distributionEstimationSamples = samplingParam._2
+                                topic0Sampling = topic0Sampling
+//                                pcaDimensions = samplingParam._1,
+//                                distributionEstimationSamples = samplingParam._2
                             ))
                         weldaGaussian.init()
                         weldaGaussian.inference()
