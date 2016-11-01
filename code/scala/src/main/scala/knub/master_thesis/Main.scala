@@ -467,8 +467,14 @@ object Main {
                 }.toList
 
                 val embeddingName = new File(args.embeddingFileName).getName
+
+                var f = new File(args.modelFileName)
+                while (!new File(s"${f.getParent}/$embeddingName.restricted.vocab.embedding.txt").exists()) {
+                    println(f)
+                    f = f.getParentFile
+                }
                 val word2Vec = WordVectorSerializer.loadTxtVectors(
-                    new File(s"${new File(args.modelFileName).getParent}/$embeddingName.restricted.vocab.embedding.txt"))
+                    new File(s"${f.getParent}/$embeddingName.restricted.vocab.embedding.txt"))
 
                 val topicLinesHead = topics.map { t =>
                     val headVector = Word2VecUtils.findActualVector(word2Vec, t.head).get
