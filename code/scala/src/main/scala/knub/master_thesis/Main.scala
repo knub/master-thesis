@@ -71,6 +71,7 @@ object Main {
             "welda-gaussian", "welda-vmf",
             "welda-gaussian-lambda", "welda-gaussian-random-init",
             "welda-gaussian-pca-samples", "welda-gaussian-nips",
+            "welda-gaussian-background-topic",
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
