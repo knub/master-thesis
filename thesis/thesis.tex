@@ -936,8 +936,14 @@ TODO: Show citations
 \end{algorithm}
 
 \subsection{Background topic for corpus-specific stop-words}
-\subsection{Running LDA as a prerequisitite}
+\subsection{Running LDA as a prerequisite}
 Explain why we do not run WELDA from the start - run experiment!
+
+\subsection{Implemenation}
+
+gensim
+Mallet
+Deep Learning 4j
 
 \chapter{WELDA Discussion}
 
@@ -1102,7 +1108,8 @@ For example, here are the top ten words of the three most-occurring topics after
 \hspace*{0cm} \framebox[0.8\textwidth]{would one writes article people like max know also think} \\
 
 These are the words the distributions are estimated on.
-Instead of improving clearly defined topics by sampling new words near the well-spread topic means, we end up actually generating more overly general, low information words for all topics.
+This initial setup has a topic coherence value of $TC = 0.311$.
+Now, instead of improving clearly defined topics by sampling new words near the well-spread topic means, we end up actually generating more overly general, low information words for all topics.
 To prove this thought experiment, we run WELDA with randomly initialized topics for $1500$ iterations on the \textsc{20News} corpus with $\lambda = 0.2$ and $\lambda = 0.5$.
 The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
 As expected, TODO
