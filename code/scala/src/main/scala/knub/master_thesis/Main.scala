@@ -72,6 +72,7 @@ object Main {
             "welda-gaussian-lambda", "welda-gaussian-random-init",
             "welda-gaussian-pca-samples", "welda-gaussian-nips",
             "welda-gaussian-background-topic",
+            "welda-gaussian-mixture-lambdas-pca-samples",
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
@@ -302,7 +303,7 @@ object Main {
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 20, new GaussianWELDA(_))
+                runCases(cases, 15, new GaussianWELDA(_))
             case "welda-gaussian-top" =>
                 //                val samplingParams = List(
                 //                    (2, 20), (2, 30), (2, 40), (2, 50), (2, 100), (2, 200), (2, 400),
@@ -358,25 +359,23 @@ object Main {
             case "welda-gaussian-mixture-lambdas-pca-samples" =>
                 val lambdas = List(0.2, 0.5)
                 val samplingParams = List(
-//                    (2, 10), (2, 20), (2, 30), (2, 40), (2, 100),
-//                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 100)
-//                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 50), (3, 100)
-//                    (4, 10), (4, 20), (4, 30), (4, 40), (4, 50), (4, 100),
-//                    (5, 10), (5, 20), (5, 30), (5, 40), (5, 50), (5, 100),
-//                    (8, 20), (8, 30), (8, 40), (8, 50), (8, 100),
-                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100),
-                    (10, 200), (10, 400)
+                    (4, 20), (4, 30), (4, 40), (4, 50), (4, 100), (4, 200), (4, 400),
+                    (6, 20), (6, 30), (6, 40), (6, 50), (6, 100), (6, 200), (6, 400),
+                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100), (10, 200), (10, 400),
+                    (20, 40), (20, 50), (20, 100), (20, 200), (20, 400),
+                    (50, 100), (50, 200), (50, 400)
                 )
 
                 val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
                     yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 20, new GaussianMixtureWELDA(_))
+                runCases(cases, 15, new GaussianMixtureWELDA(_))
             case "welda-vmf" =>
                 val THREADS = 30
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
