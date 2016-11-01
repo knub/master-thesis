@@ -470,8 +470,17 @@ object Main {
                 val word2Vec = WordVectorSerializer.loadTxtVectors(
                     new File(s"${new File(args.modelFileName).getParent}/$embeddingName.restricted.vocab.embedding.txt"))
 
-                val topicLines = topics.map { t =>
-                    val vectors = t.map(word2Vec.getWordVector)
+                val topicLinesHead = topics.map { t =>
+                    val headVector = Word2VecUtils.findActualVector(word2Vec, t.head).get
+                    val newTopic = word2Vec.wordsNearest(new NDArray(Array(headVector)), 10)
+                    val newTopicLine = newTopic.asScala.mkString(" ")
+//                    println(s"${t.mkString(" ")} --> $newTopicLine")
+                    newTopicLine
+                }
+                FileUtils.writeLines(new File(s"${args.modelFileName}.$embeddingName.raw-we-tm.head"), topicLinesHead.asJava)
+
+                val topicLinesAvg = topics.map { t =>
+                    val vectors = t.flatMap { w => Word2VecUtils.findActualVector(word2Vec, w) }
                     val avgVector = new Array[Double](vectors.head.length)
                     vectors.foreach { a =>
                         for (i <- vectors.head.indices) {
@@ -481,15 +490,12 @@ object Main {
                     for (i <- vectors.head.indices) {
                         avgVector(i) /= vectors.length
                     }
-
-//                    val v = word2Vec.getWordVector(t.head)
                     val newTopic = word2Vec.wordsNearest(new NDArray(Array(avgVector)), 10)
                     val newTopicLine = newTopic.asScala.mkString(" ")
-                    println(s"${t.mkString(" ")} --> $newTopicLine")
+//                    println(s"${t.mkString(" ")} --> $newTopicLine")
                     newTopicLine
                 }
-
-                FileUtils.writeLines(new File(args.modelFileName), topicLines.asJava)
+                FileUtils.writeLines(new File(s"${args.modelFileName}.$embeddingName.raw-we-tm.avg"), topicLinesAvg.asJava)
         }
     }
 
