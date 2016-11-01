@@ -62,12 +62,21 @@ def word2vec():
     logging.info("Training word2vec")
     sentences = LineSentence(args.sentences)
     model = Word2Vec(sentences, size=args.dimensions, window=5, min_count=5, workers=args.threads, sg=True, hs=0,
-                     negative=10, sample=0.001, iter=20)
+                     negative=10, sample=0.001, iter=40)
     model.save_word2vec_format(args.model, binary=True, fvocab=args.model + ".counts")
     logging.info("Finished training word2vec")
-    logging.info(model.most_similar(positive=['woman', 'king'], negative=['man']))
-    logging.info(model.doesnt_match("breakfast cereal dinner lunch".split()))
-    logging.info(model.similarity('woman', 'man'))
+
+    if "nips" in args.sentences:
+        for word in ["paper", "cortex", "brain", "learning", "posterior", "neural", "section", "optimization"]:
+            try:
+                logging.info(word)
+                logging.info(model.most_similar([word]))
+            except:
+                pass
+    else:
+        logging.info(model.most_similar(positive=["woman", "king"], negative=["man"]))
+        logging.info(model.doesnt_match("breakfast cereal dinner lunch".split()))
+        logging.info(model.similarity('woman', 'man'))
 
 
 if __name__ == "__main__":
