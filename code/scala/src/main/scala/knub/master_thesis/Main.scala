@@ -14,6 +14,8 @@ import knub.master_thesis.util.Word2VecUtils
 import knub.master_thesis.welda._
 import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
+import org.nd4j.linalg.api.ndarray.INDArray
+import org.nd4j.linalg.cpu.nativecpu.NDArray
 import weka.classifiers.functions.SMO
 import weka.core.{Attribute, DenseInstance, Instances}
 
@@ -70,7 +72,7 @@ object Main {
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution",
             "20news-test", "20news-document-classification",
-            "avg-embedding"
+            "avg-embedding", "raw-we-tm"
         ).foreach { mode =>
             cmd(mode).action { (_, c) => c.copy(mode = mode) }
         }
@@ -467,6 +469,35 @@ object Main {
                     pw.println(s"$clazz ${avgVector.mkString(" ")}")
                 }
                 pw.close()
+            case "raw-we-tm" =>
+                val topics = Source.fromFile(args.modelFileName).getLines().drop(1).map { l =>
+                    l.split(' ').takeRight(10)
+                }.toList
+
+                val embeddingName = new File(args.embeddingFileName).getName
+                val word2Vec = WordVectorSerializer.loadTxtVectors(
+                    new File(s"${new File(args.modelFileName).getParent}/$embeddingName.restricted.vocab.embedding.txt"))
+
+                val topicLines = topics.map { t =>
+                    val vectors = t.map(word2Vec.getWordVector)
+                    val avgVector = new Array[Double](vectors.head.length)
+                    vectors.foreach { a =>
+                        for (i <- vectors.head.indices) {
+                            avgVector(i) += a(i)
+                        }
+                    }
+                    for (i <- vectors.head.indices) {
+                        avgVector(i) /= vectors.length
+                    }
+
+//                    val v = word2Vec.getWordVector(t.head)
+                    val newTopic = word2Vec.wordsNearest(new NDArray(Array(avgVector)), 10)
+                    val newTopicLine = newTopic.asScala.mkString(" ")
+                    println(s"${t.mkString(" ")} --> $newTopicLine")
+                    newTopicLine
+                }
+
+                FileUtils.writeLines(new File(args.modelFileName), topicLines.asJava)
         }
     }
 
