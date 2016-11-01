@@ -106,6 +106,37 @@ object DataIterators {
                 new Instance(text, folder.getName, folder + "/" + document, text)
             }
         }
+
+        val nipsArticles = new File(s"$dataFolderName/articles.txt")
+        if (nipsArticles.exists()) {
+            val texts = files.flatMap { folder =>
+                folder.list().map { document =>
+                    val origLines = FileUtils.readLines(new File(s"$folder/$document")).asScala.toList
+                    val lines = origLines.dropWhile(_.length < 5)
+
+                    val title = lines.head
+                    val content = lines.view
+                        .map(_.trim)
+                        .map { l => if (l.endsWith("-")) s"${l.replaceAll("-$", "")}" else s"$l " }
+                        .dropWhile(!_.toLowerCase.contains("abstract"))
+                        .drop(1)
+                        .takeWhile { l =>
+                            !l.startsWith("References") &&
+                            !l.startsWith("REFERENCES") &&
+                            !l.endsWith("References ") &&
+                            !l.endsWith("REFERENCES ") }
+
+                    val text = title + content.mkString("")
+                    text
+                }
+            }.toList.asJavaCollection
+//            val texts = instances.map { inst =>
+//                inst.getData.asInstanceOf[String]
+//            }.toList.asJavaCollection
+            FileUtils.writeLines(nipsArticles, texts)
+            System.exit(1)
+        }
+
         scala.util.Random.shuffle(instances.toList).iterator.asJava
     }
 
