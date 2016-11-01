@@ -249,8 +249,8 @@ object Main {
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
                         embeddingFileName = embedding._1,
-                        numDocuments = embedding._2,
-                        topic0Sampling = false)
+                        numDocuments = embedding._2
+                    )
                 runCases(cases, 20, new GaussianWELDA(_))
             case "welda-gaussian-nips" =>
                 val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
@@ -259,8 +259,8 @@ object Main {
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
                         embeddingFileName = embedding._1,
-                        numDocuments = embedding._2,
-                        topic0Sampling = false)
+                        numDocuments = embedding._2
+                    )
                 runCases(cases, 20, new GaussianWELDA(_))
             case "welda-gaussian-random-init" =>
                 val lambdas = List(0.2, 0.5)
@@ -268,11 +268,11 @@ object Main {
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
-                        randomTopicInitialization = true,
-                        numIterations = 1500,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
-                        topic0Sampling = false)
+                        randomTopicInitialization = true,
+                        numIterations = 1500
+                    )
                 runCases(cases, 4, new GaussianWELDA(_))
             case "welda-gaussian-background-topic" =>
                 val lambdas = List(0.2, 0.5)
@@ -282,8 +282,8 @@ object Main {
                         lambda = lambda,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
-                        stopWordSampling = false,
-                        topic0Sampling = false)
+                        stopWordSampling = false
+                    )
                 runCases(cases, 4, new GaussianWELDA(_))
             case "welda-gaussian-pca-samples" =>
                 val lambdas = List(0.2, 0.5)
@@ -351,64 +351,31 @@ object Main {
                     }
                 }
             case "welda-gaussian-mixture" =>
-                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(
-                    lambda = 0.1,
-                    pcaDimensions = 2,
-                    distributionEstimationSamples = 20,
-                    diagnosisMode = true))
+                val mixtureWELDA = new GaussianMixtureWELDA(args.copy(diagnosisMode = true))
                 mixtureWELDA.init()
                 mixtureWELDA.inference()
-                System.exit(1)
-                val THREADS = 25
-
-                val lambdas = List(0.05, 0.1, 0.3, 0.4, 0.5, 0.7, 1.0)
-
+            case "welda-gaussian-mixture-lambdas-pca-samples" =>
+                val lambdas = List(0.2, 0.5)
                 val samplingParams = List(
-                    (2, 10), (2, 20), (2, 30), (2, 40), (2, 100),
-                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 100)
+//                    (2, 10), (2, 20), (2, 30), (2, 40), (2, 100),
+//                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 100)
 //                    (3, 10), (3, 20), (3, 30), (3, 40), (3, 50), (3, 100)
 //                    (4, 10), (4, 20), (4, 30), (4, 40), (4, 50), (4, 100),
 //                    (5, 10), (5, 20), (5, 30), (5, 40), (5, 50), (5, 100),
 //                    (8, 20), (8, 30), (8, 40), (8, 50), (8, 100),
-//                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100)
-                )
-                val embeddings = List(
-                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
-                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
+                    (10, 20), (10, 30), (10, 40), (10, 50), (10, 100),
+                    (10, 200), (10, 400)
                 )
 
-                val foo = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
-                    yield (lambda, embedding, samplingParam)
-                val cases = (0.0, embeddings(0), samplingParams(2)) :: ((0.0, embeddings(1), samplingParams(2)) :: Nil)
-//                    :: foo)
-
-
-                val parCases = if (THREADS == 1) {
-                    cases
-                } else {
-                    val parCases = cases.par
-                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
-                    parCases
-                }
-
-                parCases.foreach { case (lambda, embedding, samplingParam) =>
-                    println(s"Starting lambda=$lambda, embedding=$embedding, sampling=$samplingParam")
-                    try {
-                        val mixtureWELDA = new GaussianMixtureWELDA(args.copy(
-                            lambda = lambda,
-                            embeddingFileName = embedding._1,
-                            numDocuments = embedding._2,
-                            pcaDimensions = samplingParam._1,
-                            distributionEstimationSamples = samplingParam._2))
-                        mixtureWELDA.init()
-                        mixtureWELDA.inference()
-                        println(s"Finished lambda=$lambda, embedding=$embedding, sampling=$samplingParam")
-                    } catch {
-                        case e: Exception =>
-                            println(s"Failed lambda=$lambda, embedding=$embedding sampling=$samplingParam, " +
-                                s"$e: ${e.getMessage}")
-                    }
-                }
+                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
+                    yield args.copy(
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        pcaDimensions = samplingParam._1,
+                        distributionEstimationSamples = samplingParam._2
+                    )
+                runCases(cases, 20, new GaussianMixtureWELDA(_))
             case "welda-vmf" =>
                 val THREADS = 30
                 val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
