@@ -18,6 +18,7 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
             s"pca-$PCA_DIMENSIONS." +
             s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
             (if (p.randomTopicInitialization) "random." else "") +
+            (if (!p.stopWordSampling) "nostopword." else "") +
             s"lambda-${p.lambda.toString.replace('.', '-')}"
     }
 
