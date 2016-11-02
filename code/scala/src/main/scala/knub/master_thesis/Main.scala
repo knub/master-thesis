@@ -460,47 +460,6 @@ object Main {
                     pw.println(s"$clazz ${avgVector.mkString(" ")}")
                 }
                 pw.close()
-            case "raw-we-tm" =>
-                val topics = Source.fromFile(args.modelFileName).getLines().drop(1).map { l =>
-                    l.split(' ').takeRight(10)
-                }.toList
-
-                val embeddingName = new File(args.embeddingFileName).getName
-
-                var f = new File(args.modelFileName)
-                while (!new File(s"${f.getParent}/$embeddingName.restricted.vocab.embedding.txt").exists()) {
-                    println(f)
-                    f = f.getParentFile
-                }
-                val word2Vec = WordVectorSerializer.loadTxtVectors(
-                    new File(s"${f.getParent}/$embeddingName.restricted.vocab.embedding.txt"))
-
-                val topicLinesHead = topics.map { t =>
-                    val headVector = Word2VecUtils.findActualVector(word2Vec, t.head).get
-                    val newTopic = word2Vec.wordsNearest(new NDArray(Array(headVector)), 10)
-                    val newTopicLine = newTopic.asScala.mkString(" ")
-//                    println(s"${t.mkString(" ")} --> $newTopicLine")
-                    newTopicLine
-                }
-                FileUtils.writeLines(new File(s"${args.modelFileName}.$embeddingName.raw-we-tm.head"), topicLinesHead.asJava)
-
-                val topicLinesAvg = topics.map { t =>
-                    val vectors = t.flatMap { w => Word2VecUtils.findActualVector(word2Vec, w) }
-                    val avgVector = new Array[Double](vectors.head.length)
-                    vectors.foreach { a =>
-                        for (i <- vectors.head.indices) {
-                            avgVector(i) += a(i)
-                        }
-                    }
-                    for (i <- vectors.head.indices) {
-                        avgVector(i) /= vectors.length
-                    }
-                    val newTopic = word2Vec.wordsNearest(new NDArray(Array(avgVector)), 10)
-                    val newTopicLine = newTopic.asScala.mkString(" ")
-//                    println(s"${t.mkString(" ")} --> $newTopicLine")
-                    newTopicLine
-                }
-                FileUtils.writeLines(new File(s"${args.modelFileName}.$embeddingName.raw-we-tm.avg"), topicLinesAvg.asJava)
         }
     }
 
