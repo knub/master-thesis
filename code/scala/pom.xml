@@ -144,7 +144,7 @@
                             <id>topic-model</id>
                             <mainClass>knub.master_thesis.Main</mainClass>
                             <jvmArgs>
-                                <jvmArg>-Xms30g</jvmArg>
+                                <!--<jvmArg>-Xms30g</jvmArg>-->
                                 <jvmArg>-Xmx30g</jvmArg>
                                 <jvmArg>-XX:ParallelGCThreads=8</jvmArg>
                                 <jvmArg>-ea</jvmArg>
