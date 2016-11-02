@@ -1070,7 +1070,7 @@ This impression is further strengthened by Figure~\ref{fig:standard_lda_alpha_be
 Again, no trend is recognizable.
 Because of this, we base our following experiments on the values $(\alpha=0.02, \beta=0.02)$, as setting the parameters to $1/K$ is a common setting in the literature.
 %TODO: Cite
-The baseline topic coherence score for this is $TC = 0.424$.
+The baseline topic coherence score for this is $TC = 0.419$.
 
 The results are similar for the \textsc{Nips} corpus.
 We again choose $(\alpha=0.02, \beta=0.02)$ and start with a topic coherence baseline of $TC = 0.406$.
@@ -1093,7 +1093,59 @@ We started the evaluation with the influence of the $\lambda$ parameter.
 It must be noted, that the $\lambda$ parameter the algorithm is configured with, is not the final $\lambda$ parameter.
 This is because we always resample corpus-specific stop words, that we identified from the background topic.
 The plots in the following always use the actual $\lambda_{act}$, i.e. how often was a word replaced during sampling, either because it was a stop word or because the coin toss was successful.
+The $\lambda_{act}$ values are slightly higher than the original $\lambda$ values, with diminishing differences for higher $\lambda$. See Table~\ref{table:actual_lambda} for the differences.
+\begin{table}[]
+  \centering
+  \caption{Comparison of $\lambda$ and $\lambda_{act}$}
+  \label{table:actual_lambda}
+  \begin{tabular}{l|llllllllllll}
+    $\boldsymbol{\lambda}$     & 0.00 & 0.001 & 0.1  & 0.2  & 0.3  & 0.4  & 0.5  & 0.6  & 0.7  & 0.8  & 0.9  & 1.0 \\
+    $\boldsymbol{\lambda_{act}}$ & 0.00 & 0.11  & 0.20 & 0.29 & 0.38 & 0.46 & 0.55 & 0.64 & 0.73 & 0.82 & 0.91 & 1.0
+  \end{tabular}
+\end{table}
 
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_lambda_20news.png}
+       \caption{Topic coherence development for Gaussian WELDA and \textsc{20news} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
+       \label{fig:welda_gaussian_lambda_20news}
+\end{figure}
+% TODO: Mention plots are scaled by 100.
+
+We start with the analysis of with the topic models using the embeddings trained on the \textsc{20news} corpus.
+The results are plotted in Figure~\ref{fig:welda_gaussian_lambda_20news}.
+There are several interesting observations in the plot.
+First, with $\lambda = 0.0$ the topic coherence does not change beyond random fluctuations.
+This is expected, as WELDA with no replacement corresponds to standard LDA, where we observed the same topic coherence values around $42.5$.
+However, the same bad topic coherence values can be observered when $\lambda = 1.0$, i.e. when all words are replaced.
+This indicates, that just relying on the word embeddings to achieve good topics and completely disregarding the standard LDA structure, does not work.
+Intuitively, when all words are resampled, the means of the topics roughly stay the same after each iteration, as no knowledge from the text is incorporated into the model anymore.
+This results in roughly constant values for $\lambda = 1.0$.
+
+All the other $\lambda$ parameters from $0.1$ to $0.9$ follow a clearly rising trend.
+Around iteration $140$, the values tend to reach their optimum and stay there except some random fluctuations.
+There is no clear correlation between $\lambda$ and the topic coherence recognizable.
+The best values are reached with $\lambda = 0.73$ with a topic coherence of $0.474$, however the second best results are reached by a comparatively low $lambda = 0.2$ and topic coherence of $0.470$.
+It seems and the Gibbs sampling gets stuck in a local optimum.
+Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
+
+We now present the results for running with the embeddings trained on Wikipedia.
+Interestingly, the topic coherence values are lower on average when using this embeddings.
+This goes against the intuition, because topic coherence is evaluated using Wikipedia as a reference corpus.
+One would expect, that knowledge from the Wikipedia corpus leaks into the topics during resampling, and thus leads to better topic models.
+However, this is not the case.
+The observations for $\lambda = 0.0$ and $\lambda = 1.0$ are the same as above.
+However, here also $\lambda = 0.8$ and $\lambda = 0.9$ are significantly worse than the rest.
+The reason for this is the same as above: resampling too often throws away the corpus and just operates on the embeddings.
+The best results with this embeddings is only $0.458$ as compared to $0.474$ with the other embeddings.
+% TODO: Write more?
+
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_lambda_200.png}
+       \caption{Topic coherence development for Gaussian WELDA and \textsc{Wikipedia} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
+       \label{fig:welda_gaussian_lambda_200}
+\end{figure}
 
 \subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
@@ -1184,11 +1236,11 @@ For one search word, the search word is always in the output, as the similarity 
 
 As search words, we took the top topic words of a standard LDA run with $iterations=1500, \alpha=0.02, \beta=0.02$.
 We experimented with two cases: only taking the top word and taking the average of all top ten words.
-
 For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is: \\
-\hspace*{0cm} \framebox[1.1\width]{game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer} \\
+\hspace*{0cm} \framebox[1.03\width]{game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer} \\
 
 We show the results in Table~\ref{table:raw_we_tm}.
+The results are worse than running LDA, thus showing the only taking word embeddings is not enough.
 \begin{table}[]
   \centering
   \caption{Topic coherence on the \textsc{20news} corpus when using word embedding similarity for topics. The results are slightly worse than standard LDA.}
