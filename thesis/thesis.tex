@@ -28,6 +28,7 @@
 \usepackage{textcomp,amsmath}     % Mathezeichen etc.
 \usepackage{graphicx}             % Graphiken einbinden
 \usepackage{makecell}
+\usepackage{soul}
 \graphicspath{{./figures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{rotating}
@@ -868,7 +869,8 @@ There are several configurable parameters in the algorithm, which we will detail
     TODO: Number of top words vs. topic coherence.
   \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$}:
   \item \textbf{Dimensionality reduction method}:
-  \item \textbf{Distance function for the nearest neighbour search}: Euclidean or cosine
+  \item \textbf{Distance function for the nearest neighbour search}:
+    Euclidean distance or cosine similarity.
   \item \textbf{Number of iterations to run LDA}:
     We usually run $M = 1500$ iterations, as this yields stable topic assignments, and is also used in literature~\cite{Nguyen2015}.
     As visible in Figure~\ref{fig:ll_lda_convergence}, the log-likelihood has already converged with that many iterations.
@@ -1128,6 +1130,7 @@ There is no clear correlation between $\lambda$ and the topic coherence recogniz
 The best values are reached with $\lambda = 0.73$ with a topic coherence of $0.474$, however the second best results are reached by a comparatively low $lambda = 0.2$ and topic coherence of $0.470$.
 It seems and the Gibbs sampling gets stuck in a local optimum.
 Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
+This is an improvement of $0.051$ over the baseline value.
 
 We now present the results for running with the embeddings trained on Wikipedia.
 Interestingly, the topic coherence values are lower on average when using this embeddings.
@@ -1138,6 +1141,7 @@ The observations for $\lambda = 0.0$ and $\lambda = 1.0$ are the same as above.
 However, here also $\lambda = 0.8$ and $\lambda = 0.9$ are significantly worse than the rest.
 The reason for this is the same as above: resampling too often throws away the corpus and just operates on the embeddings.
 The best results with this embeddings is only $0.458$ as compared to $0.474$ with the other embeddings.
+This is only an improvement of $0.039$ over the baseline value.
 % TODO: Write more?
 
 \begin{figure}
@@ -1146,6 +1150,30 @@ The best results with this embeddings is only $0.458$ as compared to $0.474$ wit
        \caption{Topic coherence development for Gaussian WELDA and \textsc{Wikipedia} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
        \label{fig:welda_gaussian_lambda_200}
 \end{figure}
+
+% TODO: Nips
+We illustrate the change of topics in \textsc{Nips} and \textsc{20news} in Table~\ref{table:topic_development}.
+\begin{table}[]
+  \centering
+  \caption{Topic evolution from standard LDA to Gaussian WELDA after 200 iterations. The crossed out words were in the original top ten words of LDA, but are not in the top topic words after WELDA. The bold words are the new words. The top three topics are from the \textsc{20news} corpus, the lower three from the \textsc{Nips} corpus. The examples clearly show WELDA's capability to add specific, meaningful words in the top words, while at the same time removing overly general words.}
+  \label{table:topic_development}
+  \begin{tabular}{p{13.5cm}}
+    \hline
+    god \st{believe} \st{one} evidence religion \st{people} argument exist \st{question} atheists \textbf{faith belief existence life} \\
+    \hline
+    year players baseball \st{article} \st{good} \st{writes} lopez \st{jewish} league average \textbf{hit braves season hitter} \\
+    \hline
+    information list mail \st{may} internet send anonymous \st{faq} email \st{use} \textbf{system available privacy} \\
+    \hline
+    \hline
+    speech recognition speaker gamma acoustic phoneme \st{time} vowel \st{information} speakers \textbf{spectral phonetic} \\
+    \hline
+    bayesian gaussian distribution prior posterior \st{data} \st{using} evidence \st{mean} \st{sampling} \textbf{random covariance monte carlo} \\
+    \hline
+    kernel algorithm vector support loss margin \st{set} \st{function} linear examples \textbf{svm boosting} \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
