@@ -1172,7 +1172,36 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 
 
 \section{Topic coherence}
-\subsection{Raw-WE topic model}
+\subsection{Raw word-embedding topic model}
+As a baseline, we start with a topic model solely based on the word-similarity in the embedding space.
+This way, we see whether using the most similar words for a given word already yields good topics, or whether standard LDA
+
+For this, we used the standard \emph{distance} function, that is provided in the \emph{word2vec} package.
+Given a word or a list of words, this outputs the top $n$ similar words in the embedding space.
+In the original implementation, the search words are never in the output.
+We modified this, so that the search words may also be in the output.
+For one search word, the search word is always in the output, as the similarity is $1$.
+
+As search words, we took the top topic words of a standard LDA run with $iterations=1500, \alpha=0.02, \beta=0.02$.
+We experimented with two cases: only taking the top word and taking the average of all top ten words.
+
+For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is: \\
+\hspace*{0cm} \framebox[1.1\width]{game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer} \\
+
+We show the results in Table~\ref{table:raw_we_tm}.
+\begin{table}[]
+  \centering
+  \caption{Topic coherence on the \textsc{20news} corpus when using word embedding similarity for topics. The results are slightly worse than standard LDA.}
+  \label{table:raw_we_tm}
+  \begin{tabular}{ccc}
+    \textbf{search word}     & \textbf{200-dim., Wikipedia} & \textbf{50-dim., 20news} \\
+    \hline
+    top word                 & 0.414                        & 0.410                    \\
+    average of top ten words & 0.419                        & 0.389
+  \end{tabular}
+\end{table}
+
+% TODO: Mention later, that only the combination works good
 \section{Document classification}
 \section{Word similarity}
 
