@@ -23,9 +23,12 @@ class GaussianMixtureWELDA(p: Args) extends ReplacementWELDA(p) {
     override def transformVector(a: Array[Double]): Array[Double] = a
 
     override def getFolderName(): String = {
-        s"${p.modelFileName}.$embeddingName.welda.gaussian-mixture.0-rep." +
+        s"${p.modelFileName}.$embeddingName.welda.gaussian-mixture." +
+            (if (p.topic0Sampling) "topic0-yes." else "topic0-no.") +
             s"pca-$PCA_DIMENSIONS." +
             s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
+            (if (p.randomTopicInitialization) "random." else "") +
+            (if (!p.stopWordSampling) "nostopword." else "") +
             s"lambda-${p.lambda.toString.replace('.', '-')}"
     }
 
