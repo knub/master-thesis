@@ -275,7 +275,7 @@ object Main {
                     (50, 100), (50, 200), (50, 400)
                 )
 
-                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
+                val cases = for (embedding <- nipsEmbeddings; lambda <- lambdas; samplingParam <- samplingParams)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
