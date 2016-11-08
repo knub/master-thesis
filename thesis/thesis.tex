@@ -124,6 +124,51 @@ Betreuung: Dr. Ralf Krestel}
 % \mainmatter
 
 \chapter{Introduction}
+% \begin{algorithm}
+%   \caption{Gibbs sampling in LDA}
+%   \label{alg:welda_init}
+%   \begin{algorithmic}[1]
+%     \Procedure{GibbsSampling}{set of documents}
+%     \State{Randomly initialize words to topics}
+%     \For{iteration i}
+%       \For{document d}
+%         \For{word w in document d}
+%           \State{Calculate distribution over topics for word w}
+%           \State{Sample new topic for word w}
+%           \State{Update counts}
+%         \EndFor
+%       \EndFor
+%     \EndFor
+%     \EndProcedure
+%   \end{algorithmic}
+% \end{algorithm}
+% \begin{equation*}
+%   p(z_w = t | Z) \propto (N_{d}^{t} + \alpha) \times  \frac{N^{t, w} + \beta}{N^{t} + V * \beta}
+% \end{equation*}
+% \begin{algorithm}
+%   \caption{Gibbs sampling in WELDA}
+%   \label{alg:welda_init}
+%   \begin{algorithmic}[1]
+%     \Procedure{GibbsSamplingWELDA}{set of documents}
+%     \State{Run LDA as initialization step}
+%     \For{iteration i}
+%       \State{Estimate distribution parameters for all topics independently}
+%       \For{document d}
+%         \For{word w in document d}
+%           \State{Calculate distribution over topics for word w}
+%           \State{new\_topic\_id $\gets$ Sample new topic for word w}
+%           \If{coin\_flip($\lambda$)}
+%             \State{sample $\gets$ Sample from distribution of $new\_topic\_id$}
+%             \State{w $\gets$ Find nearest word for $sample$}
+%           \EndIf
+%           \State{Update counts}
+%         \EndFor
+%       \EndFor
+%     \EndFor
+%     \EndProcedure
+%   \end{algorithmic}
+% \end{algorithm}
+
 A core task in natural language processing (NLP) is to understand the meaning of words.
 Many downstream NLP tasks benefit from this, for example, text categorization, part-of-speech tagging, and machine translation.
 A popular concept to qualify the meaning of a word is to look at the contexts in which the word appears.
@@ -796,7 +841,6 @@ The distribution parameters are estimated
 The choice of distribution can be varied and will be explained later.
 
 We now describe the algorithm in more detail:
-
 \begin{algorithm}
   \caption{Initialization for the WELDA model, to be run before the Gibbs sampling}
   \label{alg:welda_init}
