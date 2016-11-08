@@ -144,7 +144,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
         writeTopTopicalWords(name)
         val docTopicMatrix = writeDocTopicProbs(name)
         if (it == model.p.numIterations) {
-            writeTopTopicalWords(name, 100)
+            writeTopTopicalWords(name, 500)
             writeTopicAssignments(name)
             writeTopicWordPros(name)
             writePercentageOfTopWords(name, docTopicMatrix)
