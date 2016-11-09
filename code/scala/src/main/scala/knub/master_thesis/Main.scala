@@ -2,7 +2,6 @@ package knub.master_thesis
 
 import java.io._
 import java.nio.file.Paths
-import java.util.Random
 import java.util.regex.Pattern
 
 import cc.mallet.pipe.CharSequence2TokenSequence
@@ -22,6 +21,7 @@ import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.io.Source
+import scala.util.Random
 
 case class Args(
     mode: String = "",
@@ -75,7 +75,7 @@ object Main {
             "welda-gaussian-mixture-lambdas-pca-samples",
             "welda-gaussian-mixture-nips-lambdas-pca-samples",
             "welda-gaussian-top", "welda-gaussian-mixture",
-            "inspect-topic-evolution",
+            "inspect-topic-evolution", "word-intrusion",
             "20news-test", "20news-document-classification",
             "avg-embedding", "raw-we-tm"
         ).foreach { mode =>
@@ -443,6 +443,8 @@ object Main {
 
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
+            case "word-intrusion" =>
+                wordIntrusion(args)
             case "20news-test" =>
                 run20NewsTest(args)
             case "20news-document-classification" =>
@@ -787,7 +789,7 @@ object Main {
             instances.add(instance)
         }
 
-        instances.randomize(new Random(21011991))
+        instances.randomize(new java.util.Random(21011991))
         println(s"nrInstances = ${instances.numInstances()}")
 
         val FOLDS = 10
@@ -817,5 +819,38 @@ object Main {
 
         println(s"Macro-averaged precision: ${percentages.sum / percentages.size}")
 
+    }
+
+    def wordIntrusion(args: Args): Unit = {
+        val r = new Random(21011991)
+
+        val TOP_WORDS = 5
+
+        val samples = Map(
+            "topicvec" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics"
+        )
+
+        samples.foreach { case (name, fileName) =>
+            println(s"$START_BOLD$name$STOP_BOLD")
+            val topics = Source.fromFile(fileName).getLines().map { line =>
+                line.split(' ').takeRight(500).toSeq
+            }.toSeq
+
+            val allWords = topics.flatMap(_.take(100)).toSet
+
+            r.shuffle(topics.indices.toList).take(10).foreach { topicId =>
+                val exclusionWords = topics(topicId).toSet
+                val availableWords = allWords.diff(exclusionWords)
+
+                val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
+
+                println(s"$topicId\t${intrusionPair._1.mkString(" ")} $START_BOLD${intrusionPair._2}$STOP_BOLD")
+            }
+        }
+    }
+
+    def drawWordFromSet(s: Set[String], r: Random): String = {
+        val v = s.toVector
+        v(r.nextInt(v.size))
     }
 }
