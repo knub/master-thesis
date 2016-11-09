@@ -822,12 +822,15 @@ object Main {
     }
 
     def wordIntrusion(args: Args): Unit = {
+        val outputFolder = new File("out/word-intrusion/")
+        outputFolder.mkdir()
         val r = new Random(21011991)
 
         val TOP_WORDS = 5
 
         val samples = Map(
-            "topicvec" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics"
+            "topicvec" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
+            "welda" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics"
         )
 
         samples.foreach { case (name, fileName) =>
@@ -838,14 +841,16 @@ object Main {
 
             val allWords = topics.flatMap(_.take(100)).toSet
 
-            r.shuffle(topics.indices.toList).take(10).foreach { topicId =>
+            val lines = r.shuffle(topics.indices.toList).take(10).map { topicId =>
                 val exclusionWords = topics(topicId).toSet
                 val availableWords = allWords.diff(exclusionWords)
 
                 val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
 
                 println(s"$topicId\t${intrusionPair._1.mkString(" ")} $START_BOLD${intrusionPair._2}$STOP_BOLD")
+                s"$topicId\t${intrusionPair._1.mkString("\t")}\t${intrusionPair._2}"
             }
+            FileUtils.writeLines(new File(s"${outputFolder.getAbsolutePath}/$name.txt"), "UTF-8", lines.asJavaCollection)
         }
     }
 
