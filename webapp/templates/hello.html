@@ -4,15 +4,45 @@
     <meta charset="UTF-8">
     <title>Word Intrusion</title>
     <link rel="stylesheet" href="/static/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/main.css"/>
 </head>
 <body>
     <div class="container">
         <div class="jumbotron">
             <h1>Hello!</h1>
-            <p>Hey, you already tagged xxx topics. Continue?</p>
-            <p><a class="btn btn-primary btn-lg" href="#" role="button">Continue tagging</a></p>
+            <p>
+                You will evaluate the result of a topic model.
+                A topic is presented by the list of top five words in the topic.
+                In addition to that, we add a word from another topic in the word list, and shuffle the words.
+                <strong>Your task is to identify the word, which does not fit well with the rest of the words.</strong>
+                If the topic is good, it should be easy to identify the verb.
+                If the topic is bad, the wrong word is selected.
+                We will calculate the goodness of the topic model as the percentage of correctly identified intrusion words.
+            </p>
+            <p>
+                Three notes:
+                <ul>
+                    <li>
+                        All words are lowercased, as this a standard preprocessing step for topic models.
+                        For example, if you see the word "sgd", that was probably SGD originally and refers to
+                        Stochastic Gradient Descent.
+                    </li>
+                    <li>
+                        As the terms are from scientific papers, feel free to quickly google a word,
+                        if it is completely unfamiliar, to get an idea of the meaning.
+                    </li>
+                    <li>
+                        The words stem from different topic models on the same data, so do not be surprised if a
+                        similar topic occurs again.
+                    </li>
+                </ul>
+            </p>
+            <p><a class="btn btn-success btn-lg" href="topic/{{ id }}" role="button">{{ text }}</a></p>
+            <hr>
+            <footer>
+                Master thesis on "Improving Probabilistic Topic Models with Word Embeddings" by Stefan Bunk, 2016
+            </footer>
         </div>
     </div>
-    <script src="/js/bootstrap.min.js"></script>
 </body>
 </html>
