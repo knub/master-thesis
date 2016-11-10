@@ -29,8 +29,8 @@ def parse_params(s):
 
 
 def pca(embeddings, n=2):
-    pca = RandomizedPCA(n_components=n)
-    return pca.fit_transform(embeddings)
+    trained_pca = RandomizedPCA(n_components=n, random_state=2101991)
+    return trained_pca.fit_transform(embeddings)
 
 
 def tsne(embeddings, n=2):
