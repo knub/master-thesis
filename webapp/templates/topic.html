@@ -4,27 +4,39 @@
     <meta charset="UTF-8">
     <title>Word Intrusion</title>
     <link rel="stylesheet" href="/static/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/main.css"/>
 </head>
 <body>
     <div class="container">
         <div class="jumbotron">
             <h2>Which word does not fit?</h2>
-            <button type="button" class="btn btn-primary btn-lg">{{ words[0] }}</button> <br> <br>
-            <button type="button" class="btn btn-primary btn-lg">{{ words[1] }}</button> <br> <br>
-            <button type="button" class="btn btn-primary btn-lg">{{ words[2] }}</button> <br> <br>
-            <button type="button" class="btn btn-primary btn-lg">{{ words[3] }}</button> <br> <br>
-            <button type="button" class="btn btn-primary btn-lg">{{ words[4] }}</button> <br> <br>
-            <button type="button" class="btn btn-primary btn-lg">{{ words[5] }}</button> <br> <br>
-            <!--<div class="row">-->
-                <!--<div class="col-md-2"><button type="button" class="btn btn-primary btn-lg">Foo</button></div>-->
-                <!--<div class="col-md-2"><button type="button" class="btn btn-primary btn-lg">Bonzonon</button></div>-->
-                <!--<div class="col-md-2"><button type="button" class="btn btn-primary btn-lg">bar</button></div>-->
-                <!--<div class="col-md-2"><button type="button" class="btn btn-primary btn-lg">fucking</button></div>-->
-                <!--<div class="col-md-2"><button type="button" class="btn btn-primary btn-lg">hyperpolarization</button></div>-->
-                <!--<div class="col-md-2"><button type="button" class="btn btn-primary btn-lg">omg</button></div>-->
-            <!--</div>-->
+            <br><br>
+            <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-6">
+                    <form action="/topic/{{ current_id + 1 }}" method="POST">
+                        <input type="hidden" name="method" value="{{ method }}"/>
+                        <input type="hidden" name="intrusion_idx" value="{{ current_id }}"/>
+                        <input type="hidden" name="intrusion_id" value="{{ intrusion_id }}"/>
+                        <input type="hidden" name="words" value="{{ ",".join(words) }}"/>
+                        <input type="hidden" name="intruder" value="{{ intruder }}"/>
+                        <button type="submit" name="selected_word" value="{{ words[0] }}" class="btn btn-primary btn-lg">{{ words[0] }}</button> <br> <br>
+                        <button type="submit" name="selected_word" value="{{ words[1] }}" class="btn btn-primary btn-lg">{{ words[1] }}</button> <br> <br>
+                        <button type="submit" name="selected_word" value="{{ words[2] }}" class="btn btn-primary btn-lg">{{ words[2] }}</button> <br> <br>
+                        <button type="submit" name="selected_word" value="{{ words[3] }}" class="btn btn-primary btn-lg">{{ words[3] }}</button> <br> <br>
+                        <button type="submit" name="selected_word" value="{{ words[4] }}" class="btn btn-primary btn-lg">{{ words[4] }}</button> <br> <br>
+                        <button type="submit" name="selected_word" value="{{ words[5] }}" class="btn btn-primary btn-lg">{{ words[5] }}</button> <br> <br>
+                    </form>
+                </div>
+                <div class="col-md-3">
+                </div>
+            </div>
+            <hr>
+            <footer>
+                Master thesis on "Improving Probabilistic Topic Models with Word Embeddings" by Stefan Bunk, 2016
+            </footer>
         </div>
     </div>
-    <script src="/js/bootstrap.min.js"></script>
 </body>
 </html>
