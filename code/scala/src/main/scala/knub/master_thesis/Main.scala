@@ -48,6 +48,7 @@ case class Args(
     topic0Sampling: Boolean = false,
     stopWordSampling: Boolean = true,
     diagnosisMode: Boolean = false,
+    modelNamePrefix: String = "",
     inspectFileContains: String = "###",
     weldaDistanceFunction: String = "cos") {
 
@@ -243,7 +244,15 @@ object Main {
                 }
             case "welda-gaussian" =>
                 val weldaGaussian = new GaussianWELDA(args.copy(
-                    diagnosisMode = true))
+                    modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
+                    topic0Sampling = false,
+                    pcaDimensions = 10,
+                    distributionEstimationSamples = 20,
+                    lambda = 0.2,
+                    modelNamePrefix = "redo",
+                    embeddingFileName = nipsEmbeddings.head._1,
+                    numDocuments = nipsEmbeddings.head._2
+                ))
                 weldaGaussian.init()
                 weldaGaussian.inference()
             case "welda-gaussian-lambda" =>
@@ -833,11 +842,18 @@ object Main {
         val TOP_WORDS = 5
 
         val samples = Map(
+            // 44.1
             "topicvec" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
             "welda-gaussian" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-180.topics",
+
             "welda-gaussian-mixture" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-180.topics",
-            "lftm" -> "foo",
-            "lda" -> "bar"
+            "lflda" -> "foo",
+            // 39.8
+            "lda" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv",
+            // 40.1
+            "20_lda" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.500.ssv",
+            "20_topicvec" -> "",
+            "20_lflda" -> ""
         )
 
         var i: Long = System.currentTimeMillis / 1000
