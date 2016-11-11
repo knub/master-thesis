@@ -830,7 +830,10 @@ object Main {
 
         val samples = Map(
             "topicvec" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
-            "welda" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics"
+            "welda-gaussian" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-180.topics",
+            "welda-gaussian-mixture" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-180.topics",
+            "lftm" -> "foo",
+            "lda" -> "bar"
         )
 
         var i: Long = System.currentTimeMillis / 1000
@@ -838,15 +841,15 @@ object Main {
         samples.foreach { case (name, fileName) =>
             println(s"$START_BOLD$name$STOP_BOLD")
             val topics = Source.fromFile(fileName).getLines().map { line =>
-                line.split(' ').takeRight(500).toSeq
+                line.split(' ').takeRight(500).take(50).toSeq
             }.toSeq
 
-            val allWords = topics.flatMap(_.take(100)).toSet
-            println(s"Longest word: ${allWords.maxBy(_.length)}")
+            val potentialIntruderWords = topics.flatMap(_.take(10)).toSet
+//            println(s"Longest word: ${potentialIntruderWords.maxBy(_.length)}")
 
-            val lines = r.shuffle(topics.indices.toList).take(10).map { topicId =>
+            val lines = topics.indices.toList.map { topicId =>
                 val exclusionWords = topics(topicId).toSet
-                val availableWords = allWords.diff(exclusionWords)
+                val availableWords = potentialIntruderWords.diff(exclusionWords)
 
                 val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
 
