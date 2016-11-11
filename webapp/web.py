@@ -41,13 +41,13 @@ def hello():
         min_untagged_idxs = set(range(len(intrusions))) - intrusion_idxs
         if len(min_untagged_idxs) > 0:
             min_untagged_idx = min(set(range(len(intrusions))) - intrusion_idxs)
-            text = "Continue tagging with sample " + str(min_untagged_idx)
+            text = "Continue tagging with sample %d/%d" % (min_untagged_idx, len(intrusions))
             intrusion_idx = min_untagged_idx
         else:
             text = "You already tagged everything"
             intrusion_idx = len(intrusions)
     else:
-        text = "Start tagging"
+        text = "Start tagging 0/%d" % len(intrusions)
         intrusion_idx = 0
     return render_template('hello.html', text=text, id=intrusion_idx)
 
