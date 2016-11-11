@@ -44,7 +44,7 @@ def calculate_topic_coherences(f):
              "-jar",
              local_palmetto,
              local_wikidata,
-             "C_A",
+             "C_V",
              palmetto_file],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     elif os.path.exists(remote_palmetto):
