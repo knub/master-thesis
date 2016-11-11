@@ -843,25 +843,34 @@ object Main {
 
         val samples = Map(
             // 44.1
-            "topicvec" -> "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
-            "welda-gaussian" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-180.topics",
-
-            "welda-gaussian-mixture" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-180.topics",
-            "lflda" -> "foo",
+            "topicvec" ->
+                "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
+            // 42.1
+            "welda-gaussian" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.redo.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
+            // 46.1
+            "welda-gaussian-mixture" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian-mixture.topic0-no.pca-50.des-200.lambda-0-5.lambdaact-0-38/welda.iteration-200.topics.100",
+            // 43.5
+            "lflda" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/lflda.dim-50.lambda-0-6.alphasum-1-0.beta-0-02/iteration-100.500.topics",
             // 39.8
-            "lda" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv",
+            "lda" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv"
             // 40.1
-            "20_lda" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.500.ssv",
-            "20_topicvec" -> "",
-            "20_lflda" -> ""
+//            "20_lda" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.500.ssv",
+//            "20_topicvec" -> "",
+//            "20_lflda" -> ""
         )
 
         var i: Long = System.currentTimeMillis / 1000
 
-        samples.foreach { case (name, fileName) =>
+        samples.toList.sorted.foreach { case (name, fileName) =>
             println(s"$START_BOLD$name$STOP_BOLD")
+            val takeRightValue = if (fileName.contains(".100")) 100 else 500
+            println(s"takeRightValue: $takeRightValue columns: ${Source.fromFile(fileName).getLines().next().split(' ').size}")
             val topics = Source.fromFile(fileName).getLines().map { line =>
-                line.split(' ').takeRight(500).take(50).toSeq
+                line.split(' ').takeRight(takeRightValue).take(50).toSeq
             }.toSeq
 
             val potentialIntruderWords = topics.flatMap(_.take(10)).toSet
@@ -869,6 +878,7 @@ object Main {
 
             val lines = topics.indices.toList.map { topicId =>
                 val exclusionWords = topics(topicId).toSet
+                assert(exclusionWords.size == 50)
                 val availableWords = potentialIntruderWords.diff(exclusionWords)
 
                 val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
