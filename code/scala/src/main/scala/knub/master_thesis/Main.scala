@@ -165,6 +165,7 @@ object Main {
                 }
                 */
 
+
                 val startTime = System.currentTimeMillis()
                 val res = trainAndSaveNewModel(args)
                 val endTime = System.currentTimeMillis()
@@ -554,9 +555,12 @@ object Main {
     }
 
     def writeTopWordsToTextFile(res: TopicModelResult, args: Args): Unit = {
-        val pw = args.getPrintWriterFor(".ssv-all")
-        pw.write(res.displayTopWords(100))
+        val pw = args.getPrintWriterFor(".ssv")
+        pw.write(res.displayTopWords(10))
         pw.close()
+        val pwAll = args.getPrintWriterFor(".500.ssv")
+        pwAll.write(res.displayTopWords(500))
+        pwAll.close()
     }
 
     def writeVocabulary(res: TopicModelResult, args: Args) = {
