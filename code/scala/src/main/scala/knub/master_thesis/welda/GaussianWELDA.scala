@@ -14,6 +14,7 @@ class GaussianWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.gaussian." +
+            p.modelNamePrefix +
             (if (p.topic0Sampling) "topic0-yes." else "topic0-no.") +
             s"pca-$PCA_DIMENSIONS." +
             s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
