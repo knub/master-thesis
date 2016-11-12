@@ -32,6 +32,15 @@
                 <div class="col-md-3">
                 </div>
             </div>
+            {% if glossary %}
+                {% for entry in glossary %}
+                <h3>Glossary</h3>
+                <p>
+                    <strong>{{ entry[0] }}:</strong>
+                    <span>{{ entry[1] }}</span>
+                </p>
+                {% endfor %}
+            {% endif %}
             <hr>
             <footer>
                 Master thesis on "Improving Probabilistic Topic Models with Word Embeddings" by Stefan Bunk, 2016
