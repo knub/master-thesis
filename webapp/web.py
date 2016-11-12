@@ -1,3 +1,4 @@
+# coding=utf-8
 from flask import Flask
 from flask import render_template, request
 from collections import namedtuple
@@ -26,9 +27,16 @@ intrusions = read_all_intrusions()
 random.seed(21011991)
 shuffle(intrusions)
 
+def read_glossary():
+    with open("glossary", "r") as f:
+        lines = [line.rstrip().split("\t") for line in f]
+    glossary = {s[0]: s[1] for s in lines}
+    return glossary
+
+glossary = read_glossary()
+
 
 app = Flask(__name__)
-
 
 @app.route("/")
 def hello():
@@ -71,14 +79,16 @@ def tag_intrusion(intrusion_idx):
     else:
         intrusion = intrusions[intrusion_idx]
         words = [intrusion.intruder] + intrusion.words
-        random.seed(21011991)
+        sample_glossary = [(w, glossary[w]) for w in words if w in glossary]
+        random.seed(21011991 + intrusion_idx)
         shuffle(words)
         return render_template('topic.html',
                                words=words,
                                method=intrusion.method,
                                current_id=intrusion_idx,
                                intruder=intrusion.intruder,
-                               intrusion_id=intrusion.id)
+                               intrusion_id=intrusion.id,
+                               glossary=sample_glossary)
 
 if __name__ == "__main__":
     app.run()
