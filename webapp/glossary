@@ -12,3 +12,8 @@ pca	Prinicipal component analysis
 mlp	Multilayer Perceptron
 map	Maximum A Posteriori
 som	Self-organizing map
+ucsf	University of San Francisco
+emg	Electromyography
+drf	Detector response function
+hmm	Hidden Markov model
+dtm	Generative topographic map
