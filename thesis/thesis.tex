@@ -800,20 +800,43 @@ Afterwards we will analyze the different topic models and word embedding-enhance
 \section{WELDA}
 \subsection{Motivation}
 As word embeddings and LDA topic modeling are different techniques with no inherent relationship to each other, we start with exploring how the results of one can be interpreted in the other model.
+
+We ran initial experiments on the Wikipedia corpus\footnote{Full English Wikipedia dump from June 21st, 2016}, on which we trained both a topic model and a skip-gram word embedding model with two hundred dimensions.
+We then evaluated the similarities between the words.
+In embedding models, we take the cosine similarity between the two vectors.
+
 \begin{table*}
        \centering
-       \caption{Word similarity in topic models and word embeddings}
-       \begin{tabular}{llll}
+       \caption{Typical examples for different notion of word similarity in topic models and word embeddings.
+       For example, the word pair (war, commander) in the cell (high topic model similarity, low word embedding similarity) means, that this pair is assigned a low similarity in the embedding space, but high similarity in the topic model space.
+       High similarity indicates a similarity value in the upper quartile, low similarity corresponds to a value in the lower quartile.}
+       \begin{tabular}{p{2cm}p{2cm}p{5cm}p{5cm}}
        \hline
        \textbf{}                                                                                  & \textbf{} & \multicolumn{2}{l}{\textbf{Word embedding similarity}} \\
-                                                                                                  &           & Low                       & High                       \\ \hline
-       \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}l@{}}Topic model\\ similarity\end{tabular}}} & Low       &                           &                            \\
-                                                                                                  & High      &                           &
+                                                                                                  &           & High                      & Low                       \\ \hline
+         \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}l@{}}Topic model\\ similarity\end{tabular}}} & High    &
+           (disease, diseases) \newline
+           (professor, lecturer)
+           &
+           (africa, uganda) \newline
+           (war, commander) \newline
+           (rights, discriminated) \\
+           & Low       &
+           (belgium-based, france-based) \newline
+           & \emph{unrelated words}
        \end{tabular}
        \label{table:tm_and_we_word_similarities}
 \end{table*}
 
+Even though both methods exploit the distributional hypothesis~\cite{Firth1957} the correlation of word similarities is surprisingly low.
+Surprisingly, 
+As a summary, syntactic variations and more direct connectedness play a bigger role in word embedding models, while topic models often capture loose relationships.
+We take this as motivation to create topic models, whose topics 
+to strengthen the topic themes 
+
 Without completely disregarding the bag-of-words document information
+
+In our experiments
 
 
 
