@@ -792,8 +792,8 @@ However, the method is not evaluated extensively and it is unclear, whether this
 
 \chapter{Word embeddings in topic models}
 
-In this chapter we will present our analysis on the spread.
-Afterwards we will present our new topic model approach, which is based on re-sampling words using information from the word embedding models.
+In this chapter we start with a series of experiments with word similarity calculations in both topic models and embedding models, that motivate our newly-developed approach.
+We will then present our approach, which is based on re-sampling words using information from the word embedding models.
 We call our new model WELDA (word embedding LDA).
 Afterwards we will analyze the different topic models and word embedding-enhanced topic models in two standard tasks for topic models: topic coherence and document classification.
 
@@ -803,7 +803,25 @@ As word embeddings and LDA topic modeling are different techniques with no inher
 
 We ran initial experiments on the Wikipedia corpus\footnote{Full English Wikipedia dump from June 21st, 2016}, on which we trained both a topic model and a skip-gram word embedding model with two hundred dimensions.
 We then evaluated the similarities between the words.
-In embedding models, we take the cosine similarity between the two vectors.
+For embedding models, we take the cosine similarity between the two vectors.
+For topic models, we build the topic distribution of a word by retrieving the word's probability in all topics in the topic-word matrix.
+We then normalize these probabilities to one and treat it as a distribution.
+To calculate the similarity between two words, we calculate the Jensen--Shannon divergence, which is a symmetrized and smoothed version of the Kullback--Leibler divergence:
+% TODO: cite
+\begin{equation*}
+  JSD(P~||~Q) = \frac{1}{2} KL(P~||~M) + \frac{1}{2} KL(Q~||~M),~where~M = \frac{1}{2} ( P + Q)
+\end{equation*}
+When using base two logarithm for the Kullback--Leibler divergence, the Jensen--Shannon divergence is between zero and one, where zero corresponds to the highest similarity, because the probability distributions are identical.
+We therefore use $1 - JSD(P~||~Q)$ as the similarity metric.
+Even though both methods exploit the distributional hypothesis~\cite{Firth1957} the correlation of word similarities is surprisingly low.
+We calculated the similarities of all word pairs created from the top ten words of an LDA topic model trained on Wikipedia.
+The similarities of word embeddings and the topic model only correlate with $R_{Pearson} = 0.30$.
+The results were similar, when we used Hellinger distance or Bhattacharyya distance as the similarity measure for probability distributions in the topic model.
+
+When looking at example pairs of high/low similarity in both models in Table~\ref{table:tm_and_we_word_similarities}, we see that topic models are able to detect more far-fetched, less obvious connections.
+This is a good property of topic models, however it sometimes makes the main theme hard to understand.
+% This is a goot thing! Better examples?
+Embedding models, on the other hand, assign high similarity to immediately obvious word pairs, often direct replacements of each other.
 
 \begin{table*}
        \centering
@@ -828,18 +846,20 @@ In embedding models, we take the cosine similarity between the two vectors.
        \label{table:tm_and_we_word_similarities}
 \end{table*}
 
-Even though both methods exploit the distributional hypothesis~\cite{Firth1957} the correlation of word similarities is surprisingly low.
-Surprisingly, 
-As a summary, syntactic variations and more direct connectedness play a bigger role in word embedding models, while topic models often capture loose relationships.
-We take this as motivation to create topic models, whose topics 
-to strengthen the topic themes 
+We also evaluated both model types on a standard similarity benchmark.
+We used the \textsc{WordSim-353} data set.
+This data set contains 353 word pairs, whose similarity was assessed by thirteen to sixteen human annotators each.
+The subjects were asked to rate the pair from zero (totally unrelated words) to ten (very much related or identical words).
+The highest-rated pair was \emph{midday -- noon} (9.29) and the lowest-rated pair was \emph{king -- cabbage} (0.23).
+We calculated the correlation between the human ratings and the model's ratings for both the embedding and topic model using the above mentioned similarity metrics.
+Embedding model excel at this task, matching the human ratings with $r_{Pearson} = 0.66$, while the topic model only achieves $r_{Pearson} = 0.49$.
 
-Without completely disregarding the bag-of-words document information
-
-In our experiments
-
-
-
+To summarize, syntactic variations and more direct connectedness play a bigger role in word embedding models, while topic models often capture more loose relationships.
+Embedding models are good at assessing similarity between words.
+These observations make us believe that word embeddings can help create more coherent topic models.
+% We take this as motivation to create topic models, whose topics 
+Our goal is to strengthen the topic themes by augmenting the top topic words with similar words from the word embedding space, but at the same not disregarding the bag-of-words document information completely.
+This way, we help the user understand the common theme in a topic better, while still creating an overview over the entire corpus by looking at all topics.
 
 \subsection{Algorithm}
 We base our new topic modeling technique on the observations from the last chapter.
@@ -1324,10 +1344,11 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 \section{Topic coherence}
 \subsection{Raw word-embedding topic model}
 As a baseline, we start with a topic model solely based on the word-similarity in the embedding space.
-This way, we see whether using the most similar words for a given word already yields good topics, or whether standard LDA
+This way, we see whether using the most similar words for a given word already yields good topics, or whether standard LDA is still important for creating good topics.
 
 For this, we used the standard \emph{distance} function, that is provided in the \emph{word2vec} package.
-Given a word or a list of words, this outputs the top $n$ similar words in the embedding space.
+Given a word, this outputs the top $n$ similar words in the embedding space.
+Given a list of words, the corresponding word vectors are averaged first and then the most similar words in the embedding space are retrieved.
 In the original implementation, the search words are never in the output.
 We modified this, so that the search words may also be in the output.
 For one search word, the search word is always in the output, as the similarity is $1$.
@@ -1339,6 +1360,7 @@ For example, for the search word ``game'', the topic (in the 200-dimensional emb
 
 We show the results in Table~\ref{table:raw_we_tm}.
 The results are worse than running LDA, thus showing the only taking word embeddings is not enough.
+The information contained in the bag-of-words and exploited by LDA is still very important for good topics.
 \begin{table}[]
   \centering
   \caption{Topic coherence on the \textsc{20news} corpus when using word embedding similarity for topics. The results are slightly worse than standard LDA.}
