@@ -51,6 +51,7 @@ def find_files(folder, *filters):
 
 
 SKIP_GRAM_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/embedding-models/dim-200.skip-gram.embedding"
+SKIP_GRAM_VECTOR_REMOTE_FILE = "/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding"
 WORD2VEC_VECTOR_FILE = "/home/knub/Repositories/master-thesis/models/embedding-models/google.embedding"
 
 
@@ -59,7 +60,12 @@ def load_embedding_model(model):
 
 
 def load_skip_gram():
-    return gensim.models.Word2Vec.load_word2vec_format(SKIP_GRAM_VECTOR_FILE, binary=True)
+    if os.path.exists(SKIP_GRAM_VECTOR_FILE):
+        return gensim.models.Word2Vec.load_word2vec_format(SKIP_GRAM_VECTOR_FILE, binary=True)
+    elif os.path.exists(SKIP_GRAM_VECTOR_REMOTE_FILE):
+        return gensim.models.Word2Vec.load_word2vec_format(SKIP_GRAM_VECTOR_REMOTE_FILE, binary=True)
+    else:
+        raise Exception("no skip-gram model to load")
 
 
 def load_word2vec():
