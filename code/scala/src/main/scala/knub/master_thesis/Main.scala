@@ -132,7 +132,7 @@ object Main {
             ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
         )
         val nipsEmbeddings = List(
-            ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 1740),
+//            ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 1740),
             ("/data/wikipedia/2016-06-21/embedding-models/nips.dim-50.skip-gram.embedding", 1740)
         )
         args.mode match {
