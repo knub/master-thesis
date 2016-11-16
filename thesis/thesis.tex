@@ -794,7 +794,9 @@ However, the method is not evaluated extensively and it is unclear, whether this
 
 In this chapter we start with a series of experiments with word similarity calculations in both topic models and embedding models, that motivate our newly-developed approach.
 We will then present our approach, which is based on re-sampling words using information from the word embedding models.
-We call our new model WELDA (word embedding LDA).
+We call our new model WELDA for \textbf{W}ord \textbf{E}mbedding \textbf{LDA}).
+We will present the modified Gibbs sampling algorithm and then discuss a series of important design decisions.
+
 Afterwards we will analyze the different topic models and word embedding-enhanced topic models in two standard tasks for topic models: topic coherence and document classification.
 
 \section{WELDA}
@@ -862,31 +864,39 @@ Our goal is to strengthen the topic themes by augmenting the top topic words wit
 This way, we help the user understand the common theme in a topic better, while still creating an overview over the entire corpus by looking at all topics.
 
 \subsection{Algorithm}
+
 We base our new topic modeling technique on the observations from the last chapter.
-Word embedding models are trained on predicting a certain,
-That means, if we look for similar words for a given word, the model predicts a word which could have been at the same position.
+Word embedding models are trained on predicting a certain word at an exact position.
+That means, if we look at the similar words for a given word, the model predicts a word which could have been at the same position.
+The goal is to transfer probability mass in the topic model more towards these words, which could have occurred at the same position.
 
-Now, to transfer probability mass more towards topic words, we resample 
-Instead of replacing every single word based on a similar word, we first try to get the general theme of the topic.
-We do this by creating 
-
-WELDA needs a generative model of the topic space ... because we resample
-
-
-bad topic words
-For example, imagine
-Two highly similar brands
-however, never occuring together
-but in very similar contexts
-
-Often it is only a few words, which make out a topic.
-For example, the topic words TODO make out only xxx percent of the words in the documents, where this topic is the dominating one.
-
-For each topic, we learn a multivariate probability distribution in the embedding space.
-The distribution parameters are estimated
+We achieve this by sampling new words from the embedding space.
+For this, we learn a multivariate continuous distribution in the embedding space for each topic.
 The choice of distribution can be varied and will be explained later.
+We call each of this distributions a \emph{topic distribution}.
+This topic distribution is estimated from the top words of each topic and their representation in the embedding space.
+By sampling new words from this distribution during the Gibbs sampling, we make
+We achieve this by sampling a new word in the innermost loop of the Gibbs sampling algorithm and then proceeding as if that newly sampled word appeared.
+The words have a high similarity to the existing words top words in the topic.
 
-We now describe the algorithm in more detail:
+We now describe the algorithm in more detail.
+We first start with an initialization step, which is shown in Algorithm~\ref{alg:welda_init}.
+Before running running the Gibbs sampling, we load a word embedding model.
+For all words in the corpus, we then retrieve its high-dimensional representation in the embedding space.
+Afterwards, we use prinicipal component analysis to project the word vectors to a lower number of dimensions.
+Finally, using the lower-dimensional new word vectors, we initialize a datastructure, that allows us to quickly find the nearest word given a vector in the embedding space.
+We use either locality-sensitive hashing (LSH) or k-d trees depending on the number of dimensions.
+We will explain this implementation detail later.
+
+% bad topic words
+% For example, imagine
+% Two highly similar brands
+% however, never occuring together
+% but in very similar contexts
+
+% Often it is only a few words, which make out a topic.
+% For example, the topic words TODO make out only xxx percent of the words in the documents, where this topic is the dominating one.
+
 \begin{algorithm}
   \caption{Initialization for the WELDA model, to be run before the Gibbs sampling}
   \label{alg:welda_init}
@@ -896,10 +906,20 @@ We now describe the algorithm in more detail:
       \State{$embedding\_matrix[i] = v.get\_word(words[i])$}
     \EndFor
     \State{$embedding\_matrix \gets PCA(embedding\_matrix, n)$}
-    \State{$lsh \gets \textit{initialize LSH structure for nearest neighbour search}$}
+    \State{$nn\_search \gets \textit{initialize LSH structure or k-d tree for nearest neighbour search}$}
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
+
+We then proceed with a modified version of the Gibbs sampling algorithm, which is displayed in Algorithm~\ref{alg:welda_gibbs_sampling}.
+As an important first step, we run the standard LDA algorithm until convergence.
+Only then, we will run some additional Gibbs sampling iterations using our modified algorithm.
+We run LDA first to obtain stable topic assignments and to start with relatively good topics as a baseline.
+This is important, because before each Gibbs sampling iteration we estimate the topic distributions for all topics.
+We use this topic distributions later in the innermost loop of the sampling algorithm.
+If a coin flip with success probability $\lambda$ succeeds, we sample a new word from the word embedding space, based on the topic distribution of the new topic of the current word.
+We use the previously initialized LSH or k-d tree data structure to find the nearest word near our drawn sample.
+We then update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word, and not the word we observed in the text.
 
 \begin{algorithm}
   \caption{Gibbs sampling algorithm for the WELDA model}
@@ -918,7 +938,7 @@ We now describe the algorithm in more detail:
           \If{$coin\_flip(\lambda)\textit{ is successful}$}
             \State{$sample \gets sample\_from\_distribution(topid\_id)$}
             \State{$\textit{// update $word\_id$, as if we had seen another word}$}
-            \State{$word\_id = lsh.find\_nearest\_word(sample)$}
+            \State{$word\_id = nn\_search.find\_nearest\_word(sample)$}
           \EndIf
           \State{\textit{increment doc-topic and topic-word count for new topic}}
         \EndFor
@@ -928,14 +948,20 @@ We now describe the algorithm in more detail:
   \end{algorithmic}
 \end{algorithm}
 
+As a remaining step, we will explain how we estimate the topic distributions.
+This algorithm is detailed in Algorithm~\ref{alg:welda_parameter_estimation}.
+For that, we use the top words in all topics and retrieve their respective word vectors.
+We then estimate a multivariate continuous distribution in the embedding space.
+
 \begin{algorithm}
   \caption{Estimating distribution parameters for each topic, run before each Gibbs sampling iteration}
   \label{alg:welda_parameter_estimation}
   \begin{algorithmic}[1]
     \Procedure{EstimateDistributionParameters}{}
     \For{$topic\_id \in \{\textit{ 1 .. $K$ }\}$}
-      \State{$top\_words \gets$ \textit{Get top $TODO$ words in topic $topic\_id$}}
-      \State{\textit{Get}}
+      \State{$top\_words \gets$ \textit{Get top $N_{top}$ words in topic $topic\_id$}}
+      \State{$topic\_vectors \gets [embedding\_matrix[word]~for~word~in~top\_words]$}
+      \State{$topic\_distributions[topic\_id] \gets estimate\_distribution(top\_vectors)$}
     \EndFor
     \EndProcedure
   \end{algorithmic}
@@ -944,23 +970,32 @@ We now describe the algorithm in more detail:
 There are several configurable parameters in the algorithm, which we will detail in the following:
 \begin{itemize}
   \item \textbf{Choice of topic distribution}:
-    We use two distributions for the topic distributions.
+    We test three distributions for the topic distributions.
     First, the well-known multivariate Gaussian distribution.
-    Second, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we use the multivariate von Mises-Fisher distribution.
-    We demonstrate these two in detail in the next sections.
+    Second, we also apply a Gaussian mixture model.
+    Last, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we use the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
+    According to the authors, this distribution is ``well suited for directional data'' and can leverage word similarity correlations better \cite{Batmanghelich2016}.
+    We demonstrate these three in detail in the next sections.
   \item \textbf{Resampling probability $\lambda$}:
     The parameter $\lambda$ governs, how often a word is resampled from the topic distributions.
+    Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA and will not have any effect on the model, because we already start with a converged topic model.
     With $\lambda = 1.0$, no single word is taken from the text, rather all words are sampled from the embedding space.
-    Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA.
-    This parameter decides, how much extra information from the word embeddings is leaked into the topic model.
+    This parameter governs, how much extra information from the word embeddings is leaked into the topic model.
   \item \textbf{Number of top words for distribution estimation $N_{top}$}:
     We are using the top words of each topic to estimate the distributions.
-    Usually only the first
-    TODO: Number of top words vs. topic coherence.
+    Usually only the first words of a topic share a common theme.
+    % TODO: Number of top words vs. topic coherence.
   \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$}:
+    Before estimating the multivariate distribution in the embedding space, we project the high-dimensional embedding space to a lower space.
+    There is a tradeoff between the $N_{pca}$ parameter and the $N_{top}$ parameter.
+    The lower the final dimension number, the less words we need for estimating the distribution.
+    Less words means, that we can only use the really good top words in a topic, and not the later ones.
+    On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
   \item \textbf{Dimensionality reduction method}:
+    We use principal component analysis (PCA) to maximize the variance for all dimensions.
   \item \textbf{Distance function for the nearest neighbour search}:
-    Euclidean distance or cosine similarity.
+    For the nearest neighbour search, near can be defined by either euclidean distance or cosine similarity.
+    We expect cosine distance to perform better as it is usually used for evaluating similarity in the embedding space.
   \item \textbf{Number of iterations to run LDA}:
     We usually run $M = 1500$ iterations, as this yields stable topic assignments, and is also used in literature~\cite{Nguyen2015}.
     As visible in Figure~\ref{fig:ll_lda_convergence}, the log-likelihood has already converged with that many iterations.
@@ -972,10 +1007,37 @@ There are several configurable parameters in the algorithm, which we will detail
     \end{figure}
 \end{itemize}
 
+\subsection{Different topic distributions}
 
-\subsection{WELDA with Gaussian distributions}
-\subsection{WELDA with von Mises-Fisher distributions}
-\subsection{WELDA with Gaussian mixture models}
+\subsubsection{Gaussian distribution}
+
+When using a Gaussian distribution, we need to estimate two parameters: the mean vector $\mu \in R^n$ and the covariance matrix $Q \in R^{n \times n}$.
+The mean can be easily calculated as the sample mean.
+Assuming a Gaussian distribution in the embedding space, an unbiased maximum likelihood estimator of the covariance matrix $Q$ is given as:
+\begin{equation*}
+  Q = \frac{1}{n} \sum\limits_{i=1}^n (x_i - \bar{x}) (x_i - \bar{x})^T
+\end{equation*}
+\subsubsection{WELDA with von Mises-Fisher distributions}
+The von Mises-Fisher distribution has two parameters, the mean direction $\mu$ and the concentration parameter $\kappa$.
+The distribution is rotationally symmetric around the mean direction and the higher $\kappa$ the higher the density around the mean.
+The lower $\kappa$ the closer the distribution becomes to the uniform distribution on the hypersphere.
+As the distribution is only defined on the hypersphere, we have to normalize all word vectors to unit length.
+For estimating the mean direction $\mu$ we can again use the sample mean.
+For the concentration parameter $\kappa$, there is no maximum likelihood closed form solution, ``because of a difficult transcendental equation that needs to be solved'' \cite{Sra2012}.
+We follow Sra~\cite{Sra2012} and use an approximate solution, which is calculated as follows:
+\begin{align*}
+  \kappa &= \frac{\bar{R}(p - \bar{R}^2)}{1 - \bar{R}^2},~where \\
+  \bar{R} &= \frac{|| \sum_{i}^{N} x_i ||}{N} \\
+\end{align*}
+The variable $p$ represents the number of dimensions and is equal to $N_{pca}$ in our approach.
+This initial approximation can be improved with a few iterations of Newton's method and the following formula:
+\begin{align*}
+  \kappa_{n + 1} &= \kappa_n - \frac{A_p(\hat{\kappa_n})-\bar{R}}{1-A_p(\hat{\kappa_n})^2-\frac{p-1}{\hat{\kappa_n}}A_p(\hat{\kappa_n})},~where \\
+  A_{p}(\kappa) &= \frac {I_{p/2}(\kappa)} {I_{p/2-1}(\kappa)}
+\end{align*}
+and $I_{v}$ denotes the modified Bessel function of the first kind at order $v$.
+
+\subsubsection{WELDA with Gaussian mixture models}
 
 % \subsection{Different strategies}
 % Write about different strategies
@@ -984,9 +1046,6 @@ There are several configurable parameters in the algorithm, which we will detail
 % Use all words, no filtering:
 % model.google.model.welda.lambda.full-no-filtering
 
-% Gaussian WELDA
-
-% Von-Mises-Fisher WELDA
 
 \section{Implementation details}
 \subsection{Nearest neighbour search}
@@ -999,7 +1058,7 @@ For six or more dimensions, LSH is preferred.
 \begin{figure}
        \centering
        \includegraphics[width=0.6\textwidth]{figures/lsh_vs_kdtree.png}
-       \caption{Convergence of the LDA model on the 20-news corpus}
+       \caption{Performance comparison of LSH and k-d tree for the nearest neighbour word search, based on the number of dimensions.}
        \label{fig:lsh_vs_kdtree}
 \end{figure}
 \subsection{Vocabulary mismatch between word embeddings and topic model}
@@ -1033,15 +1092,15 @@ Explain why we do not run WELDA from the start - run experiment!
 
 \subsection{Implementation}
 
-gensim
-Mallet
-Deep Learning 4j
+Our WELDA implementation is written in Scala.
+For loading the word vectors, we use the the Deeplearning4j\footnote{https://deeplearning4j.org/} library.
+The initial LDA is run with Mallet~\cite{McCallum2002}.
+The word vectors are trained using gensim~\cite{Rehurek2010}.
 
 \chapter{WELDA Discussion}
 
-
 \section{Topic Coherence}
-Topic coherence is a standard task to
+Topic coherence is a standard task to evaluate topic models.
 \subsection{Experiment setup}
 \subsubsection{Data Sets}
 \subsubsection{Topic coherence evaluation}
