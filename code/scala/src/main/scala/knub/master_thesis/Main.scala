@@ -883,26 +883,25 @@ object Main {
         val TOP_WORDS = 5
 
         val samples = Map(
-            // 44.1
-            "topicvec" ->
-                "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
-            // 43.6
-//            "topicvec-20news" ->
-//                "/home/knub/Repositories/topicvec/results/nips.dim-50.alpha-0-02.iterations-500/iteration-500.500.topics"
+//            // 44.1
+//            "topicvec" ->
+//                "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
 //            // 42.1
-            "welda-gaussian" ->
-                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.redo.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
-//            // 46.1
-//            "welda-gaussian-mixture" ->
-//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian-mixture.topic0-no.pca-50.des-200.lambda-0-5.lambdaact-0-38/welda.iteration-200.topics.100",
+//            "welda-gaussian" ->
+//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.redo.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
 //            // 43.5
-            "lflda" ->
-                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/lflda.dim-50.lambda-0-6.alphasum-1-0.beta-0-02/iteration-100.500.topics",
+//            "lflda" ->
+//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/lflda.dim-50.lambda-0-6.alphasum-1-0.beta-0-02/iteration-100.500.topics",
 //            // 39.8
-            "lda" ->
-                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv",
+//            "lda" ->
+//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv",
 
-
+            // 42.3
+            "20_welda-gaussian" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
+            // 42.1
+            "20_welda-gaussian-mixture" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.dim-200.skip-gram.embedding.welda.gaussian-mixture.topic0-no.pca-10.des-30.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
             // 40.1
             "20_lda" ->
                 "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.500.ssv",
@@ -912,6 +911,15 @@ object Main {
             // 41.1
             "20_lflda" ->
                 "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/lflda.dim-200.lambda-0-6.alphasum-1-0.beta-0-05/iteration-300.500.topics"
+
+
+
+//            // 43.6
+//            "topicvec-20news" ->
+//                "/home/knub/Repositories/topicvec/results/nips.dim-50.alpha-0-02.iterations-500/iteration-500.500.topics"
+//            // 46.1
+//            "welda-gaussian-mixture" ->
+//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian-mixture.topic0-no.pca-50.des-200.lambda-0-5.lambdaact-0-38/welda.iteration-200.topics.100",
         )
 
         var i: Long = System.currentTimeMillis / 1000
@@ -929,7 +937,7 @@ object Main {
 
             val lines = topics.indices.toList.map { topicId =>
                 val exclusionWords = topics(topicId).toSet
-                assert(exclusionWords.size == 50)
+                assert(exclusionWords.size == 50, s"50 != ${exclusionWords.size} in $fileName")
                 val availableWords = potentialIntruderWords.diff(exclusionWords)
 
                 val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
