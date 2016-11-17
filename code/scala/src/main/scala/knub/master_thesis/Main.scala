@@ -77,6 +77,7 @@ object Main {
             "welda-gaussian-background-topic",
             "welda-gaussian-mixture-lambdas-pca-samples",
             "welda-gaussian-mixture-nips-lambdas-pca-samples",
+            "welda-gaussian-nips-topics-20",
             "welda-gaussian-mixture-topics-20-nips-lambdas-pca-samples",
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution", "word-intrusion",
@@ -279,6 +280,16 @@ object Main {
                 val cases = for (embedding <- nipsEmbeddings; lambda <- lambdas)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2
+                    )
+                runCases(cases, 15, new GaussianWELDA(_))
+            case "welda-gaussian-nips-topics-20" =>
+                val lambdas = List(0.2, 0.35, 0.5)
+                val cases = for (embedding <- nipsEmbeddings.take(1); lambda <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model",
                         lambda = lambda,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2
