@@ -4,6 +4,8 @@ import java.io._
 import java.nio.file.Paths
 import java.util.regex.Pattern
 
+import breeze.linalg.{DenseMatrix, DenseVector}
+import breeze.stats.distributions.MultivariateGaussian
 import cc.mallet.pipe.CharSequence2TokenSequence
 import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{FeatureSequence, TokenSequence}
@@ -127,6 +129,12 @@ object Main {
     }
 
     def run(args: Args): Unit = {
+//        val foo = new MultivariateGaussian(new DenseVector[Double](Array(0.0, 0.0)),
+//            new DenseMatrix[Double](2, 2, Array(1.0, 0.0, 0.0, 1.0)))
+//        println(foo.draw())
+//        System.exit(1)
+//
+
         val embeddings = List(
             ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
             ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
@@ -864,29 +872,34 @@ object Main {
 
         val samples = Map(
             // 44.1
-//            "topicvec" ->
-//                "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
+            "topicvec" ->
+                "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
             // 43.6
-            "topicvec-20news" ->
-                "/home/knub/Repositories/topicvec/results/nips.dim-50.alpha-0-02.iterations-500/iteration-500.500.topics"
+//            "topicvec-20news" ->
+//                "/home/knub/Repositories/topicvec/results/nips.dim-50.alpha-0-02.iterations-500/iteration-500.500.topics"
 //            // 42.1
-//            "welda-gaussian" ->
-//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.redo.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
+            "welda-gaussian" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.redo.topic0-no.pca-10.des-20.lambda-0-2.lambdaact-0-24/welda.iteration-200.topics.500",
 //            // 46.1
 //            "welda-gaussian-mixture" ->
 //                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian-mixture.topic0-no.pca-50.des-200.lambda-0-5.lambdaact-0-38/welda.iteration-200.topics.100",
 //            // 43.5
-//            "lflda" ->
-//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/lflda.dim-50.lambda-0-6.alphasum-1-0.beta-0-02/iteration-100.500.topics",
+            "lflda" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/lflda.dim-50.lambda-0-6.alphasum-1-0.beta-0-02/iteration-100.500.topics",
 //            // 39.8
-//            "lda" ->
-//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv
+            "lda" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.rerun/model.500.ssv",
 
 
             // 40.1
-//            "20_lda" -> "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.500.ssv",
-//            "20_topicvec" -> "",
-//            "20_lflda" -> ""
+            "20_lda" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/model.500.ssv",
+            // 42.9
+            "20_topicvec" ->
+                "/home/knub/Repositories/topicvec/results/topics-20.nips.dim-200.alpha-0-05.iterations-500/iteration-500.500.topics",
+            // 41.1
+            "20_lflda" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.20-1500.alpha-0-05.beta-0-05/lflda.dim-200.lambda-0-6.alphasum-1-0.beta-0-05/iteration-300.500.topics"
         )
 
         var i: Long = System.currentTimeMillis / 1000
