@@ -747,7 +747,8 @@ object Main {
     def inspectTopicEvolution(args: Args): Unit = {
         val topicEvolutionFiles = new File(args.inspectionFolder).listFiles().filter { file =>
             file.getAbsolutePath.contains(args.inspectFileContains) &&
-                file.getAbsolutePath.endsWith(".topics")
+                file.getAbsolutePath.endsWith(".topics") &&
+                !file.getAbsolutePath.contains(".500.")
         }.sorted
         println(topicEvolutionFiles.map(_.getName).deep)
         val source = Source.fromFile(args.modelFileName + ".ssv").getLines.drop(1)
