@@ -20,6 +20,7 @@
 % \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{pifont}
+\usepackage{textcomp}
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
 \newcommand{\specialcell}[2][c]{%
@@ -322,7 +323,7 @@ Boyd-Graber et al.~\cite{Boyd-graber2014} et al. identify different types of bad
 \begin{itemize}
   \item
     \textbf{Too general topics}: As a rule of thumb, words which occur more often do not add much meaning to a document.
-    At the extreme, there are stopwords such as ``and'', ``the'', ``of'', etc., which do not provide value in terms of a good topic.
+    At the extreme, there are stop words such as ``and'', ``the'', ``of'', etc., which do not provide value in terms of a good topic.
     Topics therefore should not contain too many general words, as in the following example: \\
     \hspace*{0cm} \framebox[1.1\width]{would one writes like think article know get time people} \\
     On the contrary, topics should also not contain words, which occur only once or twice in the entire corpus.
@@ -984,6 +985,7 @@ There are several configurable parameters in the algorithm, which we will detail
   \item \textbf{Number of top words for distribution estimation $N_{top}$}:
     We are using the top words of each topic to estimate the distributions.
     Usually only the first words of a topic share a common theme.
+    Unless mentioned otherwise, we typically run with $N_{top} = 20$.
     % TODO: Number of top words vs. topic coherence.
   \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$}:
     Before estimating the multivariate distribution in the embedding space, we project the high-dimensional embedding space to a lower space.
@@ -991,10 +993,11 @@ There are several configurable parameters in the algorithm, which we will detail
     The lower the final dimension number, the less words we need for estimating the distribution.
     Less words means, that we can only use the really good top words in a topic, and not the later ones.
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
+    Unless mentioned otherwise, we typically run with $N_{pca} = 10$.
   \item \textbf{Dimensionality reduction method}:
-    We use principal component analysis (PCA) to maximize the variance for all dimensions.
+    We use principal component analysis (PCA) to reduce the number of dimensions while maximizing the variance for all remaining dimensions.
   \item \textbf{Distance function for the nearest neighbour search}:
-    For the nearest neighbour search, near can be defined by either euclidean distance or cosine similarity.
+    For the nearest neighbour search, ``near'' can be defined by either euclidean distance or cosine similarity.
     We expect cosine distance to perform better as it is usually used for evaluating similarity in the embedding space.
   \item \textbf{Number of iterations to run LDA}:
     We usually run $M = 1500$ iterations, as this yields stable topic assignments, and is also used in literature~\cite{Nguyen2015}.
@@ -1012,7 +1015,7 @@ There are several configurable parameters in the algorithm, which we will detail
 \subsubsection{Gaussian distribution}
 
 When using a Gaussian distribution, we need to estimate two parameters: the mean vector $\mu \in R^n$ and the covariance matrix $Q \in R^{n \times n}$.
-The mean can be easily calculated as the sample mean.
+The mean can be estimated with the sample mean.
 Assuming a Gaussian distribution in the embedding space, an unbiased maximum likelihood estimator of the covariance matrix $Q$ is given as:
 \begin{equation*}
   Q = \frac{1}{n} \sum\limits_{i=1}^n (x_i - \bar{x}) (x_i - \bar{x})^T
@@ -1041,34 +1044,65 @@ and $I_{v}$ denotes the modified Bessel function of the first kind at order $v$.
 The Gaussian mixture model fits multiple Gaussian distributions to the embedding space.
 Each distribution is characterized by the mean and the covariance matrix.
 Additionally, a mixture model provides the mixture weights $\pi_i$, which have to sum to one.
+We learn the mixtures by using the expectation-maximization algorithm.
+We test different number of mixtures from one up to four and choose the one with the lowest Bayesian information criterion by Schwarz~\cite{Schwarz1978}.
+Steele et al.~\cite{Steel2009} showed, that the BIC clearly outperforms other methods for choosing the number of mixtures in a Gaussian mixture model.
+The BIC is defined as follows:
 
-
-% \subsection{Different strategies}
-% Write about different strategies
-% Only use best word:
-% model.google.model.welda.lambda.only-most-similar-we
-% Use all words, no filtering:
-% model.google.model.welda.lambda.full-no-filtering
-
+\begin{equation*}
+  BIC = {-2 \cdot \ln{\hat L} + k \cdot \ln(n)},
+\end{equation*}
+where $\hat{L}$ is likelihood of the model, $k$ is the number of free parameters and $n$ is the number of observations.
+$\hat{L}$ can be calculated after learning a model and $n$ is equal to $N_{top}$ in our case.
+The number of free parameters $k$ for a mixture model is:
+\begin{equation*}
+  k = (d - 1) + (d * n_{components}) + (n_{components} * d * (d + 1)/2),
+\end{equation*}
+where $d$ is the number of dimensions and corresponds to $N_{pca}$ in our case.
+The first term corresponds to the mixture weights, which have to sum to one.
+The second term corresponds to the means of each Gaussian.
+The last term calculates the number of free parameters in the symmetric covariance matrix.
 
 \section{Implementation details}
 \subsection{Nearest neighbour search}
-https://www.youtube.com/watch?v=Arni-zkqMBA
+After we obtained a sample from the topic distribution, we want to find the closest word to our sample in the embedding space.
+The naive algorithm uses linear search and evaluates all words in the embedding space.
+This is very expensive, especially because it happens in the innermost loop of Gibbs sampling and is therefore executed very often.
+However, there are methods with a better runtime: we use two either k-d trees or locality-sensitive hashing depending on the number of dimensions.
+K-d trees by Bentley~\cite{Bentley1975} aranges the points in a tree structure, which allows to retrieve the nearest neighbour in $\mathcal{O}(\log n)$ on average.
+K-d trees are guaranteed to find the nearest neighbour.
+However, for high dimensions, the search degenerates to the linear search due to the curse of dimensionality.
+Thus we use locality-sensitive hashing (LSH) by Indyk et al.\cite{Indyk1998} for higher dimensions.
+LSH is an approximate method, i.e. it is not guaranteed that the nearest neighbour is found.
+LSH uses a hash-function based on random hyperplanes in the space to bucketize all vectors.
+Then, for a new vector, the same hash function is applied and only the bucket with the corresponding hash value must be checked.
+LSH has the opposite property, i.e. the lower the number of dimensions the longer it takes.
 
+% https://www.youtube.com/watch?v=Arni-zkqMBA
+We therefore evaluated the runtime of the two approaches during a WELDA run.
 Figure~\ref{fig:lsh_vs_kdtree} shows the ratio of the runtime of the k-d tree and LSH.
 Note the logarithmic y-axis, so the ratio actually increases very fast.
 We see, that up to five dimensions including, the k-d tree is faster for looking up the nearest neighbour.
 For six or more dimensions, LSH is preferred.
+We pick the best method automatically in the $\textsc{Init}$ method.
 \begin{figure}
        \centering
        \includegraphics[width=0.6\textwidth]{figures/lsh_vs_kdtree.png}
        \caption{Performance comparison of LSH and k-d tree for the nearest neighbour word search, based on the number of dimensions.}
        \label{fig:lsh_vs_kdtree}
 \end{figure}
+
 \subsection{Vocabulary mismatch between word embeddings and topic model}
+The typical preprocessing 
+
+Mikolov recommends
+Especially stop-
+\cite{Boyd-graber2014}
 
 Matching vocabulary is important part of preprocessing.
 TODO: Show citations
+
+and discard all words that we cannot match in this way.
 
 \begin{algorithm}
   \caption{Looking up words in the embedding model}
@@ -1090,7 +1124,7 @@ TODO: Show citations
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{Background topic for corpus-specific stop-words}
+\subsection{Background topic for corpus-specific stop words}
 \subsection{Running LDA as a prerequisite}
 Explain why we do not run WELDA from the start - run experiment!
 
@@ -1382,7 +1416,7 @@ We trained our own word embeddings using the gensim package by {\v R}eh{\r u}{\v
 We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
 
 For preprocessing, we split the corpora into sentences.
-Words were not lowercased and no stopwords were removed, as both have been show to harm the performance of the resulting vectors.
+Words were not lowercased and no stop words were removed, as both have been show to harm the performance of the resulting vectors.
 % TODO: Quote
 
 We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}.
@@ -1451,7 +1485,7 @@ The information contained in the bag-of-words and exploited by LDA is still very
 Make a full chapter about Topic Model Evaluation with the paper Exploring the Space of Topic Coherence Measures
 
 Concept categorization
-Stopword removal, lowercase, build matrix, stemming
+Stop word removal, lowercase, build matrix, stemming
 Train mallet
 Visualize in tsne
 Hyperparameter optimization
