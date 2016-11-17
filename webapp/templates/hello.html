@@ -15,9 +15,16 @@
                 A topic is presented by the list of top five words in the topic.
                 In addition to that, we add a word from another topic in the word list, and shuffle the words.
                 <strong>Your task is to identify the word, which does not fit well with the rest of the words.</strong>
+                You can stop and continue at anytime. Just go back to this page, and we'll show you the next sample.
+            </p>
                 <!--If the topic is good, it should be easy to identify the verb.-->
                 <!--If the topic is bad, the wrong word is selected.-->
                 <!--We will calculate the goodness of the topic model as the percentage of correctly identified intrusion words.-->
+            <p>
+                The topics are learned on the <span style="font-variant: small-caps;">Nips</span> (Neural Information
+                Processing Systems) corpus, a collection of scientific papers. The papers focus on neural computation,
+                learning theory, algorithms and architectures, cognitive science, information theory, neuroscience,
+                vision, speech, control and diverse applications.
             </p>
             <p>
                 Three notes:
@@ -29,7 +36,8 @@
                     </li>
                     <li>
                         As the terms are from scientific papers, feel free to quickly google a word,
-                        if it is completely unfamiliar, to get an idea of the meaning.
+                        if it is completely unfamiliar, to get an idea of the meaning. We also show a glossary for
+                        abbreviations.
                     </li>
                     <li>
                         The words stem from different topic models on the same data, so do not be surprised if a
@@ -37,6 +45,7 @@
                     </li>
                 </ul>
             </p>
+            <h2>Thank you for your time!</h2>
             <p><a class="btn btn-success btn-lg" href="topic/{{ id }}" role="button">{{ text }}</a></p>
             <hr>
             <footer>

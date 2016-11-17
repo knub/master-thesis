@@ -82,12 +82,19 @@ def tag_intrusion(intrusion_idx):
         sample_glossary = [(w, glossary[w]) for w in words if w in glossary]
         random.seed(21011991 + intrusion_idx)
         shuffle(words)
+        if intrusion_idx + 10 == len(intrusions):
+            extra_text = "Only ten more to go, you're almost finished!"
+        elif intrusion_idx == len(intrusions) / 2 + 1:
+            extra_text = "Half-way through!"
+        else:
+            extra_text = ""
         return render_template('topic.html',
                                words=words,
                                method=intrusion.method,
                                current_id=intrusion_idx,
                                intruder=intrusion.intruder,
                                intrusion_id=intrusion.id,
+                               extra_text=extra_text,
                                glossary=sample_glossary)
 
 if __name__ == "__main__":
