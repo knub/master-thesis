@@ -606,7 +606,7 @@ The negative log likelihood including $L_2$ regularization for each topic vector
 and is minimized with respect to the topic vectors.
 Optimization is done via L-BFGS~\cite{Liu1989}.
 
-Using the the topic vectors, the generative process can be summarized as follows:
+Using the topic vectors, the generative process can be summarized as follows:
 \begin{enumerate}
     \item Fix number of topics $K$ in the document collection
     \item Choose word distributions $\phi_j \sim Dirichlet(\beta)$ for each topic $j \in \{1~..~K\}$
@@ -1060,7 +1060,7 @@ The number of free parameters $k$ for a mixture model is:
 \end{equation*}
 where $d$ is the number of dimensions and corresponds to $N_{pca}$ in our case.
 The first term corresponds to the mixture weights, which have to sum to one.
-The second term corresponds to the means of each Gaussian.
+The second term corresponds to the means of all Gaussian.
 The last term calculates the number of free parameters in the symmetric covariance matrix.
 
 \section{Implementation details}
@@ -1126,17 +1126,62 @@ We discard all words that we cannot match in this way.
 \end{algorithm}
 
 \subsection{Background topic for corpus-specific stop words}
+To speed up the topic improvement process, we detect corpus specific stop words in addition to the general English-language stop words we use.
+We detect this stop words automatically during the initial LDA Gibbs sampling.
+Instead of using a symmetric Dirichlet $\alpha$ prior for all topics, we multiply the $\alpha_0$ prior by a factor $\alpha_0^{boost}$.
+With this approach, we force the first topic to appear in almost all documents.
+This forces LDA to put words in this topic, which occur in many documents and are very generic.
+% TODO: Reference section where we talk about nltk stopword list
+
+We experimented with different values of $\alpha_0^{boost}$ and show the results in Table~\ref{table:alpha0_boost}.
+The second row shows the percentage of documents containing the first topic and the third row shows the percentage of words in the first topic.
+We see, that a value of fifteen is sufficient, so that the topic occurs in more than ninenty percent of the documents.
+\begin{table}[]
+  \centering
+  \caption{Testing by which factor $\alpha_0$ must be multiplied, so that the first topic occurs in many documents.
+  All values in the last two rows are percentages.}
+  \label{table:alpha0_boost}
+  \begin{tabular}{c||cccccccccc}
+  $\mathbf{\alpha_0^{boost}}$                & 1     & 2     & 3     & 5     & 7     & 9     & 10    & 15    & 20    & 30    \\
+    \hline
+  \textbf{doc. with first topic}  & 11  & 23  & 39  & 47  & 56  & 65  & 79  & 90  & 91  & 91  \\
+  \textbf{percentage first topic} & 2   & 4   & 8   & 10  & 13  & 16  & 19  & 24  & 24  & 24
+  \end{tabular}
+\end{table}
+Indeed, if we look at the top words in the first topic in the \textsc{20News} corpus, we find corpus-specific stop words: \\
+\noindent\fbox{
+    \parbox{0.8\textwidth}{
+would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
+}
+
+We then always resample, when one of these words occurs, even if the coin toss in the WELDA algorithm failed.
+This helps replace generic words, while at the same time removing overly general words.
+In theory, WELDA should have this property automatically, because often occurring words are more likely to be replaced.
+Also, this words are usually far away from the means of the topic distributions.
+Thus, these words disappear from the topics.
+Replacing stop words should speed up this process.
+We will test this hypothesis in the evaluation section.
 \subsection{Running LDA as a prerequisite}
-Explain why we do not run WELDA from the start - run experiment!
+Normally, we run standard LDA before we start with WELDA algorithm for further topic refining.
+This is because the topic distributions are estimated on the top words of each topic.
+If we run WELDA from the first iteration, with topics assigned randomly and uniformly before the first iteration, the distributions are not well spread over the embedding space.
+For example, here are the top ten words of the three most-occurring topics after random initialization: \\
+\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
+\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
+\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article people like max know also think} \\
 
-However, this goes against the main idea of WELDA, i.e. resampling similar words from the topic space.
+These are the words the distributions are estimated on.
+Consequently, the topic means and covariance matrices in the embedding space are very similar.
+When we start running WELDA on this random initialization the advantages of WELDA disappear.
+Instead of improving clearly defined topics by sampling new words near the well-spread topic means, we end up actually generating more overly general, low information words for all topics.
+WELDA will not work in this case.
 
-\subsection{Implementation}
+\subsection{Software}
 
-Our WELDA implementation is written in Scala.
-For loading the word vectors, we use the the Deeplearning4j\footnote{https://deeplearning4j.org/} library.
+Our WELDA implementation is written in Scala and available on GitHub\footnote{https://github.com/knub/master-thesis}.
 The initial LDA is run with Mallet~\cite{McCallum2002}.
 The word vectors are trained using gensim~\cite{Rehurek2010}.
+For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{https://deeplearning4j.org/} library.
 
 \chapter{WELDA Discussion}
 
@@ -1368,18 +1413,11 @@ We illustrate the change of topics in \textsc{Nips} and \textsc{20news} in Table
 \subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
 \subsubsection{Influence of the background topic}
+confirming both the fact, that WELDA reaches similar values without background word sampling, and the fact, that it speeds up the process.
 \subsubsection{Running LDA as a prerequisite}
-Normally, we run standard LDA before we start with WELDA algorithm for further topic refining.
-This is because the topic distributions are estimated on the top words of each topic.
-If we run WELDA from the first iteration, with topics assigned randomly and uniformly before the first iteration, the distributions are not well spread over the embedding space.
-For example, here are the top ten words of the three most-occurring topics after random initialization: \\
-\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
-\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
-\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article people like max know also think} \\
-
-These are the words the distributions are estimated on.
 This initial setup has a topic coherence value of $TC = 0.311$.
-Now, instead of improving clearly defined topics by sampling new words near the well-spread topic means, we end up actually generating more overly general, low information words for all topics.
+
+TODO: Introduction text
 To prove this thought experiment, we run WELDA with randomly initialized topics for $1500$ iterations on the \textsc{20News} corpus with $\lambda = 0.2$ and $\lambda = 0.5$.
 The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
 As expected, TODO
