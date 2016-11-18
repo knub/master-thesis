@@ -12,9 +12,12 @@ Intrusion = namedtuple('Intrusion', ['method', 'id', 'topic_id', 'words', 'intru
 
 RESULTS = "out/results.txt"
 
+
 def read_all_intrusions():
     intrusions_in_files = []
     for file_name in sorted(os.listdir("out/word-intrusion")):
+        # if "welda" not in file_name:
+        #     continue
         method = file_name.replace(".txt", "")
         with open("out/word-intrusion/%s" % file_name) as f:
             for line in f:
@@ -27,11 +30,12 @@ intrusions = read_all_intrusions()
 random.seed(21011991)
 shuffle(intrusions)
 
+
 def read_glossary():
     with open("glossary", "r") as f:
         lines = [line.rstrip().split("\t") for line in f]
-    glossary = {s[0]: s[1] for s in lines}
-    return glossary
+    return_glossary = {s[0]: s[1] for s in lines}
+    return return_glossary
 
 glossary = read_glossary()
 
