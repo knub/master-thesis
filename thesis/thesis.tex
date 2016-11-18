@@ -203,7 +203,7 @@ In particular, it might be useful to investigate ``whether the two types of mode
 This master thesis is organized as follows: Chapter~\ref{sec:related-work} will introduce topic modeling and word embeddings, compare the two approaches and show existing work in combining the two methods.
 Chapter~\ref{sec:comparative-evaluation} will present first experiments, which we want to conduct at the start of this master thesis.
 Chapter~\ref{sec:approach} will show our approach for this master thesis.
-% Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modelling and word embeddings.
+% Section~\ref{sec:data-sets-and-evaluation} will show different data sets and evaluation tasks to evaluate systems based on topic modeling and word embeddings.
 
 \chapter{Related work}
 \label{chapter:related-work}
@@ -296,6 +296,7 @@ In this thesis, we will use two particularly fast and robust implementations:
 
 
 \subsection{Evaluation of topic models}
+\label{sec:evaluation_of_topic_models}
 As topic modeling is an unsupervised learning technique, there is no straightforward evaluation metric available as in supervised tasks.
 The output of a topic model, the document-topic matrix and the topic-word matrix, do not lend themselves to a quantitative evaluation either.
 Still, with many different topic modeling techniques available and hyperparameters to set, there is a need to compare topic models and to be able to choose the best topic.
@@ -624,7 +625,7 @@ Using the topic vectors, the generative process can be summarized as follows:
 The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014} and conclude that none of these works better than the other.
 
 \paragraph{Nonparametric Spherical Model}
-Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modelling.
+Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modeling.
 They build on top of Gaussian LDA, but argue that Gaussian distributions do not capture the embedding space very well.
 Instead they propose the von Mises-Fisher distribution to capture topics in the embedding space.
 The von Mises-Fisher distribution is a distribution on the hypersphere with a mean direction $\mu$ and a concentration parameter $\kappa$.
@@ -763,7 +764,7 @@ However, the method is not evaluated extensively and it is unclear, whether this
 % \end{itemize}
 
 % \section{Preprocessing}
-% No-stemming (does harm in both \emph{word2vec} and topic modelling), as it destroys the difference between Apple and apples and (TODO: other example) as well as small/smallest.
+% No-stemming (does harm in both \emph{word2vec} and topic modeling), as it destroys the difference between Apple and apples and (TODO: other example) as well as small/smallest.
 % Quoting lots of stuff from the lda2vec
 
 % \section{Enhancing topic models?}
@@ -1155,7 +1156,12 @@ would one writes like article think get know time people even good much well way
 }
 
 We then always resample, when one of these words occurs, even if the coin toss in the WELDA algorithm failed.
-This helps replace generic words, while at the same time removing overly general words.
+Due to this, we differentiate between $\lambda$ and $\lambda_{act}$ in experiments.
+The former is the $\lambda$ the algorithm was configured with.
+The latter represents the actual percentage of replacements, when we also replace corpus-specific stop words.
+$\lambda_{act}$ is higher than $\lambda$.
+
+This procedure helps replace generic words, while at the same time removing overly general words.
 In theory, WELDA should have this property automatically, because often occurring words are more likely to be replaced.
 Also, this words are usually far away from the means of the topic distributions.
 Thus, these words disappear from the topics.
@@ -1186,9 +1192,11 @@ For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{https
 \chapter{WELDA Discussion}
 
 \section{Topic Coherence}
-Topic coherence is a standard task to evaluate topic models.
+As discussed in Section~\ref{sec:evaluation_of_topic_models}, topic coherence is a standard task to evaluate topic models.
+In this section, we evaluate WELDA's design decisions with respect to topic coherence in several experiments.
 \subsection{Experiment setup}
 \subsubsection{Data Sets}
+We use two different corpora for topic modeling, the \textsc{20News} corpus and the \textsc{Nips} corpus.
 \subsubsection{Topic coherence evaluation}
 
 We will use topic coherence as a metric to evaluate the quality of our topics.
@@ -1432,6 +1440,7 @@ As expected, TODO
 
 
 \subsubsection{Choice of word embeddings}
+\subsubsection{Random fluctuations in WELDA}
 \subsubsection{Top word selection}
 
 \subsubsection{Overfitting with high lambda}
@@ -1519,39 +1528,22 @@ The information contained in the bag-of-words and exploited by LDA is still very
 \section{Runtime}
 
 \chapter{Conclusion and future work}
-
-\chapter{Thoughts}
 \section{Other notes}
-
-Make a full chapter about Topic Model Evaluation with the paper Exploring the Space of Topic Coherence Measures
-
 Concept categorization
-Stop word removal, lowercase, build matrix, stemming
-Train mallet
 Visualize in tsne
 Hyperparameter optimization
 Motivation: topic with countries
 Paper: Schwächen, Stärken, ausführlich
 
-TC evaluation for all models!
-Spherical: Is it fair to evaluate with different topic nr?
-Strange words in Gaussian: yes
-
-Run WELDA from scratch
-
 Beim resampling: sanity check, ABER: optimiert auf, Wort nur in 1 topic
-
-topic boost analysis
-
 curse of dimensionality for nearest neighbour search
 fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
 \printbibliography
 
-\begin{appendices}
-%\include{chapters/appendix}
-\end{appendices}
+% \begin{appendices}
+% \end{appendices}
 
 %\include{chapters/eigenstaendigkeit}
 \end{document}
