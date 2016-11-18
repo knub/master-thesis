@@ -1,2 +1,2 @@
 archive:
-	 tar hczf word-intrusion-study.tgz web.py templates static out/word-intrusion glossary
+	 tar hczf word-intrusion-study.tgz requirements.txt web.py templates static out/word-intrusion glossary
