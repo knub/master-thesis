@@ -1093,22 +1093,22 @@ We pick the best method automatically in the $\textsc{Init}$ method.
 \end{figure}
 
 \subsection{Vocabulary mismatch between word embeddings and topic model}
-The typical preprocessing 
+The typical preprocessing steps for topic models include lowercasing and stop-word removal~\cite{Boyd-graber2014}.
+On the other side, Mikolov~\ref{Mikolov2013d} recommends almost no preprocessing except sentence detection.
+Especially stop words are not removed in the word2vec approach:
+Due to the window-based approach, where a word predicts its context words at the exact location, this would decrease performance.
 
-Mikolov recommends
-Especially stop-
-\cite{Boyd-graber2014}
-
-Matching vocabulary is important part of preprocessing.
-TODO: Show citations
-
-and discard all words that we cannot match in this way.
+This different preprocessing leads to different vocabularies and matching those is an important part of preprocessing for WELDA.
+As the lowercasing step for topic models loses information, the matching is only approximate.
+We display the matching in Algorithm~\ref{alg:vocabulary_matching}.
+We try finding the word itself, a capitalized version (first letter is uppercased) and an uppercased version of the word.
+We discard all words that we cannot match in this way.
 
 \begin{algorithm}
   \caption{Looking up words in the embedding model}
-  \label{euclid}
+  \label{alg:vocabulary_matching}
   \begin{algorithmic}[1]
-    \Procedure{Word2Vec.get\_word}{word $w$}
+    \Procedure{word2Vec.get\_word}{word $w$}
     \If{w exists in embeddings}
       \State{}
       \Return {array of floats for word w}
@@ -1118,8 +1118,9 @@ and discard all words that we cannot match in this way.
     \ElsIf{w.uppercased() exists in embeddings}
       \State{}
       \Return {array of floats for word w.uppercased()}
+    \Else
+      \State{discard $w$}
     \EndIf
-    \State{\textbf{Exception}: Error in preprocessing}
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -1127,6 +1128,8 @@ and discard all words that we cannot match in this way.
 \subsection{Background topic for corpus-specific stop words}
 \subsection{Running LDA as a prerequisite}
 Explain why we do not run WELDA from the start - run experiment!
+
+However, this goes against the main idea of WELDA, i.e. resampling similar words from the topic space.
 
 \subsection{Implementation}
 
