@@ -76,7 +76,7 @@ def tag_intrusion(intrusion_idx):
         with open(RESULTS, mode="a") as f:
             f.write("%s\t%s\t%s\t%s\t%s\t%s\t%s\n" %
                     (old_intrusion_idx, tagged_intrusion_id, method, words, intruder, selected_word, str(intruder == selected_word)))
-        print "%s %s: %s - %s ### %s" % (tagged_intrusion_id, method, words, intruder, selected_word)
+        # print "%s %s: %s - %s ### %s" % (tagged_intrusion_id, method, words, intruder, selected_word)
 
     if intrusion_idx >= len(intrusions):
         return render_template('goodbye.html')
