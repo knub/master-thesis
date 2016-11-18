@@ -78,6 +78,7 @@ object Main {
             "welda-gaussian-mixture-lambdas-pca-samples",
             "welda-gaussian-mixture-nips-lambdas-pca-samples",
             "welda-gaussian-nips-topics-20",
+            "welda-gaussian-random-fluctuations",
             "welda-gaussian-mixture-topics-20-nips-lambdas-pca-samples",
             "welda-gaussian-top", "welda-gaussian-mixture",
             "inspect-topic-evolution", "word-intrusion",
@@ -335,6 +336,17 @@ object Main {
                         distributionEstimationSamples = samplingParam._2
                     )
                 runCases(cases, 15, new GaussianMixtureWELDA(_))
+            case "welda-gaussian-random-fluctuations" =>
+                val lambdas = List.fill(10)(0.3).zipWithIndex
+                val cases = for (embedding <- embeddings; (lambda, idx) <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        modelNamePrefix = s"fluctuationrun-$idx",
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2
+                    )
+                runCases(cases, 10, new GaussianWELDA(_))
             case "welda-gaussian-random-init" =>
                 val lambdas = List(0.2, 0.5)
                 val cases = for (embedding <- embeddings; lambda <- lambdas)
@@ -895,7 +907,7 @@ object Main {
             "lflda" ->
                 "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/lflda.dim-200.lambda-0-6.alphasum-1-0.beta-0-02/iteration-020.500.topics",
 //          // 43.5
-//            "lflda" ->
+//            "old-lflda" ->
 //                "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02.FIRST/lflda.dim-50.lambda-0-6.alphasum-1-0.beta-0-02/iteration-100.500.topics",
 //          // 39.8
 //            "lda" ->
