@@ -103,7 +103,7 @@
 } \subject{Masterarbeit}
 \title{Improving Probabilistic Topic Models using Word Embeddings
 \\ \bigskip
-\large{German Title}}
+\large{Verbessern von probabilistischen Themenmodellen mithilfe von Vektorrepräsentationen von Wörtern}}
 \author{Stefan Bunk\\{\small{\url{stefan.bunk@student.hpi.uni-potsdam.de}}}}
 \date{Eingereicht am 23.12.2016}
 \publishers{
@@ -270,40 +270,75 @@ This model can also be seen as a soft-classification of documents: instead of as
 
 In reality, we only observe the words in the documents, and need to reverse engineer the hidden, ``latent'' parameters of the model, namely the word distribution per topic $\phi$, the topic distribution per document $\theta$ and the word-topic assignments $z$.
 In this process, called \emph{inference}, we try to find the most probable parameter assignments, which could have generated our document collection.
-Computationally, this is equivalent to finding the posterior distribution of the parameters given the observed words.
-Blei et al.~\cite{Blei2003} propose an algorithm based on variational approximation, however Griffiths and Steyvers~\cite{Griffiths2004} proposed an algorithm based on Gibbs sampling.
-
-We will now explain the Gibbs sampling algorithm in detail, see Algorithm~\ref{alg:gibbs_sampling}.
-The algorithm starts by assigning topics randomly to words (line 2).
-Each word gets exactly one topic.
-Then, for a number of iterations $M$ (line 3), the algorithm iterates over all documents and all words in the documents (lines 4-7).
-The main idea is now to repeatedly sample new topics for all words in the documents.
-During sampling, all other topic assignments are assumed fixed and the conditional distribution over the topics for the current word are considered (line 10).
-The sampling occurs from the multinomial distribution defined by:
+Computationally, this is equivalent to finding the posterior distribution of the parameters given the observed words:
 \begin{equation*}
-  p(z_w = t | Z) \propto (N_{d}^{t} + \alpha_t) \times  \frac{N^{t, w} + \beta}{N^{t} + V * \beta},
+  p(\theta, \phi, Z) = \frac{p(\theta, \phi, Z, W | \alpha, \beta)}{p(W|\alpha, \beta)}
 \end{equation*}
-where $N_{d}^{t}$ is the number of times the topic $t$ occurred in the current topic, $N^{t, w}$ is the number of times the current word $w$ occurred with topic $t$ and $N^t$ is the number of times topic $t$ occurred in all documents.
-Note that all these numbers are counted without the current word taken into account (lines 8 and 11).
+However, this distribution is intractable and an approximate solution is necessary.
+Blei et al.~\cite{Blei2003} propose an algorithm based on variational approximation.
+We will use an alternative algorithm proposed by Griffiths and Steyvers~\cite{Griffiths2004}, which is called Gibbs sampling.
+Gibbs sampling is a Markov Chain Monte Carlo~\cite{Gilks1996} algorithm.
+It is proven that to obtain a sample from the posterior distribution, it is sufficient to repeatedly sample from the conditional distribution of a variable given all others.
+By repeating this process for all variables -- topic assignments in the case of LDA -- and for many iterations, the distribution obtained from this sampling approximates the true posterior distribution.
+
+The Gibbs sampling algorithm for LDA is displayed in detail in Algorithm~\ref{alg:gibbs_sampling}.
+The algorithm starts by assigning topics randomly to words (line 2).
+Note that every occurrence of a word gets assigned a topic, not only each word in the vocabulary.
+This way, a word can occur with different topics throughout the corpus.
+Each word has exactly one topic.
+Then, for a number of iterations $M$ (line 3), the algorithm iterates over all documents and all words in these documents (lines 4-7).
+The main idea is now to repeatedly and step-by-step sample new topics for all words in the documents.
+During sampling, all \emph{other} topic assignments are assumed fixed and the conditional distribution over the topics for the current word is considered (line 12).
+The sampling occurs from the multinomial distribution defined over all possible topics:
+\begin{equation*}
+  p(z_w = t | Z) \propto (Z_{d}^{t} + \alpha_t) \times  \frac{Z^{t, w} + \beta}{Z^{t} + V * \beta}
+\end{equation*}
+$z_w = t$ is the probability that the current word belongs to topic $t$.
+$Z$ stores the current assignment of all topics.
 $V$ represents the vocabulary size and $\alpha_t$ the Dirichlet prior for topic $t$ in the document-topic distribution.
 Usually, the Dirichlet prior is symmetric and all $\alpha_t$ are identical.
 $\beta$ represents the Dirichlet prior for the topic-word distributions in each topic.
-It is guaranteed, that this repeated sampling approximates the joint distribution of all variables.
+$Z_{d}^{t}$ is the number of times the topic $t$ occurred in the current topic, $Z^{t, w}$ is the number of times the current word $w$ occurred with topic $t$ and $Z^t$ is the number of times topic $t$ occurred in all documents.
+Intuitively, a topic is more likely, if many words of the topic occur in the current document, and if the word already occurred often with the topic.
+
+All of these variables can be computed directly from the topic-assignment matrix $Z$, however in the implementation all three of them are also stored as separate matrices for fast access and manipulation.
+An important point for the topic distribution is, that only the topics of all other words are relevant.
+The next topic is independent of the current topic of the word.
+Therefore, before calculating the topic distribution for the current word, the counters for the current word have to be decremented.
+This happens in lines 8 and 11.
+After sampling a new topic (line 12), the possibly different counters are incremented again (lines 13-15)
+This repeated sampling is guaranteed to approximate the joint distribution of all variables.
+
+After running the algorithm, the final topic assignment matrix $Z$ can be used.
+However, as this is just one sample from the posterior distribution, it could be an unlikely case.
+Better results can be obtained by averaging several samples from the Gibbs sampling.
+This works by first running a number of \emph{burn-in} iterations, until the distribution stabilizes.
+Every sample before is discarded.
+But even after the burn-in period, not every sample is used.
+As each sample is based on the previous one, the so-called \emph{autocorrelation} between the samples is too high.
+There is no true independence between samples.
+This is fixed by only considering every $L$th sample.
+$L$ is referred to as the \emph{lag}.
+
 \begin{algorithm}
   \caption{Gibbs sampling algorithm for LDA. The variable $M$ represents the number of iterations, i.e. the number of passes over the corpus.}
   \label{alg:gibbs_sampling}
   \begin{algorithmic}[1]
-    \Procedure{Sampling}{Documents D}
+    \Procedure{GibbsSampling}{Documents D, Topics Z}
     \State{$Randomly~assign~topics~to~all~words~in~the~corpus$}
     \For{$n \in \{\textit{ 1 .. M }\}$}
       \For{$d\_idx \in \{\textit{ 1 .. $|D|$ }\}$}
-        \State{$doc \gets D[d\_idx]$}
+        \State{$d \gets D[d\_idx]$}
         \For{$w\_idx \in \{\textit{ 1 .. $|doc|$ }\}$}
-          \State{$word\_id \gets doc[w\_idx]$}
-          \State{\textit{decrement doc-topic and topic-word count for old topic}}
-          \State{\textit{// sample new topic based on adapted counts}}
-          \State{$topic\_id \gets sample\_new\_topic()$}
-          \State{\textit{increment doc-topic and topic-word count for new topic}}
+          \State{$w \gets doc[w\_idx]$}
+          \State{$t \gets Z[d\_idx][w\_idx]$}
+          \State{$Z_{d}^{t} \gets Z_{d}^{t} - 1$}
+          \State{$Z^{t} \gets Z^{t} - 1$}
+          \State{$Z^{t, w} \gets Z^{t, w} - 1$}
+          \State{$t \gets sample\_new\_topic(Z)$}
+          \State{$Z_{d}^{t} \gets Z_{d}^{t} + 1$}
+          \State{$Z^{t} \gets Z^{t} + 1$}
+          \State{$Z^{t, w} \gets Z^{t, w} + 1$}
         \EndFor
       \EndFor
     \EndFor
@@ -311,7 +346,6 @@ It is guaranteed, that this repeated sampling approximates the joint distributio
   \end{algorithmic}
 \end{algorithm}
 \label{sec:lda}
-% expand here: limiting distribution, sampling formula etc.
 
 The output of running LDA on a corpus is three-fold:
 \begin{itemize}
@@ -330,8 +364,6 @@ In this thesis, we will use two particularly fast and robust implementations:
        \item Mallet by McCallum~\cite{McCallum2002}, Java
        \item gensim by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, Python
 \end{itemize}
-
-% LDA has problems on small texts/documents
 
 
 \subsection{Evaluation of topic models}
@@ -820,22 +852,22 @@ However, the method is not evaluated extensively and it is unclear, whether this
 %\include{chapters/recommending}
 %\include{chapters/future_work}
 
-\section{Bayesian optimization}
-\begin{itemize}
-  \item Good for noisy black-box functions, when evaluations are costly, no derivative and the problem is non convex
-  \item Builds a statistical model for the function from the hyperparameter space to the evaluation function
-  \item By using the information of all previous runs, the framework can suggest a new point to which provides max information
-  \item balances \emph{exploration} (checking previously unknown points in the hyperparameter space) vs. \emph{exploitation} (using the current best values to check nearby points in the hyperparameter space)
-  \item $\Rightarrow$ fewer experiments are necessary
-  \item \url{https://github.com/HIPS/Spearmint}
-\end{itemize}
+% \section{Bayesian optimization}
+% \begin{itemize}
+%   \item Good for noisy black-box functions, when evaluations are costly, no derivative and the problem is non convex
+%   \item Builds a statistical model for the function from the hyperparameter space to the evaluation function
+%   \item By using the information of all previous runs, the framework can suggest a new point to which provides max information
+%   \item balances \emph{exploration} (checking previously unknown points in the hyperparameter space) vs. \emph{exploitation} (using the current best values to check nearby points in the hyperparameter space)
+%   \item $\Rightarrow$ fewer experiments are necessary
+%   \item \url{https://github.com/HIPS/Spearmint}
+% \end{itemize}
 
 
 \chapter{WELDA: Word embeddings in LDA}
 
 In this chapter we start with a series of experiments with word similarity calculations in topic models and embedding models, that motivate our newly-developed approach.
 We will then present our approach, which is based on re-sampling words using information from the word embedding models.
-We call our new model WELDA for \textbf{W}ord \textbf{E}mbedding \textbf{LDA}).
+We call our new model WELDA for \textbf{W}ord \textbf{E}mbedding \textbf{LDA}), a new type of topic model which leverages information from word embeddings.
 We will present the modified Gibbs sampling algorithm and then discuss a series of important design decisions.
 Afterwards we will analyze the different topic models and word embedding-enhanced topic models in two standard tasks for topic models: topic coherence and document classification.
 
@@ -844,15 +876,14 @@ In this section, we describe the main ideas behind WELDA.
 We show and explain the algorithm and discuss the main design decisions and parameters.
 
 \subsection{Motivation}
+We aim to combine the two methods to achieve better topic models.
 As word embeddings and LDA topic modeling are techniques from different backgrounds and with no inherent relationship to each other, we started with exploring how the results of one can be interpreted in the other model.
-% TODO: We aim to combine the two methods to achieve better topic models (Tanja: concrete goal is missing, not clear so far)
 To this end, we ran initial experiments on the Wikipedia corpus\footnote{Full English Wikipedia dump from June 21st, 2016}, on which we trained both a topic model and a skip-gram word embedding model with two hundred dimensions.
-We then evaluated the similarities between the words. % TODO: Tanja: Begründung fehlt, "between the words to achieve xyz".
+We then evaluated the similarities between the words to understand the different strengths of both models.
 For embedding models, we used the cosine similarity between the two vectors.
 For topic models, we built the topic distribution of a word by retrieving the word's probability in all topics in the topic-word matrix.
 We then normalized these probabilities to one and treat it as a distribution.
-To calculate the similarity between two words, we calculated the Jensen--Shannon divergence, which is a symmetrized and smoothed version of the Kullback--Leibler divergence:
-% TODO: cite
+To calculate the similarity between two words, we calculated the Jensen--Shannon divergence, which is a symmetrized and smoothed version of the Kullback--Leibler divergence~\cite{Kullback1951}:
 \begin{equation*}
   JSD(P~||~Q) = \frac{1}{2} KL(P~||~M) + \frac{1}{2} KL(Q~||~M),~where~M = \frac{1}{2} ( P + Q)
 \end{equation*}
@@ -958,37 +989,37 @@ We will explain this implementation detail later.
 \end{algorithm}
 
 We then proceed with a modified version of the Gibbs sampling algorithm, which is displayed in Algorithm~\ref{alg:welda_gibbs_sampling}.
+For the original Gibbs sampling implementation, see Section~\ref{sec:lda}.
 As an important first step, we run the standard LDA algorithm until convergence.
-Only then, we will run some additional Gibbs sampling iterations using our modified algorithm.
+Only then we will run some additional Gibbs sampling iterations using our modified Gibbs sampling.
 We run LDA first to obtain stable topic assignments and to start with relatively good topics as a baseline.
-% TODO Tanja: An wichtigen Stellen nochmal referenzieren
-This is important, because before each Gibbs sampling iteration we estimate the topic distributions for all topics.
+This is important, because before each Gibbs sampling iteration we estimate the topic distributions for all topics (line 4).
 We use this topic distributions later in the innermost loop of the sampling algorithm.
-If a coin flip with success probability $\lambda$ succeeds, we sample a new word from the word embedding space, based on the topic distribution of the new topic of the current word.
-We use the previously initialized LSH or k-d tree data structure to find the nearest word near our drawn sample.
-We then update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word, and not the word we observed in the text.
+If a coin flip with success probability $\lambda$ succeeds (line 12), we sample a new word from the word embedding space (line 13), based on the topic distribution of the new topic of the current word.
+We use the previously initialized LSH or k-d tree data structure to find the nearest word near our drawn sample (line 14).
+We then update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word, and not the word we observed in the text (lines 15-16).
 
 \begin{algorithm}
   \caption{Gibbs sampling algorithm for the WELDA model}
   \label{alg:welda_gibbs_sampling}
   \begin{algorithmic}[1]
-    \Procedure{Sampling}{Documents D}
+    \Procedure{GibbsSampling}{Documents D, Topics Z}
     \State $\textit{initialize topic variables } z_{d_i} \textit{ by running standard LDA for } M \textit{ iterations}$
     \For{$n \in \{\textit{ 1 .. N }\}$}
       \State{\textsc{EstimateDistributionParameters()}}
       \For{$d\_idx \in \{\textit{ 1 .. $|D|$ }\}$}
         \State{$doc \gets D[d\_idx]$}
         \For{$w\_idx \in \{\textit{ 1 .. $|doc|$ }\}$}
-          \State{$word\_id \gets doc[w\_idx]$}
-          \State{\textit{decrement doc-topic and topic-word count for old topic}}
-          \State{\textit{// sample new topic based on adapted counts}}
-          \State{$topic\_id \gets sample\_new\_topic()$}
+          \State{$w \gets doc[w\_idx]$}
+          \State{$t \gets Z[d\_idx][w\_idx]$}
+          \State{\textit{decrement Z counters}}
+          \State{$t \gets sample\_new\_topic(Z)$}
           \If{$coin\_flip(\lambda)\textit{ is successful}$}
-            \State{$sample \gets sample\_from\_distribution(topid\_id)$}
-            \State{$\textit{// update $word\_id$, as if we had seen another word}$}
-            \State{$word\_id = nn\_search.find\_nearest\_word(sample)$}
+            \State{$sample \gets sample\_from\_distribution(t)$}
+            \State{$\textit{// update $w$, as if we had seen another word}$}
+            \State{$w = nn\_search.find\_nearest\_word(sample)$}
           \EndIf
-          \State{\textit{increment doc-topic and topic-word count for new topic}}
+          \State{\textit{increment Z counters}}
         \EndFor
       \EndFor
     \EndFor
@@ -998,15 +1029,14 @@ We then update the counts in the document-topic matrix and in the topic-word mat
 
 As a remaining step, we will explain how we estimate the topic distributions.
 This algorithm is detailed in Algorithm~\ref{alg:welda_parameter_estimation}.
-For that, we use the top words in all topics and retrieve their respective word vectors.
-We then estimate a multivariate continuous distribution in the embedding space.
+For that, we use the top words in all topics and retrieve their respective word vectors (lines 3-4).
+We then estimate a multivariate continuous distribution in the embedding space (line 5).
 
-% TODO: params?
 \begin{algorithm}
-  \caption{Estimating distribution parameters for each topic, run before each Gibbs sampling iteration}
+  \caption{Estimating distribution parameters for each topic, ran before each Gibbs sampling iteration}
   \label{alg:welda_parameter_estimation}
   \begin{algorithmic}[1]
-    \Procedure{EstimateDistributionParameters}{}
+    \Procedure{EstimateDistributionParameters()}{}
     \For{$topic\_id \in \{\textit{ 1 .. $K$ }\}$}
       \State{$top\_words \gets$ \textit{Get top $N_{top}$ words in topic $topic\_id$}}
       \State{$topic\_vectors \gets [embedding\_matrix[word]~for~word~in~top\_words]$}
@@ -1017,44 +1047,43 @@ We then estimate a multivariate continuous distribution in the embedding space.
 \end{algorithm}
 
 There are several configurable parameters in the algorithm, which we will detail in the following:
-% TODO Tanja: Link with "Algorithm X, Line Y
 \begin{itemize}
-  \item \textbf{Choice of topic distribution}:
+  \item \textbf{Choice of topic distribution} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 13 and Algorithm~\ref{alg:welda_parameter_estimation}, line 5):
     We tested three distributions for the topic distributions.
     First, the well-known multivariate Gaussian distribution.
     Second, we also apply a Gaussian mixture model.
     Last, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we use the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
     According to the authors, this distribution is ``well suited for directional data'' and can leverage word similarity correlations better \cite{Batmanghelich2016}.
     We demonstrate these three in detail in the next sections.
-  \item \textbf{Resampling probability $\lambda$}:
+  \item \textbf{Resampling probability $\lambda$} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 12):
     The parameter $\lambda$ governs, how often a word is resampled from the topic distributions.
     Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA and will not have any effect on the model, because we already start with a converged topic model.
     With $\lambda = 1.0$, no single word is taken from the text, rather all words are sampled from the embedding space.
     This parameter governs, how much extra information from the word embeddings is leaked into the topic model.
-  \item \textbf{Number of top words for distribution estimation $N_{top}$}:
+  \item \textbf{Number of top words for distribution estimation $N_{top}$} (Algorithm~\ref{alg:welda_parameter_estimation}, line 3):
     We are using the top words of each topic to estimate the distributions.
     Usually only the first words of a topic share a common theme.
     Unless mentioned otherwise, we typically run with $N_{top} = 20$.
     % TODO: Number of top words vs. topic coherence.
-  \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$}:
+  \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$} (Algorithm~\ref{alg:welda_init}, line 5):
     Before estimating the multivariate distribution in the embedding space, we project the high-dimensional embedding space to a lower space.
     There is a tradeoff between the $N_{pca}$ parameter and the $N_{top}$ parameter.
     The lower the final dimension number, the less words we need for estimating the distribution.
     Less words means, that we can only use the really good top words in a topic, and not the later ones.
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
     Unless mentioned otherwise, we typically run with $N_{pca} = 10$.
-  \item \textbf{Dimensionality reduction method}:
+  \item \textbf{Dimensionality reduction method} (Algorithm~\ref{alg:welda_init}, line 5):
     We use principal component analysis (PCA) to reduce the number of dimensions while maximizing the variance for all remaining dimensions.
-  \item \textbf{Distance function for the nearest neighbour search}:
+  \item \textbf{Distance function for the nearest neighbour search} (Algorithm~\ref{alg:welda_init}, line 6):
     For the nearest neighbour search, ``near'' can be defined by either euclidean distance or cosine similarity.
     We expect cosine distance to perform better as it is usually used for evaluating similarity in the embedding space.
-  \item \textbf{Number of iterations to run LDA}:
+  \item \textbf{Number of iterations to run LDA} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 2):
     We usually run $M = 1500$ iterations, as this yields stable topic assignments, and is also used in literature~\cite{Nguyen2015}.
     As visible in Figure~\ref{fig:ll_lda_convergence}, the log-likelihood has already converged with that many iterations.
     \begin{figure}
            \centering
            \includegraphics[width=0.5\textwidth]{figures/ll_lda_convergence.png}
-           \caption{Convergence of the LDA model on the 20-news corpus}
+           \caption{Convergence of the LDA model on the \textsc{20News} corpus}
            \label{fig:ll_lda_convergence}
     \end{figure}
 \end{itemize}
@@ -1107,7 +1136,7 @@ The BIC is defined as follows:
 \end{equation*}
 where $\hat{L}$ is likelihood of the model, $k$ is the number of free parameters and $n$ is the number of observations.
 $\hat{L}$ can be calculated after learning a model and $n$ is equal to $N_{top}$ in our case.
-The number of free parameters $k$ for a mixture model is:
+The number of free parameters $k$ for a Gaussian mixture model is:
 \begin{equation*}
   k = (d - 1) + (d * n_{components}) + (n_{components} * d * (d + 1)/2),
 \end{equation*}
@@ -1124,8 +1153,7 @@ We discuss the nearest neighbour search, how we fix the vocabulary mismatch betw
 \subsection{Nearest neighbour search}
 After we obtained a sample from the topic distribution, we want to find the closest word to our sample in the embedding space (see line in Algorithm~\ref{alg:welda_gibbs_sampling}).
 The naive algorithm uses linear search and evaluates all words in the embedding space.
-This is very expensive, especially because it happens in the innermost loop of Gibbs sampling and is therefore executed very often, approximately $\lambda * N * N_{words}$ times.
-% TODO: Explain N_words
+This is very expensive, especially because it happens in the innermost loop of Gibbs sampling and is therefore executed very often, approximately $\lambda * N * N_{words}$ times, where $N_{words}$ represents the number of words in the entire corpus.
 However, there are methods with a better runtime: we use two either k-d trees or locality-sensitive hashing depending on the number of dimensions.
 K-d trees by Bentley~\cite{Bentley1975} aranges the points in a tree structure, which allows to retrieve the nearest neighbour in $\mathcal{O}(\log n)$ on average.
 K-d trees are guaranteed to find the nearest neighbour.
@@ -1154,8 +1182,7 @@ We pick the best method automatically in the $\textsc{Init}$ method in Algorithm
 The typical preprocessing steps for topic models include lowercasing and stop-word removal~\cite{Boyd-graber2014}.
 On the other side, Mikolov~\ref{Mikolov2013d} recommends almost no preprocessing except sentence detection.
 Especially stop words are not removed in the word2vec approach by Mikolov:
-% TODO: "this" <noun missing>
-Due to the window-based approach, where a word predicts its context words at the exact location, this would decrease performance.
+Due to the window-based approach, where a word predicts its context words at the exact location, this stop word removal would decrease performance.
 
 This different preprocessing leads to different vocabularies and matching those is an important part of preprocessing for WELDA, because we need a word vector for every word.
 Otherwise, we can neither calculate the topic distributions nor find the word in the nearest neighbour search.
@@ -1168,7 +1195,7 @@ We discard all words that we cannot match in this way.
   \caption{Looking up words in the embedding model}
   \label{alg:vocabulary_matching}
   \begin{algorithmic}[1]
-    \Procedure{word2Vec.get\_word}{word $w$}
+    \Procedure{word2Vec.get\_word}{string $w$}
     \If{w exists in embeddings}
       \State{}
       \Return {array of floats for word w}
@@ -1186,50 +1213,54 @@ We discard all words that we cannot match in this way.
 \end{algorithm}
 
 \subsection{Background topic for corpus-specific stop words}
-To speed up the topic improvement process, we detect corpus specific stop words in addition to the general English-language stop words we use.
+To speed up the topic improvement process, we detect corpus-specific stop words in addition to the general English-language stop words we use.
 We detect this stop words automatically during the initial LDA Gibbs sampling.
 Instead of using a symmetric Dirichlet $\alpha$ prior for all topics, we multiply the $\alpha_0$ prior by a factor $\alpha_0^{boost}$.
 % TODO: first topic === background topic
-With this approach, we force the first topic to appear in almost all documents.
+By increasing the value of $\alpha_0$ we force the first topic to appear in almost all documents.
 This forces LDA to put words in this topic, which occur in many documents and are very generic.
+We call this first topic the \emph{background topic}, because it occurs in many documents as the generic word background for the more informative topics.
 % TODO: Reference section where we talk about nltk stopword list
 
 We experimented with different values of $\alpha_0^{boost}$ and show the results in Table~\ref{table:alpha0_boost}.
-The second row shows the percentage of documents containing the first topic and the third row shows the percentage of words in the first topic.
-We see, that a value of fifteen is sufficient, so that the topic occurs in more than ninety percent of the documents.
+The second row shows the percentage of documents containing the background topic and the third row shows the percentage of words in the background topic.
+We see, that a value of fifteen is sufficient, so that the background topic occurs in more than ninety percent of the documents.
 \begin{table}[]
   \centering
-  \caption{Testing by which factor $\alpha_0$ must be multiplied, so that the first topic occurs in many documents.
+  \caption{Testing by which factor $\alpha_0$ must be multiplied, so that the background topic occurs in many documents.
   All values are percentages.}
   \label{table:alpha0_boost}
   \begin{tabular}{c||cccccccccc}
   $\mathbf{\alpha_0^{boost}}$                & 1     & 2     & 3     & 5     & 7     & 9     & 10    & 15    & 20    & 30    \\
     \hline
-  \textbf{doc. containing first topic}  & 11  & 23  & 39  & 47  & 56  & 65  & 79  & 90  & 91  & 91  \\
-  \textbf{words in first topic} & 2   & 4   & 8   & 10  & 13  & 16  & 19  & 24  & 24  & 24
+  \textbf{doc. containing background topic}  & 11  & 23  & 39  & 47  & 56  & 65  & 79  & 90  & 91  & 91  \\
+  \textbf{words in background topic} & 2   & 4   & 8   & 10  & 13  & 16  & 19  & 24  & 24  & 24
   \end{tabular}
 \end{table}
-Indeed, if we look at the top words in the first topic in the \textsc{20News} corpus, we find corpus-specific stop words: \\
+Indeed, if we look at the top words in the background topic in the \textsc{20News} corpus, we find corpus-specific stop words: \\
 \noindent\fbox{
     \parbox{0.8\textwidth}{
 would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
 }
 
-We then always resample, when one of these words occurs, even if the coin toss in the WELDA algorithm failed.
-Due to this, we differentiate between $\lambda$ and $\lambda_{act}$ in experiments.
+We treat the top words in the background topic specially.
+Whenever one of these words occurs, we always resample the word, even if the coin toss in the WELDA algorithm failed.
+Note that we keep this list fixed.
+The background topic changes quickly due to this approach and a more concrete topic emerges.
+Due to this adapted sampling technique, we differentiate between $\lambda$ and $\lambda_{act}$ in experiments.
 The former is the $\lambda$ the algorithm was configured with.
 The latter represents the actual percentage of replacements, when we also replace corpus-specific stop words.
 $\lambda_{act}$ is higher than $\lambda$.
 
-% TODO: Nächster Satz macht keinen Sinn
-This procedure helps replace generic words, while at the same time removing overly general words.
-% TODO: should have
-% TODO: Ganzer Absatz noch nicht klar, hypothesis klarer definieren
-In theory, WELDA should have this property automatically, because often occurring words are more likely to be replaced.
+This procedure helps replace generic words from all topics, thus making the topics better.
+We hypothesize, that WELDA has this property automatically, even without dedicated background topic replacement.
+This is because by the nature of sampling, these words are more likely to be replaced, as they occur more often in the texts.
 Also, this words are usually far away from the means of the topic distributions.
 Thus, these words disappear from the topics.
-Replacing stop words should speed up this process.
+
+We think that using a dedicated background topic and replacing its words, this process is accelerated.
 We will test this hypothesis in the evaluation section.
+
 \subsection{Running LDA as a prerequisite}
 Normally, we run standard LDA before we start with WELDA algorithm for further topic refining.
 This is because the topic distributions are estimated on the top words of each topic.
@@ -1247,10 +1278,10 @@ WELDA will not work in this case.
 
 \subsection{Software}
 
-Our WELDA implementation is written in Scala and available on GitHub\footnote{https://github.com/knub/master-thesis}.
+Our WELDA implementation is written in Scala and available on GitHub\footnote{\url{https://github.com/knub/master-thesis}}.
 The initial LDA is run with Mallet~\cite{McCallum2002}.
 The word vectors are trained using gensim~\cite{Rehurek2010}.
-For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{https://deeplearning4j.org/} library.
+For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{\url{https://deeplearning4j.org/}} library.
 
 \chapter{WELDA Discussion}
 
@@ -1339,7 +1370,7 @@ As $C_V$ outputs one coherence value for each topic, we need to average again to
 Again, we use arithmetic mean here.
 
 We directly use the author's implementation of $C_V$ in their Palmetto\footnote{\url{https://github.com/AKSW/Palmetto}} topic quality measuring toolkit.
-Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured by $C_V$ in the 20news corpus.
+Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured by $C_V$ in the \textsc{20News} corpus.
 \begin{table}[]
   \centering
   \caption{Best and worst topics in our best topic model on the 20news-corpus with 50 topics according to $C_V$}
