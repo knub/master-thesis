@@ -255,12 +255,14 @@ object Main {
                 }
             case "welda-gaussian" =>
                 val weldaGaussian = new GaussianWELDA(args.copy(
-                    modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
+//                    modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
+                    modelFileName = "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
                     topic0Sampling = false,
                     pcaDimensions = 10,
                     distributionEstimationSamples = 20,
                     lambda = 0.2,
-                    modelNamePrefix = "redo",
+                    numIterations = 20,
+                    modelNamePrefix = "foo",
                     embeddingFileName = nipsEmbeddings.head._1,
                     numDocuments = nipsEmbeddings.head._2
                 ))
@@ -346,7 +348,7 @@ object Main {
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2
                     )
-                runCases(cases, 10, new GaussianWELDA(_))
+                runCases(cases, 20, new GaussianWELDA(_))
             case "welda-gaussian-random-init" =>
                 val lambdas = List(0.2, 0.5)
                 val cases = for (embedding <- embeddings; lambda <- lambdas)

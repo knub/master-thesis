@@ -7,6 +7,7 @@ import cc.mallet.topics.ParallelTopicModel
 import com.carrotsearch.hppc.IntArrayList
 import knub.master_thesis.{Args, util}
 import util.{Date, TopicModelWriter}
+import scala.collection.JavaConverters._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -24,6 +25,9 @@ abstract class BaseWELDA(val p: Args) {
     var alphaSum: Double = .0
     var numTopics: Int = -1
 
+    var BURN_IN = p.numIterations / 2
+    var LAG = 5
+
     var vocabularySize: Int = _
 
     var docTopicCount: Array[Array[Int]] = _
@@ -34,6 +38,8 @@ abstract class BaseWELDA(val p: Args) {
 
     var corpusWords: ArrayBuffer[IntArrayList] = _
     var corpusTopics: ArrayBuffer[IntArrayList] = _
+
+    var topicAssignmentSamples: ArrayBuffer[ArrayBuffer[IntArrayList]] = ArrayBuffer()
 
     var word2IdVocabulary: mutable.Map[String, Int] = null
     var id2WordVocabulary: mutable.Map[Int, String] = null
@@ -151,7 +157,6 @@ abstract class BaseWELDA(val p: Args) {
         for (iter <- 0 until p.numIterations) {
             currentIteration = iter
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
-//                System.out.println("\t\tSaving the output from the " + iter + "^{th} sample")
                 writer.write(iter)
             }
             if (iter % TOPIC_OUTPUT_EVERY == 0) {
@@ -161,10 +166,49 @@ abstract class BaseWELDA(val p: Args) {
                     s"samples=${this.asInstanceOf[ReplacementWELDA].DISTRIBUTION_ESTIMATION_SAMPLES})")
             }
             sampleSingleIteration()
+            if (iter + 1 >= BURN_IN && (iter + 1) % LAG == 0) {
+                storeCopyOfCurrentTopics()
+            }
         }
+
+        println(s"${Date.date()}: Aggregating topic assignments")
+        aggregateTopicAssignments()
+        println(s"${Date.date()}: Done aggregating topic assignments")
+
+
         writer.writeParameters()
         println("Sampling completed!")
         writer.write(p.numIterations)
+    }
+
+    def aggregateTopicAssignments(): Unit = {
+        corpusTopics.indices.foreach { docIdx =>
+            for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
+                val topicAssignments = topicAssignmentSamples.map { sample =>
+                    sample(docIdx).get(wordIdx)
+                }
+                val maxTopic = topicAssignments.groupBy(identity).maxBy(_._2.size)._1
+                corpusTopics(docIdx).set(wordIdx, maxTopic)
+            }
+        }
+        docTopicCount = Array.ofDim[Int](p.numDocuments, numTopics)
+        topicWordCountLDA = Array.ofDim[Int](numTopics, vocabularySize)
+        sumTopicWordCountLDA = new Array[Int](numTopics)
+        corpusWords.indices.foreach { docIdx =>
+            for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
+                val word = corpusWords(docIdx).get(wordIdx)
+                val topic = corpusTopics(docIdx).get(wordIdx)
+                docTopicCount(docIdx)(topic) += 1
+                topicWordCountLDA(topic)(word) += 1
+                sumTopicWordCountLDA(topic) += 1
+            }
+        }
+    }
+
+    def storeCopyOfCurrentTopics(): ArrayBuffer[ArrayBuffer[IntArrayList]] = {
+        val sampleCorpusTopics = new mutable.ArrayBuffer[IntArrayList](p.numDocuments)
+        corpusTopics.foreach { t => sampleCorpusTopics += t.clone() }
+        topicAssignmentSamples += sampleCorpusTopics
     }
 
     def sampleSingleIteration(): Unit
