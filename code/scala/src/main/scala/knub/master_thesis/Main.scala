@@ -548,9 +548,9 @@ object Main {
 
     def runCases(cases: Seq[Args], threads: Int, f: Args => ReplacementWELDA): Unit = {
         val parCases = if (threads == 1) {
-            cases
+            scala.util.Random.shuffle(cases)
         } else {
-            val parCases = cases.par
+            val parCases = scala.util.Random.shuffle(cases).par
             parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(threads))
             parCases
         }
