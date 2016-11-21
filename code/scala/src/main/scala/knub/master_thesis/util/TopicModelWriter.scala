@@ -49,7 +49,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
                 // TODO: Think about what is better sorting?
 //                val pro = (model.topicWordCountLDA(tIndex)(wIndex) + params.beta) /
 //                        (model.sumTopicWordCountLDA(tIndex) + model.betaSum)
-                val pro = model.topicWordCountLDA(tIndex)(wIndex)
+                val pro = model.topicWordCountLDAAveraged(tIndex)(wIndex)
                 topicWordProbs(wIndex) = pro
             }
             val mostLikelyWords = topicWordProbs.toSeq.sortBy(-_._2).take(topWords)
@@ -67,8 +67,8 @@ class TopicModelWriter(private val model: BaseWELDA) {
         val writer = new BufferedWriter(new FileWriter(baseName + s".$name.phi"))
         for (t <- 0 until model.numTopics) {
             for (w <- 0 until model.vocabularySize) {
-                val pro = (model.topicWordCountLDA(t)(w) + params.beta) /
-                        (model.sumTopicWordCountLDA(t) + model.betaSum)
+                val pro = (model.topicWordCountLDAAveraged(t)(w) + params.beta) /
+                        (model.sumTopicWordCountLDAAveraged(t) + model.betaSum)
                 writer.write(pro + " ")
             }
             writer.write("\n")
@@ -81,7 +81,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
         val docTopicMatrix = Array.ofDim[Double](params.numDocuments, model.numTopics)
         for (i <- 0 until params.numDocuments) {
             for (j <- 0 until model.numTopics) {
-                val pro = (model.docTopicCount(i)(j) + params.alpha) / (model.docWordCount(i) + model.alphaSum)
+                val pro = (model.docTopicCountAveraged(i)(j) + params.alpha) / (model.docWordCount(i) + model.alphaSum)
                 docTopicMatrix(i)(j) = pro
                 if (j == 0)
                     writer.write(pro.toString)
@@ -102,7 +102,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
             writer.write(String.valueOf(tIndex))
             val topicWordProbs = mutable.Map[Int, Double]()
             for (wIndex <- 0 until model.vocabularySize) {
-                val pro = model.topicWordCountLDA(tIndex)(wIndex)
+                val pro = model.topicWordCountLDAAveraged(tIndex)(wIndex)
                 topicWordProbs(wIndex) = pro
             }
             val mostLikelyWords = topicWordProbs.toSeq.sortBy(-_._2).take(topWords).map(_._1)
