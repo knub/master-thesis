@@ -7,7 +7,6 @@ import cc.mallet.topics.ParallelTopicModel
 import com.carrotsearch.hppc.IntArrayList
 import knub.master_thesis.{Args, util}
 import util.{Date, TopicModelWriter}
-import scala.collection.JavaConverters._
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -30,10 +29,15 @@ abstract class BaseWELDA(val p: Args) {
 
     var vocabularySize: Int = _
 
-    var docTopicCount: Array[Array[Int]] = _
+    protected var docTopicCount: Array[Array[Int]] = _
     var docWordCount: Array[Int] = _
-    var topicWordCountLDA: Array[Array[Int]] = _
-    var sumTopicWordCountLDA: Array[Int] = _
+    protected var topicWordCountLDA: Array[Array[Int]] = _
+    protected var sumTopicWordCountLDA: Array[Int] = _
+
+    var docTopicCountAveraged: Array[Array[Int]] = _
+    var topicWordCountLDAAveraged: Array[Array[Int]] = _
+    var sumTopicWordCountLDAAveraged: Array[Int] = _
+
     var multiPros: Array[Double] = _
 
     var corpusWords: ArrayBuffer[IntArrayList] = _
@@ -157,6 +161,7 @@ abstract class BaseWELDA(val p: Args) {
         for (iter <- 0 until p.numIterations) {
             currentIteration = iter
             if (p.saveStep > 0 && iter % p.saveStep == 0 && iter < p.numIterations) {
+                aggregateTopicAssignments()
                 writer.write(iter)
             }
             if (iter % TOPIC_OUTPUT_EVERY == 0) {
@@ -171,10 +176,7 @@ abstract class BaseWELDA(val p: Args) {
             }
         }
 
-        println(s"${Date.date()}: Aggregating topic assignments")
         aggregateTopicAssignments()
-        println(s"${Date.date()}: Done aggregating topic assignments")
-
 
         writer.writeParameters()
         println("Sampling completed!")
@@ -182,27 +184,35 @@ abstract class BaseWELDA(val p: Args) {
     }
 
     def aggregateTopicAssignments(): Unit = {
-        corpusTopics.indices.foreach { docIdx =>
-            for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
-                val topicAssignments = topicAssignmentSamples.map { sample =>
-                    sample(docIdx).get(wordIdx)
+        val start = System.currentTimeMillis()
+        if (topicAssignmentSamples.isEmpty) {
+            docTopicCountAveraged = docTopicCount
+            topicWordCountLDAAveraged = topicWordCountLDA
+            sumTopicWordCountLDAAveraged = sumTopicWordCountLDA
+        } else {
+            corpusTopics.indices.foreach { docIdx =>
+                for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
+                    val topicAssignments = topicAssignmentSamples.map { sample =>
+                        sample(docIdx).get(wordIdx)
+                    }
+                    val maxTopic = topicAssignments.groupBy(identity).maxBy(_._2.size)._1
+                    corpusTopics(docIdx).set(wordIdx, maxTopic)
                 }
-                val maxTopic = topicAssignments.groupBy(identity).maxBy(_._2.size)._1
-                corpusTopics(docIdx).set(wordIdx, maxTopic)
+            }
+            docTopicCountAveraged = Array.ofDim[Int](p.numDocuments, numTopics)
+            topicWordCountLDAAveraged = Array.ofDim[Int](numTopics, vocabularySize)
+            sumTopicWordCountLDAAveraged = new Array[Int](numTopics)
+            corpusWords.indices.foreach { docIdx =>
+                for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
+                    val word = corpusWords(docIdx).get(wordIdx)
+                    val topic = corpusTopics(docIdx).get(wordIdx)
+                    docTopicCountAveraged(docIdx)(topic) += 1
+                    topicWordCountLDAAveraged(topic)(word) += 1
+                    sumTopicWordCountLDAAveraged(topic) += 1
+                }
             }
         }
-        docTopicCount = Array.ofDim[Int](p.numDocuments, numTopics)
-        topicWordCountLDA = Array.ofDim[Int](numTopics, vocabularySize)
-        sumTopicWordCountLDA = new Array[Int](numTopics)
-        corpusWords.indices.foreach { docIdx =>
-            for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
-                val word = corpusWords(docIdx).get(wordIdx)
-                val topic = corpusTopics(docIdx).get(wordIdx)
-                docTopicCount(docIdx)(topic) += 1
-                topicWordCountLDA(topic)(word) += 1
-                sumTopicWordCountLDA(topic) += 1
-            }
-        }
+        println(s"\tAggregated topic assignments in ${(System.currentTimeMillis() - start) / 1000} s")
     }
 
     def storeCopyOfCurrentTopics(): ArrayBuffer[ArrayBuffer[IntArrayList]] = {

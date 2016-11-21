@@ -255,7 +255,7 @@ object Main {
                     pcaDimensions = 10,
                     distributionEstimationSamples = 20,
                     lambda = 0.2,
-                    numIterations = 20,
+                    numIterations = 200,
                     modelNamePrefix = "foo",
                     embeddingFileName = nipsEmbeddings.head._1,
                     numDocuments = nipsEmbeddings.head._2
