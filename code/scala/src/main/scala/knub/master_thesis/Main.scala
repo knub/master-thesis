@@ -275,10 +275,11 @@ object Main {
                 runCases(cases, 15, new GaussianWELDA(_))
             case "welda-gaussian-nips" =>
                 val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
-                val cases = for (embedding <- nipsEmbeddings; lambda <- lambdas)
+                val cases = for (embedding <- nipsEmbeddings; lambda <- lambdas; idx <- 0 until 5)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
+                        modelNamePrefix = s"welda-gaussian-nips.run-$idx",
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2
                     )
@@ -375,16 +376,17 @@ object Main {
                     (10, 20), (10, 30), (10, 40), (10, 50), (10, 100), (10, 200), (10, 400),
                     (50, 100), (50, 200), (50, 400), (50, 1000)
                 )
-                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams)
+                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams; idx <- 0 until 4)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
+                        modelNamePrefix = s"welda-gaussian-pca-samples.run-$idx",
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 15, new GaussianWELDA(_))
+                runCases(cases, 18, new GaussianWELDA(_))
             case "welda-gaussian-top" =>
                 //                val samplingParams = List(
                 //                    (2, 20), (2, 30), (2, 40), (2, 50), (2, 100), (2, 200), (2, 400),
