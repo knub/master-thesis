@@ -274,8 +274,20 @@ Computationally, this is equivalent to finding the posterior distribution of the
 Blei et al.~\cite{Blei2003} propose an algorithm based on variational approximation, however Griffiths and Steyvers~\cite{Griffiths2004} proposed an algorithm based on Gibbs sampling.
 
 We will now explain the Gibbs sampling algorithm in detail, see Algorithm~\ref{alg:gibbs_sampling}.
-The main idea is to repeatedly sample new topics for all words in the documents.
-During sampling, all other topic assignments are kept fixed.
+The algorithm starts by assigning topics randomly to words (line 2).
+Each word gets exactly one topic.
+Then, for a number of iterations $M$ (line 3), the algorithm iterates over all documents and all words in the documents (lines 4-7).
+The main idea is now to repeatedly sample new topics for all words in the documents.
+During sampling, all other topic assignments are assumed fixed and the conditional distribution over the topics for the current word are considered (line 10).
+The sampling occurs from the multinomial distribution defined by:
+\begin{equation*}
+  p(z_w = t | Z) \propto (N_{d}^{t} + \alpha_t) \times  \frac{N^{t, w} + \beta}{N^{t} + V * \beta},
+\end{equation*}
+where $N_{d}^{t}$ is the number of times the topic $t$ occurred in the current topic, $N^{t, w}$ is the number of times the current word $w$ occurred with topic $t$ and $N^t$ is the number of times topic $t$ occurred in all documents.
+Note that all these numbers are counted without the current word taken into account (lines 8 and 11).
+$V$ represents the vocabulary size and $\alpha_t$ the Dirichlet prior for topic $t$ in the document-topic distribution.
+Usually, the Dirichlet prior is symmetric and all $\alpha_t$ are identical.
+$\beta$ represents the Dirichlet prior for the topic-word distributions in each topic.
 It is guaranteed, that this repeated sampling approximates the joint distribution of all variables.
 \begin{algorithm}
   \caption{Gibbs sampling algorithm for LDA. The variable $M$ represents the number of iterations, i.e. the number of passes over the corpus.}
