@@ -247,12 +247,6 @@ object Main {
             case "supply-tm-similarity" =>
                 val res = loadExistingModel(args.modelFileName)
                 supplyTopicModelSimilarity(args, res)
-            case "welda-sim" =>
-                for (lambda <- List(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)) {
-                    println(lambda)
-                    val weldaSim = new SimpleSimBasedReplacementWELDA(args.copy(lambda = lambda))
-                    weldaSim.inference()
-                }
             case "welda-gaussian" =>
                 val weldaGaussian = new GaussianWELDA(args.copy(
 //                    modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
