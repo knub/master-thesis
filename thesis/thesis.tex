@@ -1179,8 +1179,9 @@ We pick the best method automatically in the $\textsc{Init}$ method in Algorithm
 \end{figure}
 
 \subsection{Vocabulary mismatch between word embeddings and topic model}
+\label{sec:vocabulary_mismatch}
 The typical preprocessing steps for topic models include lowercasing and stop-word removal~\cite{Boyd-graber2014}.
-On the other side, Mikolov~\ref{Mikolov2013d} recommends almost no preprocessing except sentence detection.
+On the other side, Mikolov~\cite{Mikolov2013d} recommends almost no preprocessing except sentence detection.
 Especially stop words are not removed in the word2vec approach by Mikolov:
 Due to the window-based approach, where a word predicts its context words at the exact location, this stop word removal would decrease performance.
 
@@ -1216,7 +1217,6 @@ We discard all words that we cannot match in this way.
 To speed up the topic improvement process, we detect corpus-specific stop words in addition to the general English-language stop words we use.
 We detect this stop words automatically during the initial LDA Gibbs sampling.
 Instead of using a symmetric Dirichlet $\alpha$ prior for all topics, we multiply the $\alpha_0$ prior by a factor $\alpha_0^{boost}$.
-% TODO: first topic === background topic
 By increasing the value of $\alpha_0$ we force the first topic to appear in almost all documents.
 This forces LDA to put words in this topic, which occur in many documents and are very generic.
 We call this first topic the \emph{background topic}, because it occurs in many documents as the generic word background for the more informative topics.
@@ -1373,7 +1373,7 @@ We directly use the author's implementation of $C_V$ in their Palmetto\footnote{
 Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured by $C_V$ in the \textsc{20News} corpus.
 \begin{table}[]
   \centering
-  \caption{Best and worst topics in our best topic model on the 20news-corpus with 50 topics according to $C_V$}
+  \caption{Best and worst topics in our best topic model on the \textsc{20News}-corpus with 50 topics according to $C_V$}
   \begin{tabular}{ll}
   \hline
   \textbf{Coherence} & \textbf{Top words} \\ \hline
@@ -1446,12 +1446,12 @@ The $\lambda_{act}$ values are slightly higher than the original $\lambda$ value
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_lambda_20news.png}
-       \caption{Topic coherence development for Gaussian WELDA and \textsc{20news} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
+       \caption{Topic coherence development for Gaussian WELDA and \textsc{20News} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
        \label{fig:welda_gaussian_lambda_20news}
 \end{figure}
 % TODO: Mention plots are scaled by 100.
 
-We start with the analysis of with the topic models using the embeddings trained on the \textsc{20news} corpus.
+We start with the analysis of with the topic models using the embeddings trained on the \textsc{20News} corpus.
 The results are plotted in Figure~\ref{fig:welda_gaussian_lambda_20news}.
 There are several interesting observations in the plot.
 First, with $\lambda = 0.0$ the topic coherence does not change beyond random fluctuations.
@@ -1489,10 +1489,10 @@ This is only an improvement of $0.039$ over the baseline value.
 \end{figure}
 
 % TODO: Nips
-We illustrate the change of topics in \textsc{Nips} and \textsc{20news} in Table~\ref{table:topic_development}.
+We illustrate the change of topics in \textsc{Nips} and \textsc{20News} in Table~\ref{table:topic_development}.
 \begin{table}[]
   \centering
-  \caption{Topic evolution from standard LDA to Gaussian WELDA after 200 iterations. The crossed out words were in the original top ten words of LDA, but are not in the top topic words after WELDA. The bold words are the new words. The top three topics are from the \textsc{20news} corpus, the lower three from the \textsc{Nips} corpus. The examples clearly show WELDA's capability to add specific, meaningful words in the top words, while at the same time removing overly general words.}
+  \caption{Topic evolution from standard LDA to Gaussian WELDA after 200 iterations. The crossed out words were in the original top ten words of LDA, but are not in the top topic words after WELDA. The bold words are the new words. The top three topics are from the \textsc{20News} corpus, the lower three from the \textsc{Nips} corpus. The examples clearly show WELDA's capability to add specific, meaningful words in the top words, while at the same time removing overly general words.}
   \label{table:topic_development}
   \begin{tabular}{p{13.5cm}}
     \hline
@@ -1604,10 +1604,10 @@ The results are worse than running LDA, thus showing the only taking word embedd
 The information contained in the bag-of-words and exploited by LDA is still very important for good topics.
 \begin{table}[]
   \centering
-  \caption{Topic coherence on the \textsc{20news} corpus when using word embedding similarity for topics. The results are slightly worse than standard LDA.}
+  \caption{Topic coherence on the \textsc{20News} corpus when using word embedding similarity for topics. The results are slightly worse than standard LDA.}
   \label{table:raw_we_tm}
   \begin{tabular}{ccc}
-    \textbf{search word}     & \textbf{200-dim., Wikipedia} & \textbf{50-dim., 20news} \\
+    \textbf{search word}     & \textbf{200-dim., Wikipedia} & \textbf{50-dim., \textsc{20News}} \\
     \hline
     top word                 & 0.414                        & 0.410                    \\
     average of top ten words & 0.419                        & 0.389
@@ -1616,6 +1616,68 @@ The information contained in the bag-of-words and exploited by LDA is still very
 
 % TODO: Mention later, that only the combination works good
 \section{Document classification}
+
+To investigate the effects of the different word embedding-enhanced topic models on document classification, we conducted a series of experiments, which we will present in the next sections.
+
+\subsection{Data set}
+
+We again use the \textsc{20News} corpus.
+The corpus was collected from twenty different newsgroups, which are shown in Table~\ref{table:20news}.
+All together, the corpus contains 11293 documents.
+
+\begin{table}[h!]
+  \centering
+  \caption{Classes in the \textsc{20News}~\cite{Rennie2008} data set. Some newsgroups are very closely related, while others are unrelated. The table groups similar newsgroups in the same cell. In parentheses, we also indicate the number of documents in each group.}
+  \label{table:20news}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \begin{tabular}[c]{@{}l@{}}comp.graphics (584)\\ comp.os.ms-windows.misc (572)\\ comp.sys.ibm.pc.hardware (590)\\ comp.sys.mac.hardware (578)\\ comp.windows.x (593)\end{tabular} & \begin{tabular}[c]{@{}l@{}}rec.autos (594)\\ rec.motorcycles (598)\\ rec.sport.baseball (597)\\ rec.sport.hockey (600)\end{tabular} & \begin{tabular}[c]{@{}l@{}}sci.crypt (595)\\ sci.electronics (591)\\ sci.med (594)\\ sci.space (593)\end{tabular}         \\ \hline
+      misc.forsale (585)                                                                                                                                        & \begin{tabular}[c]{@{}l@{}}talk.politics.misc (465)\\ talk.politics.guns (545)\\ talk.politics.mideast (564)\end{tabular}      & \begin{tabular}[c]{@{}l@{}}talk.religion.misc (377)\\ alt.atheism (480)\\ soc.religion.christian (598)\end{tabular} \\ \hline
+  \end{tabular}
+\end{table}
+
+\subsection{Setup}
+
+As features, we took the document-topic matrix: this matrix contains the distribution of topics in each topic.
+Each row sums to one.
+The number of features is equal to the number of topics.
+We ran experiments for all approaches using $T = 50$ and $T = 250$.
+
+For classification, we ran a three-fold stratified cross validation.
+In each fold, we used a linear \emph{l}-1 regularized SVM classifier, where we trained $T$ one-vs-rest classifiers.
+The results for the different classes were macro-averaged.
+The results for the three folds were macro-averaged again.
+We will report this number in the tables in the following sections.
+We used the \emph{LinearSVC} implementation from the Python scikit-learn \cite{Pedregosa2012} library.
+
+Additionally, we wanted to analyze the effect of raw word embeddings for document classification.
+For this, we conducted additional experiments, where we added the average word embedding of each document to the features.
+The average was calculated by taking the bag-of-words representation of the documents from the topic model, retrieving all word vectors using the word-matching technique described in Section~\ref{sec:vocabulary_mismatch} and then calculating their average.
+This means, that stop words were not relevant for the average calculation, as they were already removed during the topic model preprocessing.
+Depending on the word embeddings used, this added another fifty or two-hundred features to the instances.
+
+\subsection{Contenders}
+
+\begin{itemize}
+  \item
+    \textbf{TopicVec:}
+    Contrary to the paper by Li et al.~\cite{Li2016}, we configured TopicVec to only learn one set of topics.
+    In their paper, they learn 14 topics separately on each classification category and then combine the, resulting in 280 topics.
+  \item
+    \textbf{Mean of word embeddings:}
+\end{itemize}
+
+
+
+
+The learning rate was set to $\delta = 0.1$, as they reported in the paper.
+We used the parameters they reported in their paper, 
+
+
+
+
+
+
 \section{Word similarity}
 
 
