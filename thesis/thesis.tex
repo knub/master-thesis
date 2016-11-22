@@ -1578,16 +1578,30 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 
 \begin{table}[]
   \centering
-  \caption{Performance}
+  \caption{Comparison over the different word embeddings, which we trained for this work.
+  The last column indicates the performance in an analogy reasoning (AR) benchmark published by Mikolov et al.~\cite{Mikolov2013b}.
+  We also added the Google News embeddings, which were published by Google.}
   \label{table:word_embeddings_performance}
-  \begin{tabular}{ll}
-  \hline
-                                                                  & \textbf{Accuracy} \\ \hline
-  \textbf{200 dimensions, trained on English Wikipedia}           & 56.5 \%           \\
-  \textbf{50-dimensions, trained on 20-news corpus}               & 11.1 \%           \\
-  \textbf{Embeddings published by Google, trained on Google News} & 74.3 \%
+  \begin{tabular}{ccccc}
+    \textbf{Data set} & \textbf{Dimensions} & \textbf{\# words} & \textbf{\# sentences} & \textbf{Accuracy AR} \\ \hline
+    English Wikipedia & 200                 & 1,787,888,109     & 93,322,949            & 56.5 \%              \\
+    20News            & 50                  & 5,705,876         & 293,467               & 11.1 \%              \\
+    Nips              & 50                  & 4,973,427         & 212,400               & 10.1 \%              \\
+    Google News       & 300                 & 100 billion       & \textit{unknown}      & 74,3 \%             
   \end{tabular}
 \end{table}
+
+% \begin{table}[]
+%   \centering
+%   \label{table:word_embeddings_performance}
+%   \begin{tabular}{ll}
+%   \hline
+%                                                                   & \textbf{Accuracy} \\ \hline
+%   \textbf{200 dimensions, trained on English Wikipedia}           & 56.5 \%           \\
+%   \textbf{50-dimensions, trained on 20-news corpus}               & 11.1 \%           \\
+%   \textbf{Embeddings published by Google, trained on Google News} & 74.3 \%
+%   \end{tabular}
+% \end{table}
 
 
 \section{Topic coherence}
