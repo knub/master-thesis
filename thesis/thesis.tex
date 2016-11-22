@@ -1553,17 +1553,25 @@ We use the document-topic matrices.
 \subsection{Experiment setup}
 \subsection{Results}
 
+
 \chapter{Comparative evaluation of word-embedding-improved topic models}
 \section{Training word-embeddings}
 
+As the methods use word embeddings, we have train such embeddings first.
+We trained the embeddings on different corpora to see how that effects the results.
+
 We trained our own word embeddings using the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
 We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
+During preprocessing, we split the corpora into sentences.
+Words were not lowercased and no stop words were removed, as both have been show to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
+% TODO: Better quote
 
-For preprocessing, we split the corpora into sentences.
-Words were not lowercased and no stop words were removed, as both have been show to harm the performance of the resulting vectors.
-% TODO: Quote
+Training took about four hours.
 
-We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}.
+We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}, which were trained on about 100 billion words.
+
+However, for the effects of topic coherence it makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
+
 We evaluated using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
 The results can be seen in Table~\ref{table:word_embeddings_performance}.
 % TODO: Explain analogy reasoning
@@ -1660,11 +1668,14 @@ Depending on the word embeddings used, this added another fifty or two-hundred f
 
 \begin{itemize}
   \item
+    \textbf{Standard LDA:}
+  \item
     \textbf{TopicVec:}
     Contrary to the paper by Li et al.~\cite{Li2016}, we configured TopicVec to only learn one set of topics.
     In their paper, they learn 14 topics separately on each classification category and then combine the, resulting in 280 topics.
   \item
     \textbf{Mean of word embeddings:}
+    As a baseline, we also 
 \end{itemize}
 
 
@@ -1674,11 +1685,12 @@ The learning rate was set to $\delta = 0.1$, as they reported in the paper.
 We used the parameters they reported in their paper, 
 
 
+As a summary, most methods are able to generate better topics,
+at the expense of loosing accuracy in a document classification task.
 
 
 
-
-\section{Word similarity}
+% \section{Word similarity}
 
 
 \section{Runtime}
