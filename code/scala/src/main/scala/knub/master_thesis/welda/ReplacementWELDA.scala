@@ -306,7 +306,6 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     override def inference(): Unit = {
         super.inference()
-        val f = Paths.get(folder)
         val actualLambda = Math.round(totalReplaced * 100.0 / totalWords) / 100.0
         println(s"actualLambda = $actualLambda")
         val newFolderName = folder + s".lambdaact-${actualLambda.toString.replace('.', '-')}"
