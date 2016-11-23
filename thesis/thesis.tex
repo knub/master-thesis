@@ -1560,19 +1560,21 @@ We use the document-topic matrices.
 As the methods use word embeddings, we have train such embeddings first.
 We trained the embeddings on different corpora to see how that effects the results.
 
-We trained our own word embeddings using the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
+We trained our own word embeddings using the gensim word2vec implementation by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
 We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
 During preprocessing, we split the corpora into sentences.
-Words were not lowercased and no stop words were removed, as both have been show to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
-% TODO: Better quote
-
+Words were not lowercased and no stop words were removed, as both have been shown to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
 Training took about four hours.
+% TODO: Better quote
 
 We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}, which were trained on about 100 billion words.
 
 However, for the effects of topic coherence it makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
 
 We evaluated using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
+Analogy reasoning is a standard benchmark for word embedding models.
+The task is to solve questions such as ``woman is to man as king is to \textless?\textgreater''.
+This questions can also be posed on a grammatical level, e.g. ``good is to best as bad is to \textless?\textgreater''.
 The results can be seen in Table~\ref{table:word_embeddings_performance}.
 % TODO: Explain analogy reasoning
 
@@ -1676,7 +1678,7 @@ Additionally, we wanted to analyze the effect of raw word embeddings for documen
 For this, we conducted additional experiments, where we added the average word embedding of each document to the features.
 The average was calculated by taking the bag-of-words representation of the documents from the topic model, retrieving all word vectors using the word-matching technique described in Section~\ref{sec:vocabulary_mismatch} and then calculating their average.
 This means, that stop words were not relevant for the average calculation, as they were already removed during the topic model preprocessing.
-Depending on the word embeddings used, this added another fifty or two-hundred features to the instances.
+Depending on the word embeddings used (see Table~\ref{table:word_embeddings_performance}), this added another fifty or two-hundred features to the instances.
 
 \subsection{Contenders}
 
@@ -1687,16 +1689,21 @@ Depending on the word embeddings used, this added another fifty or two-hundred f
     \textbf{TopicVec:}
     Contrary to the paper by Li et al.~\cite{Li2016}, we configured TopicVec to only learn one set of topics.
     In their paper, they learn 14 topics separately on each classification category and then combine the, resulting in 280 topics.
+
+    The learning rate was set to $\delta = 0.1$, as they reported in the paper.
+    We used the parameters they reported in their paper, 
   \item
     \textbf{Mean of word embeddings:}
     As a baseline, we also 
 \end{itemize}
 
 
+\subsection{Results}
 
 
-The learning rate was set to $\delta = 0.1$, as they reported in the paper.
-We used the parameters they reported in their paper, 
+
+
+
 
 
 As a summary, most methods are able to generate better topics,
