@@ -11,7 +11,7 @@ import cc.mallet.topics.ParallelTopicModel
 import cc.mallet.types.{FeatureSequence, TokenSequence}
 import knub.master_thesis.preprocessing.DataIterators
 import knub.master_thesis.probabilistic.Divergence._
-import knub.master_thesis.util.Word2VecUtils
+import knub.master_thesis.util.{CorpusReader, Word2VecUtils}
 import knub.master_thesis.welda._
 import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
@@ -515,19 +515,26 @@ object Main {
                 val word2Vec = WordVectorSerializer.loadTxtVectors(
                     new File(s"${args.modelFileName.replaceAll("/model$", "/")}$embeddingName.restricted.vocab.embedding.txt"))
                 val embeddingDimensions = word2Vec.getWordVector("house").length
-                val tm = ParallelTopicModel.read(new File(args.modelFileName))
+//                val tm = ParallelTopicModel.read(new File(args.modelFileName))
                 val pw = new PrintWriter(s"${args.modelFileName}.$embeddingName.avg-embedding")
 
-                val data = tm.getData
-                data.foreach { doc =>
+//                val data = tm.getData
+
+
+                val corpus = CorpusReader.readCorpus(s"${args.modelFileName}.$embeddingName.restricted")
+                val clazzes = Source.fromFile(s"${args.modelFileName}.$embeddingName.restricted.classes").getLines()
+                val alph = Source.fromFile(s"${args.modelFileName}.$embeddingName.restricted.vocab")
+                    .getLines().map { line =>
+                        line
+                    }.toArray
+                corpus.documents.foreach { doc =>
                     val avgVector = new Array[Double](embeddingDimensions)
-                    val wordFeatures = doc.instance.getData.asInstanceOf[FeatureSequence]
-                    val alph = doc.instance.getDataAlphabet
 
                     var nrWordsWithVectors = 0
-                    wordFeatures.getFeatures.foreach { wordId =>
+                    doc.asScala.foreach { wordCursor =>
+                        val wordId = wordCursor.value
                         try {
-                            val word = alph.lookupObject(wordId).asInstanceOf[String]
+                            val word = alph(wordId).asInstanceOf[String]
                             val actualWord = Word2VecUtils.findActualWord(word2Vec, word)
                             val wordVector = word2Vec.getWordVector(actualWord)
                             for (i <- 0 until embeddingDimensions) {
@@ -541,10 +548,11 @@ object Main {
                     for (i <- 0 until embeddingDimensions) {
                         avgVector(i) /= nrWordsWithVectors
                     }
-                    val clazz = doc.instance.getTarget
+                    val clazz = clazzes.next()
                     pw.println(s"$clazz ${avgVector.mkString(" ")}")
                 }
                 pw.close()
+                assert(clazzes.isEmpty)
         }
     }
 
