@@ -1130,7 +1130,7 @@ Each distribution is characterized by the mean and the covariance matrix.
 Additionally, a mixture model provides the mixture weights $\pi_i$, which have to sum to one.
 We learn the mixtures by using the expectation-maximization algorithm.
 We test different number of mixtures from one up to four and choose the one with the lowest Bayesian information criterion (BIC) by Schwarz~\cite{Schwarz1978}.
-Steele et al.~\cite{Steel2009} showed, that the BIC clearly outperforms other methods for choosing the number of mixtures in a Gaussian mixture model.
+Steele et al.~\cite{Steele2009} showed, that the BIC clearly outperforms other methods for choosing the number of mixtures in a Gaussian mixture model.
 The BIC is defined as follows:
 
 \begin{equation*}
@@ -1362,7 +1362,7 @@ The topic coherence evaluation for one set of ten top words is calculated in fou
       coherence(\vec{u}, \vec{w}) = \frac{\vec{u} \cdot \vec{w}}{||\vec{u}|| * ||\vec{w}||}
     \end{equation*}
     Compared to directly using the NPMI, using an indirect measure has the advantage, that it assigns a high score also to word pairs, which occur together only rarely, but still occur in the same contexts.
-    This can be the case for products or brands in the same category~\cite{Roeder2015}.
+    This can be the case for products or brands in the same category~\cite{Roder2015}.
     While they seldom occur together, their contexts are similar, thus a high coherence score is beneficial.
   \item \textbf{Averaging}:
     As we have $N$ pairs of tuples $(W', W^*)$, the $coherence$ values need to be averaged.
@@ -1786,7 +1786,7 @@ curse of dimensionality for nearest neighbour search
 fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
-\printbibliography
+% \printbibliography
 
 % \begin{appendices}
 % \end{appendices}
