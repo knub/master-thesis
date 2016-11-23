@@ -20,6 +20,8 @@
 % \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{pifont}
+\usepackage{booktabs}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 \usepackage{textcomp}
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -657,7 +659,7 @@ Even though the authors provide some performance improvements using linear algeb
 We will compare the runtime with other models in TODO.
 
 \paragraph{Latent Feature Topic Models}
-Another approach is taken by Nguyen et al.~\cite{Nguyen2015}.
+Another approach, called Latent Feature Topic Models (LFTM), is taken by Nguyen et al.~\cite{Nguyen2015}.
 They use word embeddings to sample words not only from the multinomial topic distribution, but also from the embedding space.
 Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
 This parameter decides, whether the word is sampled as usual from the topic-word distribution or from the latent feature vectors.
@@ -695,8 +697,8 @@ Using the topic vectors, the generative process can be summarized as follows:
 \end{enumerate}
 The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014} and conclude that none of these works better than the other.
 
-\paragraph{Nonparametric Spherical Model}
-Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modeling.
+\paragraph{Nonparametric Spherical Topic Model}
+Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modeling (NSTM).
 They build on top of Gaussian LDA, but argue that Gaussian distributions do not capture the embedding space very well.
 Instead they propose the von Mises-Fisher distribution to capture topics in the embedding space.
 The von Mises-Fisher distribution is a distribution on the hypersphere with a mean direction $\mu$ and a concentration parameter $\kappa$.
@@ -1286,6 +1288,7 @@ For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{\url{
 \chapter{WELDA Discussion}
 
 \section{Topic Coherence}
+\label{sec:topic_coherence}
 As discussed in Section~\ref{sec:evaluation_of_topic_models}, topic coherence is a standard task to evaluate topic models.
 In this section, we evaluate WELDA's design decisions with respect to topic coherence in several experiments.
 \subsection{Experiment setup}
@@ -1555,41 +1558,64 @@ We use the document-topic matrices.
 
 
 \chapter{Comparative evaluation of word-embedding-improved topic models}
+
+In this chapter, we will evaluate WELDA in comparison to TopicVec, Gaussian LDA, LFTM, NSTM and standard LDA.
+We will focus on two tasks: topic coherence and document classification.
+Before we start with these results, we will explain, which word embeddings we used, as this is an important decision for the algorithms.
+
 \section{Training word-embeddings}
 
-As the methods use word embeddings, we have train such embeddings first.
+As the methods use word embeddings, we have to train such embeddings first.
 We trained the embeddings on different corpora to see how that effects the results.
 
 We trained our own word embeddings using the gensim word2vec implementation by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
 We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
 During preprocessing, we split the corpora into sentences.
 Words were not lowercased and no stop words were removed, as both have been shown to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
-Training took about four hours.
-% TODO: Better quote
 
+We trained 200-dimensional vectors on the English Wikipedia.
+We only considered article pages and then furthermore discarded disambiguation, lists and tables.
+Templates were not used.
+We also removed the headings, as they do not form a sentence usually.
+When training the Gaussian LDA model and the NSTM model, we did not achieve any results when training with the 200-dimensional model.
+Both authors confirmed this issue upon request \cite{Das2016, Saeedi2016}.
+That is why we also trained another set of Wikipedia embeddings with only 50 dimensions.
+Training took about four hours for both models.
 We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}, which were trained on about 100 billion words.
 
-However, for the effects of topic coherence it makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
+All embeddings so far were external models, i.e. they were not trained on the corpus, which the topic model was inferred on.
+This is a good approach, if external information should be leaked into the model.
+However, it also makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
+The topic model corpora are usually much smaller, so the word embeddings will not have a good quality when assessed in a general way.
+However, they are optimized to the small topic model corpus, and we will evaluate, how good they work when assessed in the topic coherence and document classification tasks.
 
-We evaluated using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
+To get an impression on the different word embedding models, we evaluated their performance using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
 Analogy reasoning is a standard benchmark for word embedding models.
 The task is to solve questions such as ``woman is to man as king is to \textless?\textgreater''.
 This questions can also be posed on a grammatical level, e.g. ``good is to best as bad is to \textless?\textgreater''.
-The results can be seen in Table~\ref{table:word_embeddings_performance}.
-% TODO: Explain analogy reasoning
+We used the question-set published by Mikolov et al.~\cite{Mikolov2013b}.
+Their set contains 8,869 semantic and 10,675 grammatical questions.
+We show the word embedding models we trained as well as their accuracy in the analogy reasoning task in Table~\ref{table:word_embeddings_performance}.
+Not surprisingly, the embeddings trained on the topic model corpora .
+This can also be explained by the fact, the both \textsc{20News} and \textsc{Nips} have a special focus.
 
 \begin{table}[]
+  \ra{1.3}
   \centering
   \caption{Comparison over the different word embeddings, which we trained for this work.
   The last column indicates the performance in an analogy reasoning (AR) benchmark published by Mikolov et al.~\cite{Mikolov2013b}.
   We also added the Google News embeddings, which were published by Google.}
   \label{table:word_embeddings_performance}
   \begin{tabular}{ccccc}
-    \textbf{Data set} & \textbf{Dimensions} & \textbf{\# words} & \textbf{\# sentences} & \textbf{Accuracy AR} \\ \hline
-    English Wikipedia & 200                 & 1,787,888,109     & 93,322,949            & 56.5 \%              \\
-    20News            & 50                  & 5,705,876         & 293,467               & 11.1 \%              \\
-    Nips              & 50                  & 4,973,427         & 212,400               & 10.1 \%              \\
-    Google News       & 300                 & 100 billion       & \textit{unknown}      & 74,3 \%             
+    \toprule
+    \textbf{Data set} & \textbf{Dimensions} & \textbf{\# words} & \textbf{\# sentences} & \textbf{Accuracy AR} \\
+    \midrule
+    \textsc{English Wikipedia} & 200                 & 1,787,888,109     & 93,322,949            & 56.5 \%              \\
+    \textsc{English Wikipedia} & 50                 & 1,787,888,109     & 93,322,949            & 40.4 \%              \\
+    \textsc{20News}   & 50                  & 5,705,876         & 293,467               & 11.1 \%              \\
+    \textsc{Nips}     & 50                  & 4,973,427         & 212,400               & 10.1 \%              \\
+    \textsc{Google News} & 300                 & 100 billion       & \textit{unknown}      & 74,3 \%              \\
+    \bottomrule
   \end{tabular}
 \end{table}
 
@@ -1607,6 +1633,9 @@ The results can be seen in Table~\ref{table:word_embeddings_performance}.
 
 
 \section{Topic coherence}
+
+We will now evaluate topic coherence as described in Section~\ref{sec:topic_coherence} on all models.
+
 \subsection{Raw word-embedding topic model}
 As a baseline, we start with a topic model solely based on the word-similarity in the embedding space.
 This way, we see whether using the most similar words for a given word already yields good topics, or whether standard LDA is still important for creating good topics.
@@ -1627,14 +1656,17 @@ We show the results in Table~\ref{table:raw_we_tm}.
 The results are worse than running LDA, thus showing the only taking word embeddings is not enough.
 The information contained in the bag-of-words and exploited by LDA is still very important for good topics.
 \begin{table}[]
+  \ra{1.3}
   \centering
   \caption{Topic coherence on the \textsc{20News} corpus when using word embedding similarity for topics. The results are slightly worse than standard LDA.}
   \label{table:raw_we_tm}
   \begin{tabular}{ccc}
-    \textbf{search word}     & \textbf{200-dim., Wikipedia} & \textbf{50-dim., \textsc{20News}} \\
-    \hline
+    \toprule
+    \textbf{search word}     & \textbf{200-dim., \textsc{Wikipedia}} & \textbf{50-dim., \textsc{20News}} \\
+    \midrule
     top word                 & 0.414                        & 0.410                    \\
-    average of top ten words & 0.419                        & 0.389
+    average of top ten words & 0.419                        & 0.389 \\
+    \bottomrule
   \end{tabular}
 \end{table}
 
@@ -1701,7 +1733,32 @@ Depending on the word embeddings used (see Table~\ref{table:word_embeddings_perf
 \subsection{Results}
 
 
+WELDA with lambda = 0.3
 
+Note: Gaussian LDA had to be trained with 50-dimensional word embeddings trained on Wikipedia.
+
+As with topic coherence, 
+
+\begin{table}[]
+  \ra{1.3}
+  \centering
+  \caption{My caption}
+  \label{my-label}
+  \begin{tabular}{lrrrcrrr}
+    \toprule
+    \multirow{2}{*}{} & \multicolumn{3}{c}{$K = 50$} & \phantom{a} & \multicolumn{3}{c}{$K = 250$} \\ \cmidrule{2-4} \cmidrule{6-8}
+                      & $Prec$    & $Rec$     & $F1$     && $Prec$    & $Recall$   & $F1$     \\ \midrule
+                      LDA               & 0.xx    & 0.xx    & 0.xx   && 0.xx    & 0.xx     & 0.xx   \\
+                      Average WE        & 68.2    & 67.9    & 67.0   && \multicolumn{3}{l}{}        \\
+                      LFTM              & 0.69    & 0.67    & 0.66   && 0.71    & 0.71     & 0.71   \\
+                      TopicVec          & 0.35    & 0.34    & 0.31   && 0.41    & 0.37     & 0.34   \\
+                      Gaussian LDA      & 0.42    & 0.43    & 0.40   && 0.xx    & 0.xx     & 0.xx   \\
+                      WELDA             & 0.62    & 0.57    & 0.57   && 0.68    & 0.66     & 0.66   \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+TopicVec has the largest improvements when adding the average word embedding vector, however, it also had the worst results before.
 
 
 
