@@ -172,7 +172,7 @@ abstract class BaseWELDA(val p: Args) {
             }
             sampleSingleIteration()
             if (iter + 1 >= BURN_IN && (iter + 1) % LAG == 0) {
-                storeCopyOfCurrentTopics()
+//                storeCopyOfCurrentTopics()
             }
         }
 
