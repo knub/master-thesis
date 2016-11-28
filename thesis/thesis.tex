@@ -1584,6 +1584,23 @@ We removed everything before the abstract except the title
 For both corpora, we lowercased, removed stopwords.
 We also removed words, which did not occur in the embedding models.
 
+\begin{table}[]
+  \ra{1.3}
+  \centering
+  \caption{Overview over the corpora we use for evaluation}
+  \label{table:data_sets}
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+                               & \textsc{20News} & \textsc{Nips}                \\ \midrule
+                               \# documents               & 11,295            & 1,740               \\
+                               \# words                   & 1,395,973         & 2,497,017           \\
+                               \# classes                 & 20                & \textit{no classes} \\
+                               vocabulary size            & 51,951            & 35,171              \\
+                               average words per document & 124               & 1,435               \\
+                               \bottomrule
+  \end{tabular}
+\end{table}
+
 
 
 \section{Training word-embeddings}
@@ -1693,6 +1710,7 @@ The corpus was collected from twenty different newsgroups, which are shown in Ta
 All together, the corpus contains 11293 documents.
 
 \begin{table}[h!]
+  \ra{1.1}
   \centering
   \caption{Classes in the \textsc{20News}~\cite{Rennie2008} data set. Some newsgroups are very closely related, while others are unrelated. The table groups similar newsgroups in the same cell. In parentheses, we also indicate the number of documents in each group.}
   \label{table:20news}
@@ -1885,6 +1903,7 @@ See the previous sections for details.
 Of all methods, standard LDA is by far the fastest
 
 \begin{table}[]
+  \ra{1.2}
   \centering
   \caption{Runtimes of the different methods with $K = 50$ on the \textsc{20News} and \textsc{Nips} corpus.
   Experiments were conducted with the 200-dimensional Wikipedia embeddings for \textsc{20News} (50-dimensional for Gaussian LDA) and the 50-dimensional corpus-specific embeddings for \textsc{Nips}.
