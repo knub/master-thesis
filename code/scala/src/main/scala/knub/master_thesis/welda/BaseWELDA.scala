@@ -184,12 +184,12 @@ abstract class BaseWELDA(val p: Args) {
     }
 
     def aggregateTopicAssignments(): Unit = {
-        val start = System.currentTimeMillis()
         if (topicAssignmentSamples.isEmpty) {
             docTopicCountAveraged = docTopicCount
             topicWordCountLDAAveraged = topicWordCountLDA
             sumTopicWordCountLDAAveraged = sumTopicWordCountLDA
         } else {
+            val start = System.currentTimeMillis()
             corpusTopics.indices.foreach { docIdx =>
                 for (wordIdx <- 0 until corpusTopics(docIdx).size()) {
                     val topicAssignments = topicAssignmentSamples.map { sample =>
@@ -211,8 +211,8 @@ abstract class BaseWELDA(val p: Args) {
                     sumTopicWordCountLDAAveraged(topic) += 1
                 }
             }
+            println(s"\tAggregated topic assignments in ${(System.currentTimeMillis() - start) / 1000} s")
         }
-        println(s"\tAggregated topic assignments in ${(System.currentTimeMillis() - start) / 1000} s")
     }
 
     def storeCopyOfCurrentTopics(): ArrayBuffer[ArrayBuffer[IntArrayList]] = {
