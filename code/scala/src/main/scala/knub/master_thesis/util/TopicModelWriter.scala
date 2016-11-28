@@ -2,11 +2,11 @@ package knub.master_thesis.util
 
 import java.io.{BufferedWriter, FileWriter}
 
-import knub.master_thesis.welda.BaseWELDA
+import knub.master_thesis.welda.{BaseWELDA, ReplacementWELDA}
 
 import scala.collection.mutable
 
-class TopicModelWriter(private val model: BaseWELDA) {
+class TopicModelWriter(private val model: ReplacementWELDA) {
 
     val params = model.p
 
@@ -139,6 +139,14 @@ class TopicModelWriter(private val model: BaseWELDA) {
         writer.close()
     }
 
+    def writeRuntime() = {
+        val endTime = System.currentTimeMillis()
+        val durationInSec = (endTime - model.startTime) / 1000
+        val writer = new BufferedWriter(new FileWriter(baseName + s".runtime"))
+        writer.write(durationInSec.toString)
+        writer.close()
+    }
+
     def write(it: Int) {
         val name = f"iteration-$it%03d"
         writeTopTopicalWords(name)
@@ -148,6 +156,7 @@ class TopicModelWriter(private val model: BaseWELDA) {
             writeTopicAssignments(name)
             writeTopicWordPros(name)
             writePercentageOfTopWords(name, docTopicMatrix)
+            writeRuntime()
         }
     }
 }

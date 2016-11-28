@@ -45,6 +45,8 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     var folder: String = _
 
+    var startTime: Long = -1L
+
     override def fileBaseName: String = s"$folder/welda"
 
     def getFolderName(): String
@@ -121,6 +123,8 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
             folderFile.mkdir()
             super.init()
         }
+
+        startTime = System.currentTimeMillis()
     }
 
     def initNearestNeighbourSearch(vocabulary: Array[String], pcaM: DenseMatrix[Double]): Unit = {

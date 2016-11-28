@@ -16,7 +16,8 @@ import scala.util.Random
 abstract class BaseWELDA(val p: Args) {
     val embeddingName = Paths.get(p.embeddingFileName).getFileName.toString
 
-    val writer = new TopicModelWriter(this)
+    // hacky, but needs to work for the last month
+    val writer = new TopicModelWriter(this.asInstanceOf[ReplacementWELDA])
 
     var alpha: Array[Double] = null
     var beta: Double = .0
