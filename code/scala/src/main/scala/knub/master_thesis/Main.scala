@@ -78,7 +78,7 @@ object Main {
             "welda-gaussian-mixture-lambdas-pca-samples",
             "welda-gaussian-mixture-nips-lambdas-pca-samples",
             "welda-gaussian-nips-topics-20",
-            "welda-gaussian-250-topics-nips",
+            "welda-gaussian-250-topics-20news",
             "welda-gaussian-random-fluctuations",
             "welda-gaussian-mixture-topics-20-nips-lambdas-pca-samples",
             "welda-gaussian-top", "welda-gaussian-mixture",
@@ -358,7 +358,7 @@ object Main {
                         numIterations = 1500
                     )
                 runCases(cases, 4, new GaussianWELDA(_))
-            case "welda-gaussian-250-topics-nips" =>
+            case "welda-gaussian-250-topics-20news" =>
                 val lambdas = List(0.0, 0.2, 0.3)
                 val cases = for (embedding <- embeddings; lambda <- lambdas)
                     yield args.copy(
