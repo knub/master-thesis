@@ -1773,6 +1773,7 @@ It seems that most of its predictive power stems from this training approach.
 In general, the F1 scores are higher for $K = 250$.
 This can be explained, because more features are available, and because the topic model can assign topic proportions on a more fine-grained level.
 However, the improvement is only a few percent for all models.
+% TODO: Gaussian LDA 250 add results and text!
 
 \begin{table}[]
   \ra{1.3}
@@ -1802,7 +1803,13 @@ However, the improvement is only a few percent for all models.
 We also tested all methods with embeddings, which were trained on the corpus itself.
 The results with the 50-dimensional \textsc{20News} embeddings are displayed in Table~\ref{table:document_classification_dim-50}.
 Interestingly, the predictive power of the embeddings is already much higher than before, even though these embeddings failed in the analogy reasoning benchmark (see Table~\ref{table:word_embeddings_performance}).
-The average vector of these embeddings is 78.0 \%.
+The F1 score of these embeddings when only taking the average vector of each document is already 78.0 \%.
+Also, all methods perform better with even without the average vector features compared to the 200-dimensional Wikipedia embeddings.
+
+Especially LFTM profits from the different embeddings.
+It is now able to surpass standard LDA for both $K = 50$ and $K = 250$, achieving the highest F1-score of 81.5 \% in all our document classification tests.
+It is worth to note, that the raw LFTM topic model features does not perform better than LDA, but only when adding the average vector.
+The observation regarding the number of topics is the same as before: $K = 250$ performs better than $K = 50$ for all models.
 
 
 \begin{table}[]
@@ -1837,12 +1844,50 @@ The average vector of these embeddings is 78.0 \%.
 As a summary, most methods are able to generate better topics,
 at the expense of loosing accuracy in a document classification task.
 
+Word Embeddings definitely help.
 
 
 % \section{Word similarity}
 
 
 \section{Runtime}
+
+In this section we present the running time of the different algorithms.
+Run time is not a crucial factor for topic models, as they are usually not executed in an online setting.
+Still, to gain an impression on the computational complexity of each model, we present their runtimes here.
+
+Experiments were conducted on a 32-core, Intel Xeon CPU E7-8837 @ 2.67GHz machine with 256 GB memory.
+While same techniques have parallelized implementations available, other's have not.
+This is why we ran all techniques with only a single core.
+
+We will now present the different implementations and also whether they can be parallelized.
+For LDA, we ran the implementation in Mallet~\cite{McCallum2002}, which implements the approach by Newman et al.~\cite{Newman2009} for distributed LDA.
+The LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
+The only step, which is parallelized is the optimization of the topic vector, which happens after each Gibbs sampling iteration.
+TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers an parallel implementation.
+WELDA is not parallelized, however a parallel implementation with the same ideas as Newman et al.~\cite{Newman2009} is possible.
+
+All methods were run until convergence.
+See the previous sections for details.
+
+\begin{table}[]
+  \centering
+  \caption{Runtimes of the different methods on the \textsc{20News} and \textsc{Nips} corpus.
+  Experiments were conducted with the 200-dimensional Wikipedia embeddings for \textsc{20News} (50-dimensional for Gaussian LDA) and the 50-dimensional corpus-specific embeddings for \textsc{Nips}.
+  }
+  \label{table:runtime}
+  \begin{tabular}{@{}lp{4cm}cc@{}}
+    \toprule
+                                        & Parallel implementation \newline available      & \textsc{20News} & \textsc{Nips}       \\ \midrule
+                 LDA                    & ~~~~~~~~~~~~~~~~\cmark                                 & xxxxx           & cccccccccc \\
+                 LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\
+                 TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 &                 & \\
+                 Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\
+                 WELDA                  & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+
 
 \chapter{Conclusion and future work}
 \section{Other notes}
