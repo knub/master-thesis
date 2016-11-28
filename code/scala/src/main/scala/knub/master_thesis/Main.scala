@@ -78,6 +78,7 @@ object Main {
             "welda-gaussian-mixture-lambdas-pca-samples",
             "welda-gaussian-mixture-nips-lambdas-pca-samples",
             "welda-gaussian-nips-topics-20",
+            "welda-gaussian-250-topics-nips",
             "welda-gaussian-random-fluctuations",
             "welda-gaussian-mixture-topics-20-nips-lambdas-pca-samples",
             "welda-gaussian-top", "welda-gaussian-mixture",
@@ -357,6 +358,16 @@ object Main {
                         numIterations = 1500
                     )
                 runCases(cases, 4, new GaussianWELDA(_))
+            case "welda-gaussian-250-topics-nips" =>
+                val lambdas = List(0.0, 0.2, 0.3)
+                val cases = for (embedding <- embeddings; lambda <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.250-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2
+                    )
+                runCases(cases, 20, new GaussianWELDA(_))
             case "welda-gaussian-background-topic" =>
                 val lambdas = List(0.2, 0.5)
                 val cases = for (embedding <- embeddings; lambda <- lambdas)
