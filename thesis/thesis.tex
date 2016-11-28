@@ -1575,6 +1575,17 @@ In this chapter, we will evaluate WELDA in comparison to TopicVec, Gaussian LDA,
 We will focus on two tasks: topic coherence and document classification.
 Before we start with these results, we will explain, which word embeddings we used, as this is an important decision for the algorithms.
 
+\section{Evaluation data sets}
+
+
+We removed everything before the abstract except the title
+
+
+For both corpora, we lowercased, removed stopwords.
+We also removed words, which did not occur in the embedding models.
+
+
+
 \section{Training word-embeddings}
 
 As the methods use word embeddings, we have to train such embeddings first.
@@ -1631,20 +1642,8 @@ This can also be explained by the fact, the both \textsc{20News} and \textsc{Nip
   \end{tabular}
 \end{table}
 
-% \begin{table}[]
-%   \centering
-%   \label{table:word_embeddings_performance}
-%   \begin{tabular}{ll}
-%   \hline
-%                                                                   & \textbf{Accuracy} \\ \hline
-%   \textbf{200 dimensions, trained on English Wikipedia}           & 56.5 \%           \\
-%   \textbf{50-dimensions, trained on 20-news corpus}               & 11.1 \%           \\
-%   \textbf{Embeddings published by Google, trained on Google News} & 74.3 \%
-%   \end{tabular}
-% \end{table}
-
-
 \section{Topic coherence}
+\label{sec:evaluation_topic_coherence}
 
 We will now evaluate topic coherence as described in Section~\ref{sec:topic_coherence} on all models.
 
@@ -1709,10 +1708,10 @@ All together, the corpus contains 11293 documents.
 As features, we took the document-topic matrix: this matrix contains the distribution of topics in each topic.
 Each row sums to one.
 The number of features is equal to the number of topics.
-We ran experiments for all approaches using $T = 50$ and $T = 250$.
+We ran experiments for all approaches using $K = 50$ and $K = 250$.
 
 For classification, we ran a three-fold stratified cross validation.
-In each fold, we used a linear \emph{l}-1 regularized SVM classifier, where we trained $T$ one-vs-rest classifiers.
+In each fold, we used a linear \emph{l}-1 regularized SVM classifier, where we trained $K$ one-vs-rest classifiers.
 The results for the different classes were macro-averaged.
 The results for the three folds were macro-averaged again.
 We will report this number in the tables in the following sections.
@@ -1729,22 +1728,26 @@ Depending on the word embeddings used (see Table~\ref{table:word_embeddings_perf
 \begin{itemize}
   \item
     \textbf{Standard LDA:}
+    We ran LDA with different values of $\alpha$ and $\beta$.
+    However, there is no influence of this parameters on the classification results.
+    We report the results for $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
   \item
     \textbf{TopicVec:}
     Contrary to the paper by Li et al.~\cite{Li2016}, we configured TopicVec to only learn one set of topics.
-    In their paper, they learn 14 topics separately on each classification category and then combine the, resulting in 280 topics.
-
+    In their paper, they learn 14 topics separately on each classification category and then combine them, resulting in 280 topics.
+    However, to allow a fair comparison, we 
     The learning rate was set to $\delta = 0.1$, as they reported in the paper.
     We used the parameters they reported in their paper, 
   \item
     \textbf{Mean of word embeddings:}
     As a baseline, we also 
   \item
-    \textbf{Mean of word embeddings:}
-    As a baseline, we also 
-  \item
     \textbf{WELDA:}
     WELDA with lambda = 0.3
+  \item
+    \textbf{LFTM:}
+    We report results for LFTM with $\lambda = 0.6$, as this yields the best document classification results according to the original paper.
+    We could confirm this in our experiments.
   \item
     \textbf{Gaussian LDA:}
     Compared to the other methods, Gaussian LDA had to be trained with 50-dimensional instead of 200-dimensional word embeddings trained on Wikipedia.
@@ -1774,7 +1777,7 @@ Depending on the word embeddings used (see Table~\ref{table:word_embeddings_perf
                       TopicVec + Avg. Emb.     & 74.2    & 73.1    & 72.1   && 74.3    & 73.4     & 72.5   \\
                       Gaussian LDA             & 41.6    & 43.4    & 40.5   && xxxx    & xxxx     & xxxx   \\
                       Gaussian LDA + Avg. Emb. & 72.7    & 72.3    & 71.8   && xxxx    & xxxx     & xxxx   \\
-                      WELDA                    & 62.1    & 61.3    & 61.0   && 64.9    & 64.6     & 64.3   \\
+                      WELDA                    & 62.1    & 61.3    & 61.0   && 67.1    & 64.8     & 65.1   \\
                       WELDA + Avg. Emb.        & 73.4    & 73.2    & 72.7   && 76.8    & 76.5     & 76.3   \\
   \bottomrule
   \end{tabular}
@@ -1820,12 +1823,11 @@ However, the improvement is only a few percent for all models.
                       TopicVec + Avg. Emb.     & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
                       Gaussian LDA             & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
                       Gaussian LDA + Avg. Emb. & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
-                      WELDA                    & 61.3    & 60.9    & 60.8   && 64.1    & 64.0     & 63.9   \\ % lambda = 0.3
-                      WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.1    & 79.6     & 79.4   \\
+                      WELDA                    & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
+                      WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
   \bottomrule
   \end{tabular}
 \end{table}
-
 
 We also tested all methods with embeddings, which were trained on the corpus itself.
 The results with the 50-dimensional \textsc{20News} embeddings are displayed in Table~\ref{table:document_classification_dim-50}.
@@ -1840,20 +1842,22 @@ It is worth to note, that the raw LFTM topic model features does not perform bet
 The order of the remaining methods is not different from before.
 The same holds for the number of topics: $K = 250$ performs better than $K = 50$ for all models.
 
+As a summary, using the word embeddings during the inference does not help to create better document representations.
+While most methods were able to generate better topics (see Section~\ref{sec:evaluation_topic_coherence}), this seems to come at the expense of loosing accuracy in document classification.
+However, in general, topic model features and word embedding features (in the form of the average vector) complement each other.
+Both features combined are always better than just one of the two models.
+Also, the fact that the average vector alone already has a high F1 score indicates, that word embeddings are well-suited for document classification in general.
+The approaches just seem to not be able to use the knowledge in the embedding space properly.
 
-
-
-
-
-As a summary, most methods are able to generate better topics,
-at the expense of loosing accuracy in a document classification task.
-
-Word Embeddings definitely help.
-
-
-% \section{Word similarity}
 \section{Word Intrusion Study}
 
+The \textsc{Nips} corpus is a with a narrow focus on 
+No general topic corpus.
+
+This is why we 
+according to the self-description
+
+Researchers and students familiar with these topics
 
 \section{Runtime}
 
@@ -1867,6 +1871,8 @@ This is why we ran all techniques with only a single core.
 
 We will now present the different implementations and also whether they can be parallelized.
 For LDA, we ran the implementation in Mallet~\cite{McCallum2002}, which implements the approach by Newman et al.~\cite{Newman2009} for distributed LDA.
+However, we will use only the single-threaded implementation.
+Mallet is the only highly optimized library in this benchmark.
 The LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
 The only step, which is parallelized is the optimization of the topic vector, which happens after each Gibbs sampling iteration.
 TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers an parallel implementation.
@@ -1887,11 +1893,12 @@ Of all methods, standard LDA is by far the fastest
   \begin{tabular}{@{}lp{4cm}cc@{}}
     \toprule
                                         & Parallel implementation \newline available      & \textsc{20News} & \textsc{Nips}       \\ \midrule
-                 LDA                    & ~~~~~~~~~~~~~~~~\cmark                                 & 6.3 min         & cccccccccc \\
+                 LDA                    & ~~~~~~~~~~~~~~~~\cmark                                 & 6.3 min         & 8.8 min \\ % 378 seconds, 527 seconds
                  LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\
                  TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 &                 & \\
                  Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\
-                 WELDA                  & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\ \bottomrule
+                 WELDA, $\lambda = 0.3$ & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\ \bottomrule
+                 % TODO: Adapt WELDA to  take best lambda
   \end{tabular}
 \end{table}
 
@@ -1899,6 +1906,7 @@ Of all methods, standard LDA is by far the fastest
 
 \chapter{Conclusion and future work}
 
+Document classification
 Topic specific replacement
 \section{Other notes}
 Concept categorization
