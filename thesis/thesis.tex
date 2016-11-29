@@ -124,6 +124,9 @@ Betreuung: Dr. Ralf Krestel}
 \cleardoublepage
 
 \include{abstract}
+% TODO: Remove
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
 \tableofcontents
 % \mainmatter
 
@@ -866,7 +869,7 @@ However, the method is not evaluated extensively and it is unclear, whether this
 % \end{itemize}
 
 
-\chapter{WELDA: Word embeddings in LDA}
+\chapter{WELDA -- Word embeddings in LDA}
 
 In this chapter we start with a series of experiments with word similarity calculations in topic models and embedding models, that motivate our newly-developed approach.
 We will then present our approach, which is based on re-sampling words using information from the word embedding models.
@@ -1296,13 +1299,129 @@ For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{\url{
 
 \chapter{WELDA Discussion}
 
+In this chapter, we will evaluate WELDA on two different tasks: topic coherence and document classification.
+We will explore different parameter settings for WELDA and determine good settings.
+Before we start with these results, we present our evaluation data sets.
+We will also explain, which word embeddings we used, as this is an important design decision for the topic models.
+
+\section{Data sets}
+
+We evaluated the different topic models on two well-known data sets: the \textsc{20News}\footnote{\url{http://qwone.com/~jason/20Newsgroups/}} and the \textsc{Nips}\footnote{\url{http://cs.nyu.edu/~roweis/data.html}}.
+See Table~\ref{table:data_sets} for an overview over these two corpora.
+\begin{table}[]
+  \ra{1.3}
+  \centering
+  \caption{Overview over the corpora we use for evaluation}
+  \label{table:data_sets}
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+                               & \textsc{20News} & \textsc{Nips}                \\ \midrule
+                               \# documents               & 11,295            & 1,740               \\
+                               \# words                   & 1,395,973         & 2,497,017           \\
+                               \# classes                 & 20                & \textit{no classes} \\
+                               vocabulary size            & 51,951            & 35,171              \\
+                               average words per document & 124               & 1,435               \\
+                               \bottomrule
+  \end{tabular}
+\end{table}
+\textsc{20News} is a collection of newsgroup posts from the early 1990s.
+The data was downloaded from different newsgroups and the name of the newsgroup is taken as the class label.
+There are twenty different classes, which are shown in Table~\ref{table:20news}.
+The \textsc{Nips} corpus is a collection of scientific papers from the proceedings of Neural Information Processing Systems.
+The papers focus on neural computation, learning theory, algorithms and architectures, cognitive science, information theory, neuroscience, vision, speech, control and diverse applications.
+We removed everything before the abstract except the title, as this part mostly contains names and email addresses.
+The same holds for the references, which we also removed.
+
+We chose these two data sets, because they represent two different type of corpora.
+The \textsc{20News} corpus is a general corpus, with a wide range of topics.
+The \textsc{Nips} corpus has a narrow focus with many technical terms.
+Many topics overlap each other.
+We will evaluate, which corpus type can benefit better from the external knowledge of word embeddings during the topic modelling.
+
+During topic model preprocessing, the entire corpus was lowercased and tokenized.
+A token was defined as a sequence of letters or punctuation characters not divided by a whitespace character.
+Trailing punctuation at the end of a token was removed.
+We then removed stop words, using the stop words list from the Python nltk~\cite{Bird2009} toolkit.
+The list contains 150 general English stop words.
+We also removed all words, which did not occur in the embedding models.
+With this preprocessing each document was represented as a bag-of-words, i.e. multiple occurrences of the same word were taken into account, but the order was discarded.
+
+We will evaluate topic coherence on both data sets.
+Document classification will be evaluated on \textsc{20News}, as \textsc{Nips} does not have classes.
+
+\begin{table}[h!]
+  \ra{1.1}
+  \centering
+  \caption{Classes in the \textsc{20News}~\cite{Rennie2008} data set. Some newsgroups are very closely related, while others are unrelated. The table groups similar newsgroups in the same cell. In parentheses, we also indicate the number of documents in each group.}
+  \label{table:20news}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \begin{tabular}[c]{@{}l@{}}comp.graphics (584)\\ comp.os.ms-windows.misc (572)\\ comp.sys.ibm.pc.hardware (590)\\ comp.sys.mac.hardware (578)\\ comp.windows.x (593)\end{tabular} & \begin{tabular}[c]{@{}l@{}}rec.autos (594)\\ rec.motorcycles (598)\\ rec.sport.baseball (597)\\ rec.sport.hockey (600)\end{tabular} & \begin{tabular}[c]{@{}l@{}}sci.crypt (595)\\ sci.electronics (591)\\ sci.med (594)\\ sci.space (593)\end{tabular}         \\ \hline
+      misc.forsale (585)                                                                                                                                        & \begin{tabular}[c]{@{}l@{}}talk.politics.misc (465)\\ talk.politics.guns (545)\\ talk.politics.mideast (564)\end{tabular}      & \begin{tabular}[c]{@{}l@{}}talk.religion.misc (377)\\ alt.atheism (480)\\ soc.religion.christian (598)\end{tabular} \\ \hline
+  \end{tabular}
+\end{table}
+
+\section{Training word-embeddings}
+
+As the methods use word embeddings, we have to train such embeddings first.
+We trained the embeddings on different corpora to see how that effects the results.
+
+We trained our own word embeddings using the gensim word2vec implementation by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
+We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
+During preprocessing, we split the corpora into sentences.
+Words were not lowercased and no stop words were removed, as both have been shown to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
+
+We trained 200-dimensional vectors on the English Wikipedia.
+We only considered article pages and then furthermore discarded disambiguation, lists and tables.
+Templates were not used.
+We also removed the headings, as they do not form a sentence usually.
+When training the Gaussian LDA model and the NSTM model, we did not achieve any results when training with the 200-dimensional model.
+Both authors confirmed this issue upon request \cite{Das2016, Saeedi2016}.
+That is why we also trained another set of Wikipedia embeddings with only 50 dimensions.
+Training took about four hours for both models.
+We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}, which were trained on about 100 billion words.
+
+All embeddings so far were external models, i.e. they were not trained on the corpus, which the topic model was inferred on.
+This is a good approach, if external information should be leaked into the model.
+However, it also makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
+The topic model corpora are usually much smaller, so the word embeddings will not have a good quality when assessed in a general way.
+However, they are optimized to the small topic model corpus, and we will evaluate, how good they work when assessed in the topic coherence and document classification tasks.
+
+To get an impression on the different word embedding models, we evaluated their performance using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
+Analogy reasoning is a standard benchmark for word embedding models.
+The task is to solve questions such as ``woman is to man as king is to \textless?\textgreater''.
+This questions can also be posed on a grammatical level, e.g. ``good is to best as bad is to \textless?\textgreater''.
+We used the question-set published by Mikolov et al.~\cite{Mikolov2013b}.
+Their set contains 8,869 semantic and 10,675 grammatical questions.
+We show the word embedding models we trained as well as their accuracy in the analogy reasoning task in Table~\ref{table:word_embeddings_performance}.
+Not surprisingly, the embeddings trained on the topic model corpora .
+This can also be explained by the fact, the both \textsc{20News} and \textsc{Nips} have a special focus.
+
+\begin{table}[]
+  \ra{1.3}
+  \centering
+  \caption{Comparison over the different word embeddings, which we trained for this work.
+  The last column indicates the performance in an analogy reasoning (AR) benchmark published by Mikolov et al.~\cite{Mikolov2013b}.
+  We also added the Google News embeddings, which were published by Google for comparison.}
+  \label{table:word_embeddings_performance}
+  \begin{tabular}{ccccc}
+    \toprule
+    \textbf{Data set} & \textbf{Dimensions} & \textbf{\# words} & \textbf{\# sentences} & \textbf{Accuracy AR} \\
+    \midrule
+    \textsc{English Wikipedia} & 200                 & 1,787,888,109     & 93,322,949            & 56.5 \%              \\
+    \textsc{English Wikipedia} & 50                  & 1,787,888,109     & 93,322,949            & 40.4 \%              \\
+    \textsc{20News}            & 50                  & 5,705,876         & 293,467               & 11.1 \%              \\
+    \textsc{Nips}              & 50                  & 4,973,427         & 212,400               & 10.1 \%              \\
+    \textsc{Google News}       & 300                 & 100 billion       & \textit{unknown}      & 74,3 \%              \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \section{Topic Coherence}
 \label{sec:topic_coherence}
 As discussed in Section~\ref{sec:evaluation_of_topic_models}, topic coherence is a standard task to evaluate topic models.
 In this section, we evaluate WELDA's design decisions with respect to topic coherence in several experiments.
 \subsection{Experiment setup}
-\subsubsection{Data Sets}
-We use two different corpora for topic modeling, the \textsc{20News} corpus and the \textsc{Nips} corpus.
 \subsubsection{Topic coherence evaluation}
 
 We will use topic coherence as a metric to evaluate the quality of our topics.
@@ -1398,17 +1517,6 @@ Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured 
   \label{table:best_worst_cv_topics}
 \end{table}
 
-\subsubsection{Preprocessing}
-
-For the topic models, the entire corpus was lowercased and tokenized.
-A token was each sequence of letter or punctuation characters not divided by a whitespace character.
-Trailing punctuation at the end of a token was removed.
-We then removed stop words, using the stop words list from the Python nltk~\cite{Bird2009} toolkit.
-The list contains 150 general English stop words.
-With this preprocessing each document was represented as a bag-of-words, i.e. multiple occurrences of the same word were taken into account.
-
-TODO: Word embeddings?
-
 
 \subsubsection{Standard LDA as baseline}
 As a baseline, we started with evaluating the topic coherence of the standard LDA algorithm.
@@ -1433,7 +1541,7 @@ We again choose $(\alpha=0.02, \beta=0.02)$ and start with a topic coherence bas
        \label{fig:standard_lda_alpha_beta}
 \end{figure}
 
-\subsection{Gaussian WELDA}
+\subsection{Results}
 
 We will start with the analysis of our basic algorithm, which uses a Gaussian distribution to estimate the topic-word distribution in the embedding space.
 Only then we will evaluate the more complex von Mises-Fisher distribution and the Gaussian mixtures.
@@ -1573,91 +1681,6 @@ We use the document-topic matrices.
 
 In this chapter, we will evaluate WELDA in comparison to TopicVec, Gaussian LDA, LFTM, NSTM and standard LDA.
 We will focus on two tasks: topic coherence and document classification.
-Before we start with these results, we will explain, which word embeddings we used, as this is an important decision for the algorithms.
-
-\section{Evaluation data sets}
-
-
-We removed everything before the abstract except the title
-
-
-For both corpora, we lowercased, removed stopwords.
-We also removed words, which did not occur in the embedding models.
-
-\begin{table}[]
-  \ra{1.3}
-  \centering
-  \caption{Overview over the corpora we use for evaluation}
-  \label{table:data_sets}
-  \begin{tabular}{@{}lrr@{}}
-    \toprule
-                               & \textsc{20News} & \textsc{Nips}                \\ \midrule
-                               \# documents               & 11,295            & 1,740               \\
-                               \# words                   & 1,395,973         & 2,497,017           \\
-                               \# classes                 & 20                & \textit{no classes} \\
-                               vocabulary size            & 51,951            & 35,171              \\
-                               average words per document & 124               & 1,435               \\
-                               \bottomrule
-  \end{tabular}
-\end{table}
-
-
-
-\section{Training word-embeddings}
-
-As the methods use word embeddings, we have to train such embeddings first.
-We trained the embeddings on different corpora to see how that effects the results.
-
-We trained our own word embeddings using the gensim word2vec implementation by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}, written in Python.
-We used skip-gram training, with a window size of five, negative sampling with ten noise words, and running training for twenty iterations.
-During preprocessing, we split the corpora into sentences.
-Words were not lowercased and no stop words were removed, as both have been shown to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
-
-We trained 200-dimensional vectors on the English Wikipedia.
-We only considered article pages and then furthermore discarded disambiguation, lists and tables.
-Templates were not used.
-We also removed the headings, as they do not form a sentence usually.
-When training the Gaussian LDA model and the NSTM model, we did not achieve any results when training with the 200-dimensional model.
-Both authors confirmed this issue upon request \cite{Das2016, Saeedi2016}.
-That is why we also trained another set of Wikipedia embeddings with only 50 dimensions.
-Training took about four hours for both models.
-We also compared to word embedding vectors published by Google\footnote{\url{https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing}}, which were trained on about 100 billion words.
-
-All embeddings so far were external models, i.e. they were not trained on the corpus, which the topic model was inferred on.
-This is a good approach, if external information should be leaked into the model.
-However, it also makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
-The topic model corpora are usually much smaller, so the word embeddings will not have a good quality when assessed in a general way.
-However, they are optimized to the small topic model corpus, and we will evaluate, how good they work when assessed in the topic coherence and document classification tasks.
-
-To get an impression on the different word embedding models, we evaluated their performance using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
-Analogy reasoning is a standard benchmark for word embedding models.
-The task is to solve questions such as ``woman is to man as king is to \textless?\textgreater''.
-This questions can also be posed on a grammatical level, e.g. ``good is to best as bad is to \textless?\textgreater''.
-We used the question-set published by Mikolov et al.~\cite{Mikolov2013b}.
-Their set contains 8,869 semantic and 10,675 grammatical questions.
-We show the word embedding models we trained as well as their accuracy in the analogy reasoning task in Table~\ref{table:word_embeddings_performance}.
-Not surprisingly, the embeddings trained on the topic model corpora .
-This can also be explained by the fact, the both \textsc{20News} and \textsc{Nips} have a special focus.
-
-\begin{table}[]
-  \ra{1.3}
-  \centering
-  \caption{Comparison over the different word embeddings, which we trained for this work.
-  The last column indicates the performance in an analogy reasoning (AR) benchmark published by Mikolov et al.~\cite{Mikolov2013b}.
-  We also added the Google News embeddings, which were published by Google for comparison.}
-  \label{table:word_embeddings_performance}
-  \begin{tabular}{ccccc}
-    \toprule
-    \textbf{Data set} & \textbf{Dimensions} & \textbf{\# words} & \textbf{\# sentences} & \textbf{Accuracy AR} \\
-    \midrule
-    \textsc{English Wikipedia} & 200                 & 1,787,888,109     & 93,322,949            & 56.5 \%              \\
-    \textsc{English Wikipedia} & 50                 & 1,787,888,109     & 93,322,949            & 40.4 \%              \\
-    \textsc{20News}   & 50                  & 5,705,876         & 293,467               & 11.1 \%              \\
-    \textsc{Nips}     & 50                  & 4,973,427         & 212,400               & 10.1 \%              \\
-    \textsc{Google News} & 300                 & 100 billion       & \textit{unknown}      & 74,3 \%              \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 \section{Topic coherence}
 \label{sec:evaluation_topic_coherence}
@@ -1702,24 +1725,6 @@ The information contained in the bag-of-words and exploited by LDA is still very
 \section{Document classification}
 
 To investigate the effects of the different word embedding-enhanced topic models on document classification, we conducted a series of experiments, which we will present in the next sections.
-
-\subsection{Data set}
-
-We again use the \textsc{20News} corpus.
-The corpus was collected from twenty different newsgroups, which are shown in Table~\ref{table:20news}.
-All together, the corpus contains 11293 documents.
-
-\begin{table}[h!]
-  \ra{1.1}
-  \centering
-  \caption{Classes in the \textsc{20News}~\cite{Rennie2008} data set. Some newsgroups are very closely related, while others are unrelated. The table groups similar newsgroups in the same cell. In parentheses, we also indicate the number of documents in each group.}
-  \label{table:20news}
-  \begin{tabular}{|l|l|l|}
-    \hline
-    \begin{tabular}[c]{@{}l@{}}comp.graphics (584)\\ comp.os.ms-windows.misc (572)\\ comp.sys.ibm.pc.hardware (590)\\ comp.sys.mac.hardware (578)\\ comp.windows.x (593)\end{tabular} & \begin{tabular}[c]{@{}l@{}}rec.autos (594)\\ rec.motorcycles (598)\\ rec.sport.baseball (597)\\ rec.sport.hockey (600)\end{tabular} & \begin{tabular}[c]{@{}l@{}}sci.crypt (595)\\ sci.electronics (591)\\ sci.med (594)\\ sci.space (593)\end{tabular}         \\ \hline
-      misc.forsale (585)                                                                                                                                        & \begin{tabular}[c]{@{}l@{}}talk.politics.misc (465)\\ talk.politics.guns (545)\\ talk.politics.mideast (564)\end{tabular}      & \begin{tabular}[c]{@{}l@{}}talk.religion.misc (377)\\ alt.atheism (480)\\ soc.religion.christian (598)\end{tabular} \\ \hline
-  \end{tabular}
-\end{table}
 
 \subsection{Setup}
 
@@ -1913,10 +1918,10 @@ Of all methods, standard LDA is by far the fastest
     \toprule
                                         & Parallel implementation \newline available      & \textsc{20News} & \textsc{Nips}       \\ \midrule
                  LDA                    & ~~~~~~~~~~~~~~~~\cmark                                 & 6.3 min         & 8.8 min \\ % 378 seconds, 527 seconds
-                 LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\
-                 TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 &                 & \\
-                 Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\
-                 WELDA, $\lambda = 0.3$ & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\ \bottomrule
+                 LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 & 61.2 h          & \\
+                 TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 & 178 min         & \\
+                 Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 & 14.1 h          & \\ % 50713 seconds
+                 WELDA, $\lambda = 0.3$ & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\ \bottomrule % 6371 sec lambda=1.0
                  % TODO: Adapt WELDA to  take best lambda
   \end{tabular}
 \end{table}
