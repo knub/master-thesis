@@ -1898,7 +1898,7 @@ Still, to gain an impression on the computational complexity of each model, we p
 
 Experiments were conducted on a 32-core, Intel Xeon CPU E7-8837 @ 2.67GHz machine with 256 GB memory.
 While same techniques have parallelized implementations available, other's have not.
-This is why we ran all techniques with only a single core.
+To ensure comparability, we ran all techniques with only a single core.
 
 We will now present the different implementations and also whether they can be parallelized.
 For LDA, we ran the implementation in Mallet~\cite{McCallum2002}, which implements the approach by Newman et al.~\cite{Newman2009} for distributed LDA.
@@ -1906,14 +1906,20 @@ However, we will use only the single-threaded implementation.
 Mallet is the only highly optimized library in this benchmark.
 The LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
 The only step, which is parallelized is the optimization of the topic vector, which happens after each Gibbs sampling iteration.
-TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers an parallel implementation.
-This relies on existing parallelization in linear algebra libraries, as TopicVec heavily relies on matrix operations.
+TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers an parallel implementation, which mostly relies on existing parallelization in linear algebra libraries, as TopicVec heavily works with matrix operations.
 Gaussian LDA\footnote{\url{https://github.com/rajarshd/Gaussian_LDA}} is not parallelized and no straightforward parallelization is possible.
 WELDA is not parallelized, however a parallel implementation with the same ideas as Newman et al.~\cite{Newman2009} is possible.
 
 All methods were run until convergence.
 See the previous sections for details.
-Of all methods, standard LDA is by far the fastest
+Of all methods, standard LDA is by far the fastest.
+The next best method is WELDA, but it is already slower by a factor of ten.
+Note that especially WELDA's performance largely depends on the resampling probability $\lambda$.
+The higher $\lambda$, the more new words are sample, which leads to more nearest-neighbour searches.
+The nearest-neighbour search is the most expensive operation, hence it dominates the runtime.
+We illustrate this dependency in Figure~\ref{fig:welda_lambda_runtime}.
+Still, even with $\lambda = 1.0$ the runtime of WELDA is 164 min, which is still faster than the next-fastest TopicVec.
+Especially LFTM is very slow, making it infeasible to run on larger corpora.
 
 \begin{table}[]
   \ra{1.2}
@@ -1929,10 +1935,16 @@ Of all methods, standard LDA is by far the fastest
                  LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 & 61.2 h          & \\
                  TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 & 178 min         & \\
                  Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 & 14.1 h          & \\ % 50713 seconds
-                 WELDA, $\lambda = 0.3$ & ~~~~~~~~~~~~~~~~\xmark                                 &                 & \\ \bottomrule % 6371 sec lambda=1.0
-                 % TODO: Adapt WELDA to  take best lambda
+                 WELDA, $\lambda = 0.3$ & ~~~~~~~~~~~~~~~~\xmark                                 & 67 min          & \\ \bottomrule % 4027 sec,
   \end{tabular}
 \end{table}
+
+\begin{figure}
+       \centering
+       \includegraphics[width=0.9\textwidth]{figures/welda_lambda_runtime.png}
+       \caption{Runtime of WELDA depending on the resampling parameter $\lambda$.}
+       \label{fig:welda_lambda_runtime}
+\end{figure}
 
 
 
