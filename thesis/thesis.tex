@@ -32,6 +32,12 @@
 \usepackage{graphicx}             % Graphiken einbinden
 \usepackage{makecell}
 \usepackage{soul}
+\usepackage{ulem, xpatch}
+\xpatchcmd{\sout}
+  {\bgroup}
+    {\bgroup\def\ULthickness{1.1pt}}
+      {}{}
+
 \graphicspath{{./figures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{rotating}
@@ -395,7 +401,7 @@ In this thesis, we will use two particularly fast and robust implementations:
 \label{sec:evaluation_of_topic_models}
 As topic modeling is an unsupervised learning technique, there is no straightforward evaluation metric available as in supervised tasks.
 The output of a topic model, the document-topic matrix and the topic-word matrix, do not lend themselves to a quantitative evaluation either.
-Still, with many different topic modeling techniques available and hyperparameters to set, there is a need to compare topic models and to be able to choose the best topic.
+Still, with many different topic modeling techniques available and hyperparameters to set, there is a need to compare topic models and to be able to choose the best model.
 
 Traditionally, topic models were evaluated using held-out likelihood of unseen documents.
 In this approach, a topic model was trained on a corpus.
@@ -416,14 +422,14 @@ On the contrary, an example for a bad topic is:
 The topic contains very general words, no clear common theme is recognizable.
 This topic is not useful for a human trying to understand a document collection.
 
-Boyd-Graber et al.~\cite{Boyd-graber2014} et al. identify different types of bad topics:
+Boyd-Graber et al.~\cite{Boyd-graber2014} identify different types of bad topics:
 \begin{itemize}
   \item
     \textbf{Too general topics}: As a rule of thumb, words which occur more often do not add much meaning to a document.
     At the extreme, there are stop words such as ``and'', ``the'', ``of'', etc., which do not provide value in terms of a good topic.
     Topics therefore should not contain too many general words, as in the following example:
     \topicboxList{would one writes like think article know get time people}
-    On the contrary, topics should also not contain words, which occur only once or twice in the entire corpus.
+    On the contrary, topics should also not contain words, which occur only once or twice in the entire corpus, because these words do not represent the documents.
   \item
     \textbf{Mixed topics}: A mixed topic is a topic, which contains two topics.
     An example is the following topic, which mixes a ``automobile'' topic with an ``energy'' topic:
@@ -441,13 +447,13 @@ Boyd-Graber et al.~\cite{Boyd-graber2014} et al. identify different types of bad
 \end{itemize}
 
 Topic coherence can be evaluated by humans.
-Given the top words of a topic, human annotators can rate the topic on a three-point Likert scale 1-3 as either ``useless'', ``average'', or useful~\cite{Aletras2013}.
+Given the top words of a topic, human annotators can rate the topic on a three-point Likert scale 1-3 as either ``useless'', ``average'', or ``useful''~\cite{Aletras2013}.
 Averaging the annotations from several annotators yields the gold standard for the topic coherence of a set of words.
 However, this an extensive and time-consuming approach in itself, and then needs to be done again for every new topic model with its own new topics.
 
 The goal of a automatic topic coherence metric is to capture the usefulness of a topic for a human user automatically without depending on human annotators.
 The base idea for such a automatic measure was introduced by Newman et al.~\cite{Newman2010}.
-Just as human annotators, an automatic measure outputs a number indicating the coherence of given topic.
+Just as human annotators, an automatic measure outputs a number indicating the coherence of a given topic.
 Usually this yields a value between zero and one.
 The best automatic topic coherence measure is then that measure, which has the highest correlation with human ratings.
 Correlation is measured using Pearson's correlation.
@@ -1317,7 +1323,7 @@ The initial LDA is run with Mallet~\cite{McCallum2002}.
 The word vectors are trained using gensim~\cite{Rehurek2010}.
 For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{\url{https://deeplearning4j.org/}} library.
 
-\chapter{WELDA Discussion}
+\chapter{WELDA discussion}
 
 In this chapter, we will evaluate WELDA on two different tasks: topic coherence and document classification.
 We will explore different parameter settings for WELDA and determine good settings.
@@ -1643,24 +1649,26 @@ This is only an improvement of $0.039$ over the baseline value.
 % TODO: Nips
 We illustrate the change of topics in \textsc{Nips} and \textsc{20News} in Table~\ref{table:topic_development}.
 \begin{table}[]
+  \ra{1.15}
   \centering
   \caption{Topic evolution from standard LDA to Gaussian WELDA after 200 iterations. The crossed out words were in the original top ten words of LDA, but are not in the top topic words after WELDA. The bold words are the new words. The top three topics are from the \textsc{20News} corpus, the lower three from the \textsc{Nips} corpus. The examples clearly show WELDA's capability to add specific, meaningful words in the top words, while at the same time removing overly general words.}
   \label{table:topic_development}
   \begin{tabular}{p{13.5cm}}
-    \hline
-    god \st{believe} \st{one} evidence religion \st{people} argument exist \st{question} atheists \textbf{faith belief existence life} \\
-    \hline
-    year players baseball \st{article} \st{good} \st{writes} lopez \st{jewish} league average \textbf{hit braves season hitter} \\
-    \hline
-    information list mail \st{may} internet send anonymous \st{faq} email \st{use} \textbf{system available privacy} \\
-    \hline
-    \hline
-    speech recognition speaker gamma acoustic phoneme \st{time} vowel \st{information} speakers \textbf{spectral phonetic} \\
-    \hline
-    bayesian gaussian distribution prior posterior \st{data} \st{using} evidence \st{mean} \st{sampling} \textbf{random covariance monte carlo} \\
-    \hline
-    kernel algorithm vector support loss margin \st{set} \st{function} linear examples \textbf{svm boosting} \\
-    \hline
+    \toprule
+    % \hline
+    god \sout{believe} \sout{one} evidence religion \sout{people} argument exist \sout{question} atheists \textbf{faith belief existence life} \\
+    % \midrule
+    year players baseball \sout{article} \sout{good} \sout{writes} lopez \sout{jewish} league average \textbf{hit braves season hitter} \\
+    % \hline
+    % \midrule
+    information list mail \sout{may} internet send anonymous \sout{faq} email \sout{use} \textbf{system available privacy} \\
+    % \midrule
+    \midrule
+    speech recognition speaker gamma acoustic phoneme \sout{time} vowel \sout{information} speakers \textbf{spectral phonetic} \\
+    bayesian gaussian distribution prior posterior \sout{data} \sout{using} evidence \sout{mean} \sout{sampling} \textbf{random covariance monte carlo} \\
+    kernel algorithm vector support loss margin \sout{set} \sout{function} linear examples \textbf{svm boosting} \\
+    \bottomrule
+    % \hline
   \end{tabular}
 \end{table}
 
