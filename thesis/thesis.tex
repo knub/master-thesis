@@ -1729,8 +1729,8 @@ For one search word, the search word is always in the output, as the similarity 
 
 As search words, we took the top topic words of a standard LDA run with $iterations=1500, \alpha=0.02, \beta=0.02$.
 We experimented with two cases: only taking the top word and taking the average of all top ten words.
-For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is: \\
-\hspace*{0cm} \framebox[1.03\width]{game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer} \\
+For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is:
+\topicbox{\noindent game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer}
 
 We show the results in Table~\ref{table:raw_we_tm}.
 The results are worse than running LDA, thus showing the only taking word embeddings is not enough.
