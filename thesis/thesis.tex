@@ -26,7 +26,7 @@
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
 \newcommand{\specialcell}[2][c]{%
-         \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
 \usepackage{textcomp,amsmath}     % Mathezeichen etc.
 \usepackage{graphicx}             % Graphiken einbinden
@@ -51,6 +51,25 @@
 \usepackage{tabulary}
 \usepackage{multicol}
 \usepackage{multirow}
+% \usepackage{tcolorbox}% http://ctan.org/pkg/tcolorbox
+\usepackage{framed}
+\newcommand{\topicbox}[1]{
+  \setlength{\OuterFrameSep}{0pt}
+  \begin{framed}
+    #1
+  \end{framed}
+}
+\newcommand{\topicboxList}[1]{
+  \setlength{\OuterFrameSep}{0pt}
+  \newline
+  \begin{minipage}{\linewidth}
+    \vspace{6pt}
+    \begin{framed}
+      #1
+    \end{framed}
+    \vspace{6pt}
+  \end{minipage}
+}
 \usepackage{listings}
 \usepackage[toc,page]{appendix}
 \usepackage{hyperref}
@@ -388,12 +407,12 @@ Thus, another topic model evaluation measure was necessary.
 The idea of \emph{topic coherence} is to measure topic models based on the top words of all of its topics.
 This corresponds to the way, that humans interact with topic models mostly: by looking at the top words in a topic and mentally assigning an umbrella term to a topic.
 Thus, topic coherence measures, how well the top-words in the topics belong together and form a common theme.
-A good topic (examples taken from \cite{Boyd-graber2014}) is: \\
-\hspace*{1cm} \framebox[1.1\width]{trout fish fly fishing water angler stream rod flies salmon} \\
-The words in topic clearly form a narrow topic, all words belong to the common ``fishing'' theme.
+A good topic (examples taken from \cite{Boyd-graber2014}) is: \topicbox{trout fish fly fishing water angler stream rod flies salmon}
+% \hspace*{1cm} \framebox[1.1\width]{trout fish fly fishing water angler stream rod flies salmon} \\
+The words in the topic clearly form a narrow topic, all words belong to the common ``fishing'' theme.
 One can easily imagine a document, which contains all of these words.
-On the contrary, an example for a bad topic is: \\
-\hspace*{1cm} \framebox[1.1\width]{notion sense choice situation idea natural explictly explicit definition refer} \\
+On the contrary, an example for a bad topic is:
+\topicbox{notion sense choice situation idea natural explictly explicit definition refer}
 The topic contains very general words, no clear common theme is recognizable.
 This topic is not useful for a human trying to understand a document collection.
 
@@ -402,24 +421,23 @@ Boyd-Graber et al.~\cite{Boyd-graber2014} et al. identify different types of bad
   \item
     \textbf{Too general topics}: As a rule of thumb, words which occur more often do not add much meaning to a document.
     At the extreme, there are stop words such as ``and'', ``the'', ``of'', etc., which do not provide value in terms of a good topic.
-    Topics therefore should not contain too many general words, as in the following example: \\
-    \hspace*{0cm} \framebox[1.1\width]{would one writes like think article know get time people} \\
+    Topics therefore should not contain too many general words, as in the following example:
+    \topicboxList{would one writes like think article know get time people}
     On the contrary, topics should also not contain words, which occur only once or twice in the entire corpus.
   \item
-    \textbf{Mixed topics}: A mixed topic is a topic, which contains two topics. \\
-    An example is the following topic \\
-    \hspace*{0cm} \framebox[1.1\width]{cars engine speed oil water power air light}, \\
-    which mixes a ``automobile'' topic with a ``energy'' topic.
+    \textbf{Mixed topics}: A mixed topic is a topic, which contains two topics.
+    An example is the following topic, which mixes a ``automobile'' topic with an ``energy'' topic:
+    \topicboxList{cars engine speed oil water power air light}
   \item
     \textbf{Chained topics}: Chained topics are similar to mixed topics, in that they contain two topics.
     They also contain a word with several meanings, which occurs in both topics, thus creating an anchor point and an explanation, why the two topics occur together.
-    In the following bad topic, the word ``windows'' constitutes such a word: \\
-    \hspace*{0cm} \framebox[1.1\width]{file folder dos windows door house built}
+    In the following bad topic, the word ``windows'' constitutes such a word:
+    \topicboxList{file folder dos windows door house built}
   \item
     \textbf{Nonsensical topics}:
     Topics, which are not interpretable at all, because they contain uncommon words.
-    This often happens, because of preprocessing errors leaving fragments in the text: \\
-    \hspace*{0cm} \framebox[1.1\width]{max giz air uww fyn tct ahf fpl vmk pmf}
+    This often happens, because of preprocessing errors leaving fragments in the text:
+    \topicboxList{max giz air uww fyn tct ahf fpl vmk pmf}
 \end{itemize}
 
 Topic coherence can be evaluated by humans.
@@ -1074,7 +1092,7 @@ There are several configurable parameters in the algorithm, which we will detail
   \item \textbf{Number of top words for distribution estimation $N_{top}$} (Algorithm~\ref{alg:welda_parameter_estimation}, line 3):
     We are using the top words of each topic to estimate the distributions.
     Usually only the first words of a topic share a common theme.
-    Unless mentioned otherwise, we typically run with $N_{top} = 20$.
+    % Unless mentioned otherwise, we typically run with $N_{top} = 20$.
     % TODO: Number of top words vs. topic coherence.
   \item \textbf{Number of dimensions for dimensionality reduction $N_{pca}$} (Algorithm~\ref{alg:welda_init}, line 5):
     Before estimating the multivariate distribution in the embedding space, we project the high-dimensional embedding space to a lower space.
@@ -1082,7 +1100,7 @@ There are several configurable parameters in the algorithm, which we will detail
     The lower the final dimension number, the less words we need for estimating the distribution.
     Less words means, that we can only use the really good top words in a topic, and not the later ones.
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
-    Unless mentioned otherwise, we typically run with $N_{pca} = 10$.
+    % Unless mentioned otherwise, we typically run with $N_{pca} = 10$.
   \item \textbf{Dimensionality reduction method} (Algorithm~\ref{alg:welda_init}, line 5):
     We use principal component analysis (PCA) to reduce the number of dimensions while maximizing the variance for all remaining dimensions.
   \item \textbf{Distance function for the nearest neighbour search} (Algorithm~\ref{alg:welda_init}, line 6):
@@ -1279,10 +1297,12 @@ We will test this hypothesis in the evaluation section.
 Normally, we run standard LDA before we start with WELDA algorithm for further topic refining.
 This is because the topic distributions are estimated on the top words of each topic.
 If we run WELDA from the first iteration, with topics assigned randomly and uniformly before the first iteration, the distributions are not well spread over the embedding space.
-For example, here are the top ten words of the three most-occurring topics after random initialization: \\
-\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
-\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article like people get know also use} \\
-\hspace*{0cm} \framebox[0.8\textwidth]{would one writes article people like max know also think} \\
+For example, here are the top ten words of the three most-occurring topics after random initialization:
+\topicbox{
+  would one writes article like people get know also use \par
+  would one writes article like people get know also use \par
+  would one writes article people like max know also think
+}
 
 These are the words the distributions are estimated on.
 Consequently, the topic means and covariance matrices in the embedding space are very similar.
@@ -1503,16 +1523,17 @@ Again, we use arithmetic mean here.
 We directly use the author's implementation of $C_V$ in their Palmetto\footnote{\url{https://github.com/AKSW/Palmetto}} topic quality measuring toolkit.
 Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured by $C_V$ in the \textsc{20News} corpus.
 \begin{table}[]
+  \ra{1.15}
   \centering
   \caption{Best and worst topics in our best topic model on the \textsc{20News}-corpus with 50 topics according to $C_V$}
   \begin{tabular}{ll}
-  \hline
-  $\mathbf{C_V}$ & \textbf{Top words} \\ \hline
+  \toprule
+  $\mathbf{C_V}$ & \textbf{Top words} \\ \midrule
   0.79               & god, faith, moral, morality, truth, christians, religion, atheists, belief, bible \\
   0.76               & team, hockey, players, season, game, nhl, league, teams, games, play \\
   ...                &                    \\
   0.33               & good, find, figuring, exciting, sure, things, anybody, mistake, hopefully, decent \\
-  0.30               & radar, detector, realizing, saturn, make, insurance, car, detectors, dealer, weight \\ \hline
+  0.30               & radar, detector, realizing, saturn, make, insurance, car, detectors, dealer, weight \\ \bottomrule
   \end{tabular}
   \label{table:best_worst_cv_topics}
 \end{table}
