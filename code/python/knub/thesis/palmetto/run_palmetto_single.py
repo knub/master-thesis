@@ -109,7 +109,7 @@ def main():
         print "ERROR: file <%s> does not exist" % str(args.topic_file)
         sys.exit(1)
 
-    best_ks = range(10)
+    best_ks = range(10, 100)
     if args.threads == 1:
         for r in best_ks:
             calculate_line(r, args.topic_file)
