@@ -1622,6 +1622,7 @@ Also see Section~\ref{sec:raw_tm_we}, where we experiment with a topic model sol
 All the other $\lambda$ parameters follow a clearly rising trend.
 Around iteration $140$, the values tend to reach their optimum and stay there except some random fluctuations.
 The best topic coherence value is reached with $\lambda_{act} = 0.47$ with a topic coherence of $47.4$.
+Topic coherence values less than or greater than this $\lambda_{act}$ lead to worse topic coherence.
 It seems and the Gibbs sampling gets stuck in a local optimum.
 Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
 This is an improvement of $0.051$ over the baseline value.
