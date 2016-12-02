@@ -1563,7 +1563,7 @@ We also used this to determine good values for the LDA parameters $\alpha$ and $
 We ran a grid search using $[0.002, 0.005, 0.01, 0.02, 0.05]$ as possible values for $\alpha$ and $[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]$ as possible values for $\beta$.
 Interestingly, there is no clear trend visible.
 The best topic coherence results were achieved with $(\alpha=0.01,\beta=0.02)$, $(\alpha=0.005,\beta=0.005)$, and $(\alpha=0.02,\beta=0.1)$.
-However, all results were in a very close range, with a standard deviation of all results of $0.006$, indicating no relationship between $\alpha$, $\beta$ and the topic coherence.
+However, all results were in a very close range, with a standard deviation of all results of $0.6$, indicating no relationship between $\alpha$, $\beta$ and the topic coherence.
 This impression is further strengthened by Figure~\ref{fig:standard_lda_alpha_beta}, where we plot the average TC coherence for a fixed $\alpha$ respectively $\beta$.
 Again, no trend is recognizable.
 Because of this, we base our following experiments on the values $\alpha = \beta = 1/K = 0.02$.
@@ -1571,7 +1571,7 @@ The baseline topic coherence score for this is $TC = 41.9$.
 We show the development of topic coherence through the Gibbs sampling iterations in Figure~\ref{fig:lda_20news_tc_development}.
 
 The results are similar for the \textsc{Nips} corpus.
-We again choose $\alpha = \beta = 0.02)$ and start with a topic coherence baseline of $TC = 40.6$.
+We again choose $\alpha = \beta = 0.02$ and start with a topic coherence baseline of $TC = 40.6$.
 
 \begin{figure}
        \centering
@@ -1605,22 +1605,23 @@ The $\lambda_{act}$ values are slightly higher than the original $\lambda$ value
        \caption{Topic coherence development for Gaussian WELDA and \textsc{20News} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
        \label{fig:welda_gaussian_lambda_20news}
 \end{figure}
-% TODO: Mention plots are scaled by 100.
 
+Due to the random component in LDA, we ran all experiments five times and averaged the results in the following experiments.
 We start with the analysis of with the topic models using the embeddings trained on the \textsc{20News} corpus.
 The results are plotted in Figure~\ref{fig:welda_gaussian_lambda_20news}.
+All runs start with the same value $TC = 41.9$ at iteration 0, because the models are initialized with the topic assignments from LDA.
 There are several interesting observations in the plot.
-First, with $\lambda = 0.0$ the topic coherence does not change beyond random fluctuations.
-This is expected, as WELDA with no replacement corresponds to standard LDA, where we observed the same topic coherence values around $42.5$.
-However, the same bad topic coherence values can be observered when $\lambda = 1.0$, i.e. when all words are replaced.
+First, the topic coherence does not change beyond random fluctuations with $\lambda = 0.0$.
+This is expected, as WELDA with no replacement corresponds to standard LDA, where we observed the same topic coherence values.
+However, the same bad topic coherence values can be observed when $\lambda = 1.0$, i.e. when all words are replaced.
 This indicates, that just relying on the word embeddings to achieve good topics and completely disregarding the standard LDA structure, does not work.
 Intuitively, when all words are resampled, the means of the topics roughly stay the same after each iteration, as no knowledge from the text is incorporated into the model anymore.
 This results in roughly constant values for $\lambda = 1.0$.
+Also see Section~\ref{sec:raw_tm_we}, where we experiment with a topic model solely based on word embeddings.
 
-All the other $\lambda$ parameters from $0.1$ to $0.9$ follow a clearly rising trend.
+All the other $\lambda$ parameters follow a clearly rising trend.
 Around iteration $140$, the values tend to reach their optimum and stay there except some random fluctuations.
-There is no clear correlation between $\lambda$ and the topic coherence recognizable.
-The best values are reached with $\lambda = 0.73$ with a topic coherence of $0.474$, however the second best results are reached by a comparatively low $\lambda = 0.2$ and topic coherence of $0.470$.
+The best topic coherence value is reached with $\lambda_{act} = 0.47$ with a topic coherence of $47.4$.
 It seems and the Gibbs sampling gets stuck in a local optimum.
 Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
 This is an improvement of $0.051$ over the baseline value.
@@ -1717,6 +1718,7 @@ We will focus on two tasks: topic coherence and document classification.
 We will now evaluate topic coherence as described in Section~\ref{sec:topic_coherence} on all models.
 
 \subsection{Raw word-embedding topic model}
+\label{sec:raw_tm_we}
 As a baseline, we start with a topic model solely based on the word-similarity in the embedding space.
 This way, we see whether using the most similar words for a given word already yields good topics, or whether standard LDA is still important for creating good topics.
 
@@ -1988,8 +1990,10 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
 \clearpage
 % \printbibliography
 
-% \begin{appendices}
-% \end{appendices}
+\begin{appendices}
+\chapter{Plots}
+
+\end{appendices}
 
 %\include{chapters/eigenstaendigkeit}
 \end{document}
