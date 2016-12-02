@@ -78,16 +78,23 @@ def calculate_topic_coherences(f, best_k):
 
 
 def calculate_line(best_k, topic_file):
-    params_str = "\t".join(parse_params(topic_file).values())
-    topic_coherences = calculate_topic_coherences(topic_file, best_k)
-    if params_str:
-        line = "%d\t%.3f\t%.3f" % (best_k, np.mean(topic_coherences), np.std(topic_coherences))
-        print line
-        return line
-    else:
-        line = "%d\t%.3f\t%.3f" % (best_k, np.mean(topic_coherences), np.std(topic_coherences))
-        print line
-        return line
+    try:
+        params_str = "\t".join(parse_params(topic_file).values())
+        topic_coherences = calculate_topic_coherences(topic_file, best_k)
+        if params_str:
+            line = "%d\t%.3f\t%.3f" % (best_k, np.mean(topic_coherences), np.std(topic_coherences))
+            print line
+            return line
+        else:
+            line = "%d\t%.3f\t%.3f" % (best_k, np.mean(topic_coherences), np.std(topic_coherences))
+            print line
+            return line
+    except:
+        import traceback
+        print "Error with %s and %s" % (str(best_k, topic_file))
+        traceback.print_exc()
+        traceback.print_stack()
+
 
 
 def main():
