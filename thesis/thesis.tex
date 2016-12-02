@@ -33,6 +33,7 @@
 \usepackage{makecell}
 \usepackage{soul}
 \usepackage{ulem, xpatch}
+\normalem
 \xpatchcmd{\sout}
   {\bgroup}
     {\bgroup\def\ULthickness{1.1pt}}
@@ -155,6 +156,7 @@ Betreuung: Dr. Ralf Krestel}
 \tableofcontents
 % \mainmatter
 
+% TODO: Mention somewhere, that we take the last alpha beta values from Mallet
 \chapter{Introduction}
 % \begin{algorithm}
 %   \caption{Gibbs sampling in LDA}
@@ -1279,9 +1281,9 @@ Indeed, if we look at the top words in the background topic in the \textsc{20New
 would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
 }
 
-We treat the top words in the background topic specially.
+We treat the thirty top words in the background topic specially.
 Whenever one of these words occurs, we always resample the word, even if the coin toss in the WELDA algorithm failed.
-Note that we keep this list fixed.
+Note that we keep this list fixed during the WELDA iterations.
 The background topic changes quickly due to this approach and a more concrete topic emerges.
 Due to this adapted sampling technique, we differentiate between $\lambda$ and $\lambda_{act}$ in experiments.
 The former is the $\lambda$ the algorithm was configured with.
@@ -1683,24 +1685,32 @@ For both corpora, we picked the best model from above and compared it to standar
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
 \subsubsection{Influence of the background topic}
 
+We will now analyze the influence of the background topic.
+
+
+
+When running without the background topic, the $\lambda$ is equal to $\lambda_{act}$, as we do not replace words from the background topic.
+To ensure the results are not influenced by different $\lambda_{act}$ values, we set 
 This confirms both facts, that we hypothesized in Section~\ref{sec:background_topic}:
 WELDA reaches similar topic coherence values without background word sampling, and the fact, that it speeds up the process.
+After same experiments, we found $\lambda = 0.10$ and $\lambda = 0.45$.
+
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_background_topic.png}
+       \caption{Comparison of WELDA with and without background topic}
+       \label{fig:welda_gaussian_background_topic}
+\end{figure}
+
 \subsubsection{Running LDA as a prerequisite}
 This initial setup has a topic coherence value of $TC = 0.311$.
 
-After same experiments, we set $\lambda = $
+
 
 TODO: Introduction text
 To prove this thought experiment, we run WELDA with randomly initialized topics for $1500$ iterations on the \textsc{20News} corpus with $\lambda = 0.2$ and $\lambda = 0.5$.
 The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
 As expected, TODO
-
-% \begin{figure}
-%        \centering
-%        \includegraphics[width=\textwidth]{figures/standard_lda_alpha_beta.png}
-%        \caption{TODO.}
-%        \label{fig:standard_lda_as_prerequisite}
-% \end{figure}
 
 
 
@@ -2017,7 +2027,7 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
 \section{WELDA discussion}
 \subsection{Experiments with different $\lambda$ values on the NIPS corpus.}
 \label{sec:appendix_nips_lambda}
-  \begin{figure}[H]
+\begin{figure}[H]
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_50.png}
        \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings}
