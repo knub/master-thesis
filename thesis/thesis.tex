@@ -1247,6 +1247,7 @@ We discard all words that we cannot match in this way.
 \end{algorithm}
 
 \subsection{Background topic for corpus-specific stop words}
+\label{sec:background_topic}
 To speed up the topic improvement process, we detect corpus-specific stop words in addition to the general English-language stop words we use (see Section~\ref{sec:data_sets}).
 We detect this stop words automatically during the initial LDA Gibbs sampling.
 Instead of using a symmetric Dirichlet $\alpha$ prior for all topics, we multiply the $\alpha_0$ prior by a factor $\alpha_0^{boost}$.
@@ -1620,33 +1621,45 @@ This results in roughly constant values for $\lambda = 1.0$.
 Also see Section~\ref{sec:raw_tm_we}, where we experiment with a topic model solely based on word embeddings.
 
 All the other $\lambda$ parameters follow a clearly rising trend.
-Around iteration $140$, the values tend to reach their optimum and stay there except some random fluctuations.
+Especially the huge improvement from $\lambda_{act} = 0.0$ to $\lambda_{act} = 0.29$ shows, that the base idea of resampling words during the Gibbs sampling works.
+The values tend to reach their optimum around iteration $140$ and stay there except some random fluctuations.
 The best topic coherence value is reached with $\lambda_{act} = 0.47$ with a topic coherence of $47.4$.
-Topic coherence values less than or greater than this $\lambda_{act}$ lead to worse topic coherence.
-It seems and the Gibbs sampling gets stuck in a local optimum.
-Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
-This is an improvement of $0.051$ over the baseline value.
+Topic coherence values less than or greater than this $\lambda_{act}$ lead to worse topic coherence, which indicates that this value achieves a good balance between topic model and word embeddings.
+All together, this is an improvement of $5.1$ over the baseline value.
 
 We now present the results for running with the embeddings trained on Wikipedia.
 Interestingly, the topic coherence values are lower on average when using this embeddings.
 This goes against the intuition, because topic coherence is evaluated using Wikipedia as a reference corpus.
 One would expect, that knowledge from the Wikipedia corpus leaks into the topics during resampling, and thus leads to better topic models.
 However, this is not the case.
-The observations for $\lambda = 0.0$ and $\lambda = 1.0$ are the same as above.
-However, here also $\lambda = 0.8$ and $\lambda = 0.9$ are significantly worse than the rest.
+The observations for $\lambda_{act} = 0.0$ and $\lambda_{act} = 1.0$ are the same as above.
+However, the same phanomenon as for $\lambda_{act} = 1.0$ here also occurs already for $\lambda_{act} = 0.82$.
 The reason for this is the same as above: resampling too often throws away the corpus and just operates on the embeddings.
-The best results with this embeddings is only $0.458$ as compared to $0.474$ with the other embeddings.
-This is only an improvement of $0.039$ over the baseline value.
-We illustrate the change of topics in \textsc{Nips} and \textsc{20News} in Table~\ref{table:topic_development}.
+The best results with this embeddings is only $45.8$ as compared to $47.4$ with the other embeddings.
+This is only an improvement of $3.9$ over the baseline value.
 
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_lambda_200.png}
-       \caption{Topic coherence development for Gaussian WELDA and \textsc{Wikipedia} as embedding corpus. Topic coherence was evaluated every 20 iterations.}
+       \caption{Topic coherence development for Gaussian WELDA and Wikipedia as embedding corpus.}
        \label{fig:welda_gaussian_lambda_200}
 \end{figure}
 
-% TODO: Nips
+The results for the \textsc{Nips} corpus are similar.
+Medium $\lambda_{act}$ values between $0.4$ and $0.6$ produce the best results.
+With corpus-specific embeddings, the maximum is reached at $TC = 42.2$, yielding an improvement of $1.3$ over the baseline.
+Contrary to the \textsc{20News} corpus, the results are similar with Wikipedia embeddings.
+The best value is $TC = 42.4$.
+The respective graphs for the \textsc{Nips} corpus can be seen in Appendix~\ref{sec:appendix_nips_lambda}.
+The improvement for this corpus is much smaller than before, even though the baseline was lower.
+This answers the initial question, on which type of corpus WELDA works better: the general \textsc{20News} corpus as opposed to the narrow, technical \textsc{Nips} corpus.
+When the focus is narrow, many top topic words are close in the embedding space, therefore many topic distributions are similar.
+Because of this, WELDA is not able to produce words, which clearly distinguish different topics during the resampling.
+
+Finally, we give a qualitative overview over WELDA's topics.
+In Table~\ref{table:topic_development}, we illustrate the change of topics in \textsc{Nips} and \textsc{20News} before and after WELDA iterations.
+For both corpora, we picked the best model from above and compared it to standard LDA's topics.
+
 \begin{table}[]
   \ra{1.15}
   \centering
@@ -1669,26 +1682,33 @@ We illustrate the change of topics in \textsc{Nips} and \textsc{20News} in Table
 \subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
 \subsubsection{Influence of the background topic}
-confirming both the fact, that WELDA reaches similar values without background word sampling, and the fact, that it speeds up the process.
+
+This confirms both facts, that we hypothesized in Section~\ref{sec:background_topic}:
+WELDA reaches similar topic coherence values without background word sampling, and the fact, that it speeds up the process.
 \subsubsection{Running LDA as a prerequisite}
 This initial setup has a topic coherence value of $TC = 0.311$.
+
+After same experiments, we set $\lambda = $
 
 TODO: Introduction text
 To prove this thought experiment, we run WELDA with randomly initialized topics for $1500$ iterations on the \textsc{20News} corpus with $\lambda = 0.2$ and $\lambda = 0.5$.
 The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
 As expected, TODO
 
-\begin{figure}
-       \centering
-       \includegraphics[width=\textwidth]{figures/standard_lda_alpha_beta.png}
-       \caption{TODO.}
-       \label{fig:standard_lda_as_prerequisite}
-\end{figure}
+% \begin{figure}
+%        \centering
+%        \includegraphics[width=\textwidth]{figures/standard_lda_alpha_beta.png}
+%        \caption{TODO.}
+%        \label{fig:standard_lda_as_prerequisite}
+% \end{figure}
 
 
 
 \subsubsection{Choice of word embeddings}
+\subsubsection{Strange behaviour for $\lambda_{act} = 1.0$}
 \subsubsection{Random fluctuations in WELDA}
+It seems and the Gibbs sampling gets stuck in a local optimum.
+Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
 \subsubsection{Top word selection}
 
 \subsubsection{Overfitting with high lambda}
@@ -1992,7 +2012,24 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
 % \printbibliography
 
 \begin{appendices}
+
 \chapter{Plots}
+\section{WELDA discussion}
+\subsection{Experiments with different $\lambda$ values on the NIPS corpus.}
+\label{sec:appendix_nips_lambda}
+  \begin{figure}[H]
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_50.png}
+       \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings}
+       \label{fig:welda_gaussian_nips_50}
+\end{figure}
+\begin{figure}[H]
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_200.png}
+       \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with Wikipedia as embedding corpus}
+       \label{fig:welda_gaussian_nips_200}
+\end{figure}
+
 
 \end{appendices}
 
