@@ -28,8 +28,8 @@ def create_palmetto_file(topic_file, best_k):
         with open(palmetto_file, "w") as output:
             for line in input:
                 split = line.split(" ")
-                if "topic-count" not in line: # skip first line
-                    new_line = " ".join(split[(-100 + best_k):(-90 + best_k)])
+                if "topic-count" not in line:  # skip first line
+                    new_line = " ".join(split[(2 + best_k):(12 + best_k)])
                     output.write(new_line.rstrip() + "\n")
     return palmetto_file
 
@@ -61,7 +61,6 @@ def calculate_topic_coherences(f, best_k):
     else:
         raise Exception("Palmetto not found")
 
-
     stdout, stderr = p.communicate()
     os.remove(palmetto_file)
     error = p.returncode
@@ -91,10 +90,9 @@ def calculate_line(best_k, topic_file):
             return line
     except:
         import traceback
-        print "Error with %s and %s" % (str(best_k, topic_file))
+        print "Error with %s and %s" % (str(best_k), topic_file)
         traceback.print_exc()
         traceback.print_stack()
-
 
 
 def main():
@@ -111,7 +109,7 @@ def main():
         print "ERROR: file <%s> does not exist" % str(args.topic_file)
         sys.exit(1)
 
-    best_ks = range(50, 90 + 1)
+    best_ks = range(10)
     if args.threads == 1:
         for r in best_ks:
             calculate_line(r, args.topic_file)
