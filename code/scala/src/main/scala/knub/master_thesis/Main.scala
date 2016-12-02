@@ -650,8 +650,8 @@ object Main {
         val pw = args.getPrintWriterFor(".ssv")
         pw.write(res.displayTopWords(10))
         pw.close()
-        val pwAll = args.getPrintWriterFor(".500.ssv")
-        pwAll.write(res.displayTopWords(500))
+        val pwAll = args.getPrintWriterFor(".2000.ssv")
+        pwAll.write(res.displayTopWords(2000))
         pwAll.close()
     }
 
