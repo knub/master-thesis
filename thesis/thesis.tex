@@ -1683,17 +1683,20 @@ For both corpora, we picked the best model from above and compared it to standar
 
 \subsubsection{Influence of the number of PCA dimensions $N_{PCA}$}
 \subsubsection{Influence of the number of distribution estimation samples $N_{TOP}$}
-\subsubsection{Influence of the background topic}
+\subsubsection{Influence of the background topic sampling}
 
 We will now analyze the influence of the background topic.
+When using background topic sampling, we also replace every occurrence of one of the top thirty words in the background topic in addition to all words, which had a successful coin flip.
+When we replace these words, the $\lambda$ is not equal to the actual $\lambda_{act}$, as we replace more words in that case.
+We tested with $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$.
+To ensure similar values when using background word sampling and to not influence the results by different $\lambda$ values, we tested different $\lambda$ parameters.
+After same experiments, we found $\lambda = 0.10$ and $\lambda = 0.45$ to result in $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$.
+Experiments were conducted on the \textsc{20News} corpus with Wikipedia embeddings.
 
-
-
-When running without the background topic, the $\lambda$ is equal to $\lambda_{act}$, as we do not replace words from the background topic.
-To ensure the results are not influenced by different $\lambda_{act}$ values, we set 
-This confirms both facts, that we hypothesized in Section~\ref{sec:background_topic}:
-WELDA reaches similar topic coherence values without background word sampling, and the fact, that it speeds up the process.
-After same experiments, we found $\lambda = 0.10$ and $\lambda = 0.45$.
+Figure~\ref{fig:welda_gaussian_background_topic} confirms both facts of our initial hypothesis (see Section~\ref{sec:background_topic}).
+First, using background word resampling leads to a faster convergence of the topic coherence.
+The process is accelerated.
+Second, similar topic coherence values are achieved in the end, as WELDA naturally replaces the often-occuring words more often.
 
 \begin{figure}
        \centering
@@ -1714,16 +1717,14 @@ As expected, TODO
 
 
 
-\subsubsection{Choice of word embeddings}
+% \subsubsection{Choice of word embeddings} TODO
 \subsubsection{Strange behaviour for $\lambda_{act} = 1.0$}
+When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
+/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 \subsubsection{Random fluctuations in WELDA}
 It seems and the Gibbs sampling gets stuck in a local optimum.
 Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
 \subsubsection{Top word selection}
-
-\subsubsection{Overfitting with high lambda}
-When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
-/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
 
 
