@@ -394,23 +394,25 @@ object Main {
                     )
                 runCases(cases, 4, new GaussianWELDA(_))
             case "welda-gaussian-pca-samples" =>
-                val lambdas = List(0.2, 0.5)
+                val lambdas = List(0.5)
                 val samplingParams = List(
                     (2, 20), (2, 30), (2, 40), (2, 50), (2, 100), (2, 200), (2, 400),
                     (10, 20), (10, 30), (10, 40), (10, 50), (10, 100), (10, 200), (10, 400),
-                    (50, 100), (50, 200), (50, 400), (50, 1000)
+                    (30, 60), (30, 100), (30, 200), (30, 400),
+                    (50, 100), (50, 200), (50, 400), (50, 1000),
+                    (200, 100), (200, 200), (200, 400), (200, 1000)
                 )
-                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams; idx <- 0 until 4)
+                val cases = for (embedding <- embeddings.take(1); lambda <- lambdas; samplingParam <- samplingParams)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
-                        modelNamePrefix = s"welda-gaussian-pca-samples.run-$idx",
+                        modelNamePrefix = s"welda-gaussian-pca-samples",
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 18, new GaussianWELDA(_))
+                runCases(cases, 30, new GaussianWELDA(_))
             case "welda-gaussian-top" =>
                 //                val samplingParams = List(
                 //                    (2, 20), (2, 30), (2, 40), (2, 50), (2, 100), (2, 200), (2, 400),
