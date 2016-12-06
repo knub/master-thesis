@@ -1558,6 +1558,7 @@ Only then we will evaluate the more complex von Mises-Fisher distribution and th
 Unless noted otherwise, all our experiments are run with $1500$ standard LDA iterations and then $200$ following WELDA iterations.
 
 \subsubsection{Standard LDA as baseline}
+\label{sec:lda_as_baseline}
 
 \begin{figure}
        \centering
@@ -1686,7 +1687,30 @@ For both corpora, we picked the best model from above and compared it to standar
 \end{table}
 
 \subsubsection{Influence of parameters $N_{pca}$ and $N_{top}$}
-% \subsubsection{Influence of the number of distribution estimation samples $N_{top}$}
+
+We will evaluate the influence of the parameters $N_{pca}$ and $N_{top}$ together in this section, as these parameters depend on each other.
+The larger $N_{pca}$ the larger $N_{top}$ needs to be, i.e. $N_{top} \geq N_{pca}$.
+We conducted experiments with $\lambda = 0.5$ and the Wikipedia embeddings on the \textsc{20News} corpus.
+We illustrate the results in Figure~\ref{fig:welda_gaussian_pca_samples}.
+We plot the development of the topic coherence with different fixed values of $N_{pca}$ against $N_{top}$.
+The first observation is, that $N_{top}$ does not have a large influence on the topic coherence.
+The regression is almost constant for all values of $N_{pca}$.
+However, large differences are visible for $N_{pca}$.
+In general, the higher the value, the higher the topic coherence.
+This observation can be explained, as dimensionality reduction always loses information.
+With more dimensions more semantic information can be encoded in the embedding space, and the similarity function between two words becomes more accuracte.
+% TODO: PCA dimensions vs topic similarity evaluation?
+The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
+% TODO: WHY?
+
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_pca_samples.png}
+       \caption{Topic coherence development for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for higher $N_{top}$}
+       \label{fig:welda_gaussian_pca_samples}
+\end{figure}
+
+
 \subsubsection{Influence of the background topic sampling}
 
 We will now analyze the influence of the background topic.
@@ -1710,24 +1734,43 @@ Second, similar topic coherence values are achieved in the end, as WELDA natural
 \end{figure}
 
 \subsubsection{Running LDA as a prerequisite}
-This initial setup has a topic coherence value of $TC = 0.311$.
 
-
-
-TODO: Introduction text
-To prove this thought experiment, we run WELDA with randomly initialized topics for $1500$ iterations on the \textsc{20News} corpus with $\lambda = 0.2$ and $\lambda = 0.5$.
+We run standard LDA before WELDA to estimate the topic distributions on already good topics.
+We now evalute the performance of WELDA, when we initialize topics randomly as standard LDA.
+This initial setup has a topic coherence value of $TC = 31.1$.
+As convergence takes longer with random initialization, we ran WELDA for $1500$ iterations on \textsc{20News} with $\lambda = 0.5$.
 The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
-As expected, TODO
-
-
+As expected, WELDA performs far worse than before, reaching only $39.1$ with corpus-specific and $40.0$ with Wikipedia embeddings.
+With random initialization, WELDA is actually harmful, as we do not even reach standard LDA's topic coherence of $41.9$.
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/welda_gaussian_random_init.png}
+       \caption{WELDA with $\lambda = 0.5$ and random topic initialization. }
+       \label{fig:standard_lda_as_prerequisite}
+\end{figure}
 
 % \subsubsection{Choice of word embeddings} TODO
 \subsubsection{Strange behaviour for $\lambda_{act} = 1.0$}
 When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
 /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 \subsubsection{Random fluctuations in WELDA}
+
+As seen in Section~\ref{sec:lda_as_baseline} where we evaluated the topic coherence for different $\alpha$ and $\beta$ values, the topic coherence of an LDA model is subject to random fluctuations.
+This can be explained by the random component of LDA in the innermost loop of the Gibbs sampling, where new topics are sampled.
+Due to the additional coin flip and the random sampling from the embedding space, WELDA is even more subject to random fluctuations in several runs.
+
+Therefore, we now evaluate how much the topic coherence fluctuates for several WELDA runs ev
+% TODO: Mention alpha und beta taken from LDA?
+Due to the additional sampling from the embedding space,
+
+We therefore evaluated, how big 
+
+
+
 It seems and the Gibbs sampling gets stuck in a local optimum.
 Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
+
+
 \subsubsection{Top word selection}
 
 
