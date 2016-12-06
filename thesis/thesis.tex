@@ -1588,6 +1588,21 @@ We again choose $\alpha = \beta = 0.02$ and start with a topic coherence baselin
        \label{fig:standard_lda_alpha_beta}
 \end{figure}
 
+\subsubsection{Random fluctuations in WELDA}
+
+As seen in the last section, the topic coherence of an LDA model is subject to random fluctuations.
+This can be explained by the random component of LDA in the innermost loop of the Gibbs sampling, where new topics are sampled.
+Due to the additional coin flip and the random sampling from the embedding space, WELDA is even more subject to random fluctuations in several runs.
+
+Therefore, we evaluated how much the topic coherence fluctuates for several WELDA runs with the same parameter settings.
+We ran ten identical experiments with $\lambda = 0.3$ on the \textsc{20News} corpus.
+With corpus-specific embeddings, the $C_V$ value ranged from $44.8$ to $45.5$, with an average of $45.02$ and a standard deviation of $0.27$.
+With Wikipedia embeddings, the $C_V$ value ranged from $44.5$ to $45.1$, with an average of $44.74$ and a standard deviation of $0.22$.
+Thus, as in standard topic models, it is best to rerun the model several times and pick the best.
+In the following experiments, we ran each parameter setting three times.
+
+% TODO: Mention alpha und beta taken from LDA?
+
 \subsubsection{Influence of the resampling parameter $\lambda$}
 We started the evaluation with the influence of the $\lambda$ parameter.
 It must be noted, that the $\lambda$ parameter the algorithm is configured with, is not the final $\lambda$ parameter.
@@ -1750,28 +1765,11 @@ With random initialization, WELDA is actually harmful, as we do not even reach s
 \end{figure}
 
 % \subsubsection{Choice of word embeddings} TODO
-\subsubsection{Strange behaviour for $\lambda_{act} = 1.0$}
-When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
-/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
-\subsubsection{Random fluctuations in WELDA}
+% \subsubsection{Strange behaviour for $\lambda_{act} = 1.0$} TODO
+% When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
+% /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
-As seen in Section~\ref{sec:lda_as_baseline} where we evaluated the topic coherence for different $\alpha$ and $\beta$ values, the topic coherence of an LDA model is subject to random fluctuations.
-This can be explained by the random component of LDA in the innermost loop of the Gibbs sampling, where new topics are sampled.
-Due to the additional coin flip and the random sampling from the embedding space, WELDA is even more subject to random fluctuations in several runs.
-
-Therefore, we now evaluate how much the topic coherence fluctuates for several WELDA runs ev
-% TODO: Mention alpha und beta taken from LDA?
-Due to the additional sampling from the embedding space,
-
-We therefore evaluated, how big 
-
-
-
-It seems and the Gibbs sampling gets stuck in a local optimum.
-Thus, as in standard topic models, it seems best to rerun the model several times and pick the best.
-
-
-\subsubsection{Top word selection}
+%\subsubsection{Top word selection} TODO
 
 
 
