@@ -1449,7 +1449,7 @@ This can be explained by the fact, that both \textsc{20News} and \textsc{Nips} a
   \end{tabular}
 \end{table}
 
-\section{Topic Coherence}
+\section{Topic coherence}
 \label{sec:topic_coherence}
 As discussed in Section~\ref{sec:evaluation_of_topic_models}, topic coherence is a standard task to evaluate topic models.
 In this section, we evaluate WELDA's design decisions with respect to topic coherence in several experiments.
@@ -1769,11 +1769,11 @@ With random initialization, WELDA is actually harmful, as we do not even reach s
 % When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
 % /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
-%\subsubsection{Top word selection} TODO
+% \subsubsection{Top word selection} TODO
 
 
 
-\section{Document Classification}
+\section{Document classification}
 We also evaluated topic models on another commonly used task: document classification.
 In contrast to topic coherence, this allows to use topic models in an supervised setting with clear evaluation metrics.
 Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
@@ -1980,7 +1980,7 @@ Both features combined are always better than just one of the two models.
 Also, the fact that the average vector alone already has a high F1 score indicates, that word embeddings are well-suited for document classification in general.
 The approaches just seem to not be able to use the knowledge in the embedding space properly.
 
-\section{Word Intrusion Study}
+\section{Word intrusion study}
 
 The \textsc{Nips} corpus is a with a narrow focus on 
 No general topic corpus.
