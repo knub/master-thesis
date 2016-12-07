@@ -692,8 +692,8 @@ Also, this parameters need to be updated after each word.
 Even though the authors provide some performance improvements using linear algebra identities, inference in Gaussian LDA is very slow.
 We will compare the runtime with other models in Section~\ref{sec:runtime}.
 
-\paragraph{Latent Feature Topic Models}
-Another approach, called Latent Feature Topic Models (LFTM), is taken by Nguyen et al.~\cite{Nguyen2015}.
+\paragraph{Latent Feature Topic Models (LFTM)}
+Another approach, called Latent Feature Topic Models, is taken by Nguyen et al.~\cite{Nguyen2015}.
 They use word embeddings to sample words not only from the multinomial topic distribution, but also from the embedding space.
 Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
 This parameter decides, whether the word is sampled as usual from the topic-word distribution or from the latent feature vectors.
@@ -731,8 +731,8 @@ Using the topic vectors, the generative process can be summarized as follows:
 \end{enumerate}
 The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014} and conclude that none of these works better than the other.
 
-\paragraph{Nonparametric Spherical Topic Model}
-Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modeling (NSTM).
+\paragraph{Nonparametric Spherical Topic Model (NSTM)}
+Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modeling.
 They build on top of Gaussian LDA, but argue that Gaussian distributions do not capture the embedding space very well.
 Instead they propose the von Mises-Fisher distribution to capture topics in the embedding space.
 The von Mises-Fisher distribution is a distribution on the hypersphere with a mean direction $\mu$ and a concentration parameter $\kappa$.
@@ -767,24 +767,18 @@ All together, the generative process looks as follows:
 The authors use 50-dimensional word embeddings, which they trained on Wikipedia.
 The word vectors are not available.
 
-\paragraph{Generative Topic Embedding}
-Li et al.\cite{Li2016} propose generative topic embeddings.
-They call their system TopicVec.
-The TopicVec model is less focused on topic coherence, but rather on document representations.
-They treat a document as a ``bag-of-vectors'' and learn a topic model and the word embeddings in parallel.
-This is in contrast to the other models, which are always built on pre-trained word vectors.
-The authors claim, that this method ``exploits the word collocation patterns both at the level of the local context and the global document''~\cite{Li2016}.
-
-The vectors are learned by maximizing the probability of a word occurring with its context, according to the following formula:
+\paragraph{Generative Topic Embedding (TopicVec)}
+Li et al.~\cite{Li2016} propose generative topic embeddings and call their system TopicVec.
+The main idea compared to LDA is to take the immediate context of a word into account and not only the bag-of-words information.
+While LDA picks a word from one of the $K$ multinomial topic distributions, TopicVec defines this distribution based on the context words, similar to the word2vec skip-gram architecture.
+For that, they encode a topic with a vector $t_k$ in the embedding space, which they call ``topic embedding''.
+These topic embeddings are used to define the multinomial distribution:
 \begin{equation*}
-  P(w_c | w_0 : w_{c - 1}, z_c, d_i) = P(w_c) * \exp \bigg( v_{w_{c}}^T * \Big( \sum\limits_{l=0}^{c-1} v_{w_l} + t_{z_c} \Big) + \sum\limits_{l=0}^{c - 1} a_{w_{l} w_c}  + r_{z_c} \bigg),
+  P(w_c | w_0 : w_{c - 1}, z_c, d_i) \propto \exp \bigg( v_{w_{c}}^T * \Big( \sum\limits_{l=0}^{c-1} v_{w_l} + t_{z_c} \Big) + \sum\limits_{l=0}^{c - 1} a_{w_{l} w_c}  + r_{z_c} \bigg),
 \end{equation*}
 where $c$ is the context window size, $w_c$ is the word at the last position of the current context window, $v_{w_c}$ is the word's vector embedding, $t_{z_c}$ is the topic embedding vector of the word at position $c$ and $r_{z_c}$ is a normalizing constant.
 The terms $a_{w_l w_c}$ are bigram residuals, which capture the relationship between each context word and the target word explictly.
-Similarly to other methods TopicVec also encodes a topic with a vector $t_k$ in the embedding space.
-Topic vectors
-
-
+The authors claim, that this method ``exploits the word collocation patterns both at the level of the local context and the global document''~\cite{Li2016}.
 The generative process looks as follows:
 \begin{enumerate}
     \item Fix number of topics $K$ in the document collection
@@ -795,11 +789,17 @@ The generative process looks as follows:
         \item For each position $i$ in the document
         \begin{enumerate}
             \item Choose topic $z_{d,i} \sim Multinomial(\theta_d)$
-            \item Choose word $w \sim Multinomial()$
+            \item Choose word $w$ according to the distribution defined above
         \end{enumerate}
     \end{enumerate}
 \end{enumerate}
 
+The authors provide a variational inference algorithm for TopicVec, which learns the topic assignments and the topic embeddings simultaneously.
+As the words are sampled from their context words, the architecture allows to learn different topics for a single document.
+No word collocation information over different documents is necessary.
+However, as no other method offers this possibility, we will evaluate TopicVec with one set of topics for all documents.
+In their paper, the authors evaluated the model only on a document classification task.
+We will also evaluate topic coherence.
 
 \paragraph{Gaussian Mixture Model in Embedding Space}
 Another idea is proposed by Sridhar~\cite{Sridhar2015}.
@@ -1830,6 +1830,68 @@ The information contained in the bag-of-words and exploited by LDA is still very
 \end{table}
 
 % TODO: Mention later, that only the combination works good
+\subsection{Contenders}
+We now present the different settings for the contenders.
+\begin{itemize}
+  \item
+    \textbf{Standard LDA:}
+    We ran LDA with different values of $\alpha$ and $\beta$.
+    However, there is no influence of this parameters on the classification results.
+    We report the results for $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
+  \item
+    \textbf{Gaussian LDA:}
+    Compared to the other methods, Gaussian LDA had to be trained with 50-dimensional instead of 200-dimensional word embeddings trained on Wikipedia.
+    When training with higher-dimensional embeddings, Gaussian LDA does not converge and yield interpretable results~\cite{Das2016}.
+  \item
+    \textbf{LFTM:}
+    We report results for LFTM with $\lambda = 1.0$, as this yields the best topic coherence results according to the original paper.
+    We could confirm this in our experiments.
+    With $\lambda = 1.0$ every word is sampled from the embedding space and the multinomial word-distribution from standard LDA is effectively discarded.
+  \item
+    \textbf{NSTM:}
+    We had the same problems with NSTM as with Gaussian LDA: training with 200-dimensional embeddings did not succeed.
+    Thus, we again used the 50-dimensional embeddings.
+    For the \textsc{20News} corpus, we could still could not obtain any results.
+    We could confirm these issues in communication with the authors~\cite{Saeedi2016}.
+    We only report the results for the \textsc{Nips} corpus.
+    We preprocessed all word embeddings to have unit norm.
+  \item
+    \textbf{TopicVec:}
+    The authors did not evaluate the performance of TopicVec with topic coherence, so no best parameter settings are given.
+    The relevant parameters are the learning rate $\delta$ and the hypersphere radius $\gamma$.
+    We experimented with $\delta \in { 0.01, 0.05, 0.1, 0.2, 1.0 }$ and $\gamma \in { 1, 5, 7, 10 }$.
+    Best results were achieved with $\delta = 0.1$ and $\gamma = 7$, which are also the values reported in the paper for document classification.
+    In contrast to the other methods, TopicVec needs different preprocessing, as it is trained on the context of a word, similarily to the skip-gram architecture.
+    Therefore, we do not lowercase the text and do not remove stop words.
+    The text is tokenized into sentences, as TopicVec processes one sentence at a time.
+  \item
+    \textbf{WELDA:}
+    TODO
+\end{itemize}
+
+To eliminate random effects, we ran all methods with the best settings three times and report the best results.
+
+\subsection{Results}
+\begin{table}[]
+  \ra{1.3}
+  \centering
+  \caption{My caption}
+  \label{my-label}
+  \begin{tabular}{@{}lrrcrr@{}}
+    \toprule
+                 & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{\textsc{Nips}} \\ \cmidrule{2-3} \cmidrule{5-6}
+                              & Wikipedia     & \textsc{20News}     && Wikipedia     & \textsc{Nips}     \\
+                 \midrule
+                              LDA          & \multicolumn{2}{c}{41.9}   && \multicolumn{2}{c}{40.6} \\
+                              Gaussian LDA & 38.5          &            && 39.2          & TODO     \\
+                              LFTM         &               &            &&               &          \\
+                              NSTM         & --            & --         && 37.5          &          \\
+                              TopicVec     & 48.5          & 46.2       && 43.4          & 43.6     \\
+                              WELDA        & TODO          &            &&               &          \\
+                              \bottomrule
+  \end{tabular}
+\end{table}
+
 \section{Document classification}
 
 To investigate the effects of the different word embedding-enhanced topic models on document classification, we conducted a series of experiments, which we will present in the next sections.
@@ -1935,33 +1997,8 @@ In general, the F1 scores are higher for $K = 250$, with the exception of Gaussi
 This can be explained, because more features are available, and because the topic model can assign topic proportions on a more fine-grained level.
 However, the improvement is only a few percent for all models.
 
-\begin{table}[]
-  \ra{1.3}
-  \centering
-  \caption{Document classification results for the \textsc{20News} corpus when using 50-dimensional embeddings trained on \textsc{20News}.
-  All methods are worse than standard LDA.}
-  \label{table:document_classification_dim-50}
-  \begin{tabular}{lrrrcrrr}
-    \toprule
-    \multirow{2}{*}{} & \multicolumn{3}{c}{$K = 50$} & \phantom{a} & \multicolumn{3}{c}{$K = 250$} \\ \cmidrule{2-4} \cmidrule{6-8}
-                      & $Prec$    & $Rec$     & $F1$     && $Prec$    & $Rec$   & $F1$     \\ \midrule
-                      Only Avg. Emb.           & 78.6    & 78.1    & 78.0   && \multicolumn{3}{l}{}        \\
-                      LDA                      & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
-                      LDA + Avg. Emb.          & 79.1    & 78.6    & 78.5   && 80.3    & 80.1     & 80.0   \\
-                      LFTM                     & 69.8    & 68.2    & 67.3   && 73.2    & 72.9     & 72.6   \\
-                      LFTM + Avg. Emb.         & 80.2    & 79.9    & \textbf{79.7}   && 81.1    & 81.5     & \textbf{81.5}   \\
-                      TopicVec                 & 35.1    & 33.0    & 30.6   && 42.1    & 40.1     & 39.7   \\
-                      TopicVec + Avg. Emb.     & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
-                      WELDA                    & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
-                      WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
-                      Gaussian LDA             & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
-                      Gaussian LDA + Avg. Emb. & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
-  \bottomrule
-  \end{tabular}
-\end{table}
-
 We also tested all methods with embeddings, which were trained on the corpus itself.
-The results with the 50-dimensional \textsc{20News} embeddings are displayed in Table~\ref{table:document_classification_dim-50}.
+The results with the 50-dimensional \textsc{20News} embeddings are displayed in Table~\ref{table:document_classification_dim-50} in Appendix~\ref{sec:appendix_document_classification_corpus_specific}.
 Interestingly, the predictive power of the embeddings is already much higher than before, even though these embeddings failed in the analogy reasoning benchmark (see Table~\ref{table:word_embeddings_performance}).
 The F1 score of these embeddings when only taking the average vector of each document is already 78.0 \%.
 Also, all methods perform better with even without the average vector features compared to the 200-dimensional Wikipedia embeddings.
@@ -2036,7 +2073,7 @@ Especially LFTM is very slow, making it infeasible to run on larger corpora.
                  LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 & 61.2 h          & \\
                  TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 & 178 min         & \\
                  Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 & 14.1 h          & \\ % 50713 seconds
-                 WELDA, $\lambda = 0.3$ & ~~~~~~~~~~~~~~~~\xmark                                 & 67 min          & \\ \bottomrule % 4027 sec,
+                 WELDA, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                                 & 67 min          & \\ \bottomrule % 4027 sec,
   \end{tabular}
 \end{table}
 
@@ -2068,24 +2105,50 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
 % \printbibliography
 
 \begin{appendices}
+  \chapter{Plots}
+  \section{WELDA discussion}
+  \subsection{Experiments with different $\lambda$ values on the NIPS corpus.}
+  \label{sec:appendix_nips_lambda}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_50.png}
+         \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings}
+         \label{fig:welda_gaussian_nips_50}
+  \end{figure}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_200.png}
+         \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with Wikipedia as embedding corpus}
+         \label{fig:welda_gaussian_nips_200}
+  \end{figure}
 
-\chapter{Plots}
-\section{WELDA discussion}
-\subsection{Experiments with different $\lambda$ values on the NIPS corpus.}
-\label{sec:appendix_nips_lambda}
-\begin{figure}[H]
-       \centering
-       \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_50.png}
-       \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings}
-       \label{fig:welda_gaussian_nips_50}
-\end{figure}
-\begin{figure}[H]
-       \centering
-       \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_200.png}
-       \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with Wikipedia as embedding corpus}
-       \label{fig:welda_gaussian_nips_200}
-\end{figure}
-
+  \section{Comparative Evaluation}
+  \subsection{Document classification on 20News with corpus-specific embeddings}
+  \label{sec:appendix_document_classification_corpus_specific}
+  \begin{table}[]
+    \ra{1.3}
+    \centering
+    \caption{Document classification results for the \textsc{20News} corpus when using 50-dimensional embeddings trained on \textsc{20News}.
+    All methods are worse than standard LDA.}
+    \label{table:document_classification_dim-50}
+    \begin{tabular}{lrrrcrrr}
+      \toprule
+      \multirow{2}{*}{} & \multicolumn{3}{c}{$K = 50$} & \phantom{a} & \multicolumn{3}{c}{$K = 250$} \\ \cmidrule{2-4} \cmidrule{6-8}
+                        & $Prec$    & $Rec$     & $F1$     && $Prec$    & $Rec$   & $F1$     \\ \midrule
+                        Only Avg. Emb.           & 78.6    & 78.1    & 78.0   && \multicolumn{3}{l}{}        \\
+                        LDA                      & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
+                        LDA + Avg. Emb.          & 79.1    & 78.6    & 78.5   && 80.3    & 80.1     & 80.0   \\
+                        LFTM                     & 69.8    & 68.2    & 67.3   && 73.2    & 72.9     & 72.6   \\
+                        LFTM + Avg. Emb.         & 80.2    & 79.9    & \textbf{79.7}   && 81.1    & 81.5     & \textbf{81.5}   \\
+                        TopicVec                 & 35.1    & 33.0    & 30.6   && 42.1    & 40.1     & 39.7   \\
+                        TopicVec + Avg. Emb.     & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
+                        WELDA                    & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
+                        WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
+                        Gaussian LDA             & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
+                        Gaussian LDA + Avg. Emb. & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
+    \bottomrule
+    \end{tabular}
+  \end{table}
 
 \end{appendices}
 
