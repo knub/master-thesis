@@ -486,48 +486,21 @@ object Main {
                     )
                 runCases(cases, 15, new GaussianMixtureWELDA(_))
             case "welda-vmf" =>
-                val THREADS = 30
-                val lambdas = List(0.5, 0.6, 0.8, 1.0, 0.3, 0.05, 0.1, 0.2, 0.0)
+                val lambdas = List(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0)
                 val kappaFactors = List(1, 2, 3, 5, 10, 20, 50, 100)
-                val embeddings = List(
-                    ("/data/wikipedia/2016-06-21/embedding-models/dim-200.skip-gram.embedding", 11295),
-                    ("/data/wikipedia/2016-06-21/embedding-models/20news.dim-50.skip-gram.embedding", 11294)
-                    //                    "/data/wikipedia/2016-06-21/embedding-models/google.embedding"
-                )
-                val cases = for (embedding <- embeddings; lambda <- lambdas; kappaFactor <- kappaFactors)
-                    yield (lambda, embedding, kappaFactor)
-
-                cases.foreach(println)
-                val parCases = if (THREADS == 1) {
-                    cases
-                } else {
-                    val parCases = cases.par
-                    parCases.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(THREADS))
-                    parCases
-                }
-
-                parCases.foreach { case (lambda, embedding, kappaFactor) =>
-                    println(s"Starting lambda = $lambda, embedding = $embedding")
-                    try {
-                        val weldaVmf = new VmfWELDA(
-                            args.copy(lambda = lambda,
-                                embeddingFileName = embedding._1,
-                                numDocuments = embedding._2,
-                                kappaFactor = kappaFactor)
-                        )
-                        weldaVmf.init()
-                        weldaVmf.inference()
-
-                        println(s"Finshed lambda = $lambda, embedding = $embedding")
-                    } catch {
-                        case e: Exception =>
-                            println(s"Failed lambda = $lambda, embedding = $embedding, $e: ${e.getMessage}")
-                    }
-                }
-//                val weldaVmf = new VmfWELDA(args)
-//                weldaVmf.init()
-//                weldaVmf.inference()
-
+                val samplingParams = List((10, 20), (30, 100))
+                val cases = for (embedding <- embeddings; lambda <- lambdas; kappaFactor <- kappaFactors; samplingParam <- samplingParams)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        kappaFactor = kappaFactor,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        modelNamePrefix = s"welda-vmf",
+                        pcaDimensions = samplingParam._1,
+                        distributionEstimationSamples = samplingParam._2
+                    )
+                runCases(cases, 20, new VmfWELDA(_))
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "word-intrusion" =>

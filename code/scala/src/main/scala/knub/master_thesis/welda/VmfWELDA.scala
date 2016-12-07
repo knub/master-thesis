@@ -25,8 +25,13 @@ class VmfWELDA(p: Args) extends ReplacementWELDA(p) {
 
     override def getFolderName(): String = {
         s"${p.modelFileName}.$embeddingName.welda.vmf." +
-            s"distance-${p.weldaDistanceFunction}." +
+            (if (p.modelNamePrefix.nonEmpty) p.modelNamePrefix + "." else "") +
+            (if (p.topic0Sampling) "topic0-yes." else "topic0-no.") +
+            s"pca-$PCA_DIMENSIONS." +
+            s"des-$DISTRIBUTION_ESTIMATION_SAMPLES." +
             s"lambda-${p.lambda.toString.replace('.', '-')}." +
+            (if (p.randomTopicInitialization) "random." else "") +
+            (if (!p.stopWordSampling) "nostopword." else "") +
             s"kappafactor-$KAPPA_FACTOR_FOR_MORE_CONCENTRATION"
     }
 
