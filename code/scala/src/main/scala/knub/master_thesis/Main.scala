@@ -251,16 +251,16 @@ object Main {
                 supplyTopicModelSimilarity(args, res)
             case "welda-gaussian" =>
                 val weldaGaussian = new GaussianWELDA(args.copy(
-//                    modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
-                    modelFileName = "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
+                    modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+//                    modelFileName = "/home/knub/Repositories/master-thesis/models/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
                     topic0Sampling = false,
                     pcaDimensions = 10,
                     distributionEstimationSamples = 20,
-                    lambda = 0.2,
+                    lambda = 0.25,
                     numIterations = 200,
-                    modelNamePrefix = "foo",
-                    embeddingFileName = nipsEmbeddings.head._1,
-                    numDocuments = nipsEmbeddings.head._2
+                    modelNamePrefix = "sampling-other",
+                    embeddingFileName = embeddings.head._1,
+                    numDocuments = embeddings.head._2
                 ))
                 weldaGaussian.init()
                 weldaGaussian.inference()

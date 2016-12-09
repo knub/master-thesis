@@ -1,14 +1,14 @@
 package knub.master_thesis.welda
 
 import java.io.File
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Paths}
 import java.util
 
 import be.tarsos.lsh.{CommandLineInterface, LSH, Vector}
 import breeze.linalg.{DenseMatrix, DenseVector}
 import knub.master_thesis
 import knub.master_thesis.Args
-import master_thesis.util.{Sampler, Timer, Word2VecUtils}
+import master_thesis.util.{Sampler, Word2VecUtils}
 import org.apache.commons.io.FileUtils
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer
 import weka.core.{Attribute, DenseInstance, Instance, Instances}
@@ -212,16 +212,29 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 wordsInIteration += 1
                 // determine topic first
                 val topicId = corpusTopics(docIdx).get(wIndex)
-                if (topicId == 1)
-                    topic1Count += 1
-                if (topicId == 0)
-                    topic0Count += 1
                 val originalWordId = corpusWords(docIdx).get(wIndex)
+
+                if (topicId == 1)
+                        topic1Count += 1
+                if (topicId == 0)
+                        topic0Count += 1
+
+                docTopicCount(docIdx)(topicId) -= 1
+                topicWordCountLDA(topicId)(originalWordId) -= 1
+                sumTopicWordCountLDA(topicId) -= 1
+
+                for (tIndex <- 0 until numTopics) {
+                    multiPros(tIndex) =
+                        (docTopicCount(docIdx)(tIndex) + alpha(tIndex)) * (topicWordCountLDA(tIndex)(originalWordId) + beta) /
+                            (sumTopicWordCountLDA(tIndex) + betaSum)
+                }
+                val newTopicId = Sampler.nextDiscrete(multiPros)
+
                 // now determine the word we "observe"
                 val wordId = if (Sampler.nextCoinFlip(p.lambda) ||
                     (p.lambda != 0.0 && p.topic0Sampling && topicId == 0) ||
                     (p.lambda != 0.0 && p.stopWordSampling && newStopwordIds.contains(originalWordId))) {
-                    val sampledWord = sampleAndFindWord(topicId)
+                    val sampledWord = sampleAndFindWord(newTopicId)
                     if (sampledWord == "NONE") {
                         originalWordId
                     } else {
@@ -231,17 +244,6 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
                 } else {
                     originalWordId
                 }
-
-                docTopicCount(docIdx)(topicId) -= 1
-                topicWordCountLDA(topicId)(wordId) -= 1
-                sumTopicWordCountLDA(topicId) -= 1
-
-                for (tIndex <- 0 until numTopics) {
-                    multiPros(tIndex) =
-                        (docTopicCount(docIdx)(tIndex) + alpha(tIndex)) * (topicWordCountLDA(tIndex)(wordId) + beta) /
-                            (sumTopicWordCountLDA(tIndex) + betaSum)
-                }
-                val newTopicId = Sampler.nextDiscrete(multiPros)
 
                 docTopicCount(docIdx)(newTopicId) += 1
                 topicWordCountLDA(newTopicId)(wordId) += 1
