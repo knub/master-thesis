@@ -205,11 +205,11 @@ Betreuung: Dr. Ralf Krestel}
 
 A core task in natural language processing (NLP) is to understand the meaning of words.
 Many downstream NLP tasks benefit from this, for example, text categorization, part-of-speech tagging, and machine translation.
-A popular concept to qualify the meaning of a word is to look at the contexts in which the word appears.
+A popular concept to quantify the meaning of a word is to look at the contexts in which the word appears.
 A famous quote by Firth says: ``You shall know a word by the company it keeps''~\cite{Firth1957}.
 This assumption is also known as the distributional hypothesis.
 
-Two existing approaches in this area are topic modeling and word embeddings.
+Two existing approaches in this area are topic models and word embeddings.
 Topic modeling assumes that an author has certain topics in mind when writing a document, which are chosen beforehand.
 For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then picks the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
 Topic modeling techniques, with latent Dirichlet allocation being the most popular one, try to recover the hidden topics in large corpora, i.e.\ find out that ``soccer'' and ``ball'' come from the same topic.
@@ -223,15 +223,36 @@ Using a clever network architecture, these vectors exhibit interesting propertie
 First, similar words tend to be in similar positions in the vector space.
 For example, when looking for the most similar words for ``France'' using cosine distance, the model outputs ``Spain'', ``Belgium'', ``Netherlands'' and ``Italy''.
 Second, the word vectors exhibit interesting linear relationships.
-For example, when calculating the vector $vector("King") - vector("Man") + vector("Woman")$ and looking for the closest word at the vector result, the result is the word ``queen''~\cite{Mikolov2013b}.
+For example, when calculating the vector $vector("king") - vector("man") + vector("woman")$ and looking for the closest word at the vector result, the result is the word ``queen''~\cite{Mikolov2013b}.
 
 The two approaches have different origins.
 Word embeddings have their roots in the neural network and deep learning community, while topic modeling stems and Bayesian statistics.
-% https://www.gavagai.se/blog/2015/09/30/a-brief-history-of-word-embeddings/ THIS BLOG POST IS VERY ENLIGHTENING, GIVES A GOOD OVERVIEW
-% These different contextual representations capture different types of semantic similarity; the document-based models capture semantic relatedness (e.g. “boat” – “water”) while the word-based models capture semantic similarity (e.g. “boat” – “ship”). This very basic difference is too often misunderstood.
-Hence, there is relatively little research in combination of these two methods.
+They also capture different notions of similarity: the word-based embedding models focus on semantic similarity, e.g. ``lecturer'' and ``teacher'', while the document-based topic models capture relatedness, e.g. ``teacher'' and ``school''.
+Recently, there has been a lot of research on combining these two methods~\cite{Li2016,Nguyen2015,Das2015,Batmanghelich2016}.
 In this master thesis, we aim to explore potential synergies between these technologies.
 In particular, it might be useful to investigate ``whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
+
+In general, there are two ways of combining these two methods: one can create better topic models or one can create better word embeddings.
+In this thesis
+
+
+The contributions of these thesis are:
+\begin{itemize}
+  \item
+    We propose a new topic model called WELDA (Word Embedding LDA).
+    WELDA uses the word embeddings to resample new words based on the topic.
+  \item
+    We run an exhaustive evaluation of existing models and WELDA on two tasks.
+    The first, topic coherence, evaluates the top words in a topic with respect to interpretability by humans.
+    The second task, document classification, uses the topic model output for text classification.
+  \item
+    We demonstrate the usefulness of word embeddings trained on small corpora, when training topic models.
+    In general, word embeddings need huge amounts of training data to be accurate.
+    However, when evaluating embeddings with respect to typical topic model metrics like topic coherence or document classification, embeddings trained on the small corpora itself can be superior.
+\end{itemize}
+Open questions:
+Should both models be trained on the same corpus?
+
 
 Contribution:
 New topci model
@@ -1872,11 +1893,17 @@ We now present the different settings for the contenders.
 To eliminate random effects, we ran all methods with the best settings three times and report the best results.
 
 \subsection{Results}
+We show the results of the topic coherence experiments in Table~\ref{table:topic_coherence}.
+The two best methods by far are WELDA and TopicVec.
+
+
+The two remaining methods, Gaussian LDA and NSTM, perform even worse than standard LDA.
+
 \begin{table}[]
   \ra{1.3}
   \centering
-  \caption{My caption}
-  \label{my-label}
+  \caption{Topic coherence on the \textsc{20News} and \textsc{Nips} corpus}
+  \label{table:topic_coherence}
   \begin{tabular}{@{}lrrcrr@{}}
     \toprule
                  & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{\textsc{Nips}} \\ \cmidrule{2-3} \cmidrule{5-6}
@@ -1884,7 +1911,7 @@ To eliminate random effects, we ran all methods with the best settings three tim
                  \midrule
                               LDA          & \multicolumn{2}{c}{41.9}   && \multicolumn{2}{c}{40.6} \\
                               Gaussian LDA & 38.5          &            && 39.2          & TODO     \\
-                              LFTM         &               &            &&               &          \\
+                              LFTM         &               & 45.6       &&               &          \\
                               NSTM         & --            & --         && 37.5          &          \\
                               TopicVec     & 48.5          & 46.2       && 43.4          & 43.6     \\
                               WELDA        & TODO          &            &&               &          \\
@@ -2057,7 +2084,7 @@ The higher $\lambda$, the more new words are sample, which leads to more nearest
 The nearest-neighbour search is the most expensive operation, hence it dominates the runtime.
 We illustrate this dependency in Figure~\ref{fig:welda_lambda_runtime}.
 Still, even with $\lambda = 1.0$ the runtime of WELDA is 164 min, which is still faster than the next-fastest TopicVec.
-Especially LFTM is very slow, making it infeasible to run on larger corpora.
+Especially LFTM is very slow with 200-dimensional embeddings, making it infeasible to run on larger corpora.
 
 \begin{table}[]
   \ra{1.2}
@@ -2070,7 +2097,7 @@ Especially LFTM is very slow, making it infeasible to run on larger corpora.
     \toprule
                                         & Parallel implementation \newline available      & \textsc{20News} & \textsc{Nips}       \\ \midrule
                  LDA                    & ~~~~~~~~~~~~~~~~\cmark                                 & 6.3 min         & 8.8 min \\ % 378 seconds, 527 seconds
-                 LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 & 61.2 h          & \\
+                 LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 & 61.2 h          & 71 min \\
                  TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 & 178 min         & \\
                  Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 & 14.1 h          & \\ % 50713 seconds
                  WELDA, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                                 & 67 min          & \\ \bottomrule % 4027 sec,
