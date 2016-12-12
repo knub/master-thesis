@@ -901,6 +901,7 @@ object Main {
         val TOP_WORDS = 5
 
         val samples = Map(
+            /*
 //            // 44.1
             "topicvec" ->
                 "/home/knub/Repositories/topicvec/results/nips.dim-200.alpha-0-02.iterations-500/iteration-500.500.topics",
@@ -938,9 +939,9 @@ object Main {
 
 
 
-//            // 43.6
-//            "topicvec-20news" ->
-//                "/home/knub/Repositories/topicvec/results/nips.dim-50.alpha-0-02.iterations-500/iteration-500.500.topics"
+            */
+            "welda-20news" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-2.des-100.lambda-0-2.lambdaact-0-29/welda.iteration-200.topics.100"
         )
 
         var i: Long = System.currentTimeMillis / 1000
@@ -952,7 +953,7 @@ object Main {
             val takeRightValue = if (fileName.contains(".100")) 100 else 500
             println(s"takeRightValue: $takeRightValue columns: ${Source.fromFile(fileName).getLines().next().split(' ').length}")
             val topics = Source.fromFile(fileName).getLines().map { line =>
-                line.split(' ').takeRight(takeRightValue).take(50).toSeq
+                line.split(' ').takeRight(takeRightValue).take(100).toSeq
             }.toSeq
             println(topics.size)
 
@@ -961,7 +962,7 @@ object Main {
 
             def buildIntrusion(topicId: Int): String = {
                 val exclusionWords = topics(topicId).toSet
-                assert(exclusionWords.size == 50, s"50 != ${exclusionWords.size} in $fileName")
+                assert(exclusionWords.size == 100, s"100 != ${exclusionWords.size} in $fileName")
                 val availableWords = potentialIntruderWords.diff(exclusionWords)
 
                 val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
