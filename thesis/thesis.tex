@@ -514,9 +514,9 @@ Correlation is measured using Pearson's correlation.
 Basically, the human ratings are used as training data to decide, which automatic measure is the best.
 
 To evaluate topic coherence automatically, all measures need an external knowledge base or corpus.
-Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-cooccurrences in Wikipedia articles, and found that using Wikipedia provides the best metric.
+Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-co-occurrences in Wikipedia articles, and found that using Wikipedia provides the best metric.
 
-Röder et al.~\cite{Roder2015} built on this idea and developed an extensive survey to find the best method to combine the word-cooccurrences from Wikipedia into a coherence measure.
+Röder et al.~\cite{Roder2015} built on this idea and developed an extensive survey to find the best method to combine the word-co-occurrences from Wikipedia into a coherence measure.
 Using previously published topic ratings~\cite{Aletras2013,Chang2009,Newman2010,Rosner2013}, they could find the topic coherence measure with the highest correlation.
 It is important to realize, that they could reuse previously published topic ratings, because the top words of a topic are independent of any topic model implementation or architecture.
 The topic coherence is solely based on the coherence of a set of words.
@@ -2078,22 +2078,45 @@ The approaches just seem to not be able to use the knowledge in the embedding sp
 
 So far, we evaluated the quality of our topics using the $C_V$ by Röder et al.~\cite{Roder2015}, which we introduced in Section~\ref{sec:topic_coherence}.
 While this method is cheap and many models can be evaluated, the correlation with human ratings is not perfect, but only $r_{Pearson} = 0.731$.
+Also, it is based on co-occurrence statistics from the English Wikipedia under the assumption, that this corpus contains a large number of topics and can therefore be used as a reference corpus.
+In the case of the \textsc{20News} corpus with its wide range of general topics, this assumption holds.
+However, it is questionable for the \textsc{Nips} corpus.
+The \textsc{Nips} with its scientific papers and many technical terms has a clearly different scope.
 
+For this reasons, we decided to conduct a manual study on the \textsc{Nips} corpus.
+We evaluated the quality of a topic model by the word intrusion task by Chang et al.~\cite{Chang2009}.
+In this task, a subject is presented with a list of six words.
+Five of these six words belong to the top words of one topic of the topic model.
+The sixth word is chosen randomly from another topic.
+This word is called the \emph{intruder}.
+Our potential intruders had to be in the top ten words of another topic, but not in the top fifty words of the topic the other five words stem from.
+The word order is randomized.
+The idea of this word intrusion study is the following: if the five words form a clear, coherent topic, it should be simple to detect the intruder.
+For example, in the word set:
+\topicbox{gaussian bayesian posterior neural distribution prior}
+the intruder ``neural'' is easily recognizable, because all other words stem from Bayesian statistics.
+However, in the sample:
+\topicbox{error generalization hypothesis convergence evidence probability}
+the intruder ``convergence'' is much harder to recognize.
+In this cases, the subjects will choose one of the words at random.
+The percentage of correctly identified intruders is taken as a metric to assess the quality of a topic model.
 
+In our study, we picked the four best models from Section~\ref{sec:evaluation_topic_coherence}, i.e. LDA, LFTM, TopicVec and WELDA.
+We tested two different scenarios: one with $K = 50$ topics and one with $K = 20$ topics.
+We created one sample for each topic.
+This resulted in 200 samples for the 50-topic topic models and 80 samples for $K = 20$.
+Our subject group consisted of computer science students and computer scientists familiar with the topics of the \textsc{Nips} corpus.
+To not bias the results, subjects were not presented with the information, whether their selection was correct~\cite{Chang2009}.
 
-In order to evaluate 
-The \textsc{Nips} corpus is a with a narrow focus on 
-No general topic corpus.
-
-This is why we 
-according to the self-description
-
-Researchers and students familiar with these topics
+We present the results in Figures~\ref{fig:word_intrusion_20} and \ref{fig:word_intrusion_50}.
+Each sampled was evaluated by at least five subjects.
+We plot the accuracy of the individual subjects, as well as the average accuracy over all subjects.
+% TODO: Results after Michael
 
 \begin{figure}
        \centering
        \includegraphics[width=12cm]{figures/word_intrusion_20.png}
-       \caption{Word intrusion study results for 20 topics}
+       \caption{Word intrusion study results for 20 topics. The data points represent the accuracy of the different subjects. We also marked the micro-averaged accuracy over all subjects.}
        \label{fig:word_intrusion_20}
 \end{figure}
 
