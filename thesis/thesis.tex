@@ -1170,7 +1170,7 @@ There are several configurable parameters in the algorithm, which we will detail
     As visible in Figure~\ref{fig:ll_lda_convergence}, the log-likelihood has already converged with that many iterations.
     \begin{figure}
            \centering
-           \includegraphics[width=0.5\textwidth]{figures/ll_lda_convergence.png}
+           \includegraphics[width=10cm]{figures/ll_lda_convergence.png}
            \caption{Convergence of the LDA model on the \textsc{20News} corpus}
            \label{fig:ll_lda_convergence}
     \end{figure}
@@ -1261,7 +1261,7 @@ For six or more dimensions, LSH is preferred.
 We pick the best method automatically in the $\textsc{Init}$ method in Algorithm~\ref{alg:welda_init}.
 \begin{figure}
        \centering
-       \includegraphics[width=1.0\textwidth]{figures/lsh_vs_kdtree.png}
+       \includegraphics[width=12cm]{figures/lsh_vs_kdtree.png}
        \caption{Performance comparison of LSH and k-d tree for the nearest neighbour word search, based on the number of dimensions.}
        \label{fig:lsh_vs_kdtree}
 \end{figure}
@@ -2076,6 +2076,12 @@ The approaches just seem to not be able to use the knowledge in the embedding sp
 
 \section{Word intrusion study}
 
+So far, we evaluated the quality of our topics using the $C_V$ by Röder et al.~\cite{Roder2015}, which we introduced in Section~\ref{sec:topic_coherence}.
+While this method is cheap and many models can be evaluated, the correlation with human ratings is not perfect, but only $r_{Pearson} = 0.731$.
+
+
+
+In order to evaluate 
 The \textsc{Nips} corpus is a with a narrow focus on 
 No general topic corpus.
 
@@ -2083,6 +2089,20 @@ This is why we
 according to the self-description
 
 Researchers and students familiar with these topics
+
+\begin{figure}
+       \centering
+       \includegraphics[width=12cm]{figures/word_intrusion_20.png}
+       \caption{Word intrusion study results for 20 topics}
+       \label{fig:word_intrusion_20}
+\end{figure}
+
+\begin{figure}
+       \centering
+       \includegraphics[width=12cm]{figures/word_intrusion_50.png}
+       \caption{Word intrusion study results for 50 topics}
+       \label{fig:word_intrusion_50}
+\end{figure}
 
 \section{Runtime}
 \label{sec:runtime}
