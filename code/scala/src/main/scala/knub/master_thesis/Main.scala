@@ -941,8 +941,10 @@ object Main {
 
 
             */
-            "welda-20news" ->
-                "/home/knub/Repositories/master-thesis/models/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-2.des-100.lambda-0-2.lambdaact-0-29/welda.iteration-200.topics.100"
+//            "welda-20news" ->
+//                "/home/knub/Repositories/master-thesis/models/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.gaussian.topic0-no.pca-2.des-100.lambda-0-2.lambdaact-0-29/welda.iteration-200.topics.100",
+            "welda-vmf-20news" ->
+                "/home/knub/Repositories/master-thesis/models/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.dim-200.skip-gram.embedding.welda.vmf.welda-vmf.topic0-no.pca-10.des-20.lambda-0-5.kappafactor-3.lambdaact-0-56/welda.iteration-200.topics"
         )
 
         var i: Long = System.currentTimeMillis / 1000
@@ -963,7 +965,7 @@ object Main {
 
             def buildIntrusion(topicId: Int): String = {
                 val exclusionWords = topics(topicId).toSet
-                assert(exclusionWords.size == 100, s"100 != ${exclusionWords.size} in $fileName")
+                assert(exclusionWords.size == 10, s"100 != ${exclusionWords.size} in $fileName")
                 val availableWords = potentialIntruderWords.diff(exclusionWords)
 
                 val intrusionPair = (topics(topicId).take(TOP_WORDS), drawWordFromSet(availableWords, r))
