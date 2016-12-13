@@ -156,7 +156,6 @@ Betreuung: Dr. Ralf Krestel}
 \tableofcontents
 % \mainmatter
 
-% TODO: Mention somewhere, that we take the last alpha beta values from Mallet
 \chapter{Introduction}
 \label{sec:introduction}
 % \begin{algorithm}
@@ -1801,7 +1800,7 @@ Second, similar topic coherence values are achieved in the end, as WELDA natural
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_background_topic.png}
-       \caption{Comparison of WELDA with and without background topic}
+       \caption{Comparison of WELDA with and without background topic. Background topic resampling converges faster, but not better.}
        \label{fig:welda_gaussian_background_topic}
 \end{figure}
 
@@ -1822,6 +1821,33 @@ The topic coherence development during the $1500$ iterations is displayed in Fig
 % \subsubsection{Top word selection} TODO
 
 \subsubsection{WELDA with von Mises-Fisher distributions}
+
+So far, all experiments were executed with Gaussian distributions as the topic distributions.
+We now evaluate WELDA with von Mises-Fisher distributions.
+We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $N_{top} = 20$.
+The results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_vmf}.
+
+In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations.
+
+\begin{table}[]
+  \centering
+  \caption{Comparison of WELDA's topic coherence with Gaussian distributions and with von Mises-Fisher (vMF) distributions on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions are worse.}
+  \label{table:welda_vmf}
+  \begin{tabular}{@{}ccccccc@{}}
+    \toprule
+           &           & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{Wikipedia} \\ \cmidrule{3-4} \cmidrule{6-7}
+
+           $\lambda$ & $\lambda_{act}$ & $TC~vMF$             & $\Delta TC$&           & $TC~vMF$         & $\Delta TC$      \\
+           \midrule
+           0.2    & 0.29      & $45.8$         & $\pm 0.0$         && 45.7       & $+0.7$           \\
+           0.4    & 0.47      & 45.3           & $-1.8$            && 45.9       & $+0.3$           \\
+           0.5    & 0.56      & 45.6           & $-1.1$            && 46.0       & $+0.5$           \\
+           0.6    & 0.64      & 45.1           & $-0.4$            && 45.4       & $+0.6$           \\
+           0.8    & 0.82      & 45.0           & $-0.9$            && 44.8       & $+1.4$           \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{WELDA with Gaussian mixtures}
 
 
 
@@ -2236,6 +2262,15 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
          \label{fig:standard_lda_as_prerequisite}
   \end{figure}
 
+  \subsection{WELDA with von Mises-Fisher distributions}
+  \label{sec:appendix_welda_vmf}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{figures/welda_vmf_20news.png}
+         \caption{Von Mises-Fisher WELDA's topic coherence development on \textsc{20News} for different $\lambda_{act}$ values with corpus-specific embeddings. At the end, we plot the respective $TC$ values for Gaussian WELDA, which is superior in this case.}
+         \label{fig:welda_vmf_20news}
+  \end{figure}
+
   \section{Comparative Evaluation}
   \subsection{Document classification on 20News with corpus-specific embeddings}
   \label{sec:appendix_document_classification_corpus_specific}
@@ -2258,8 +2293,8 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
                         TopicVec + Avg. Emb.     & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
                         WELDA                    & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
                         WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
-                        Gaussian LDA             & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
-                        Gaussian LDA + Avg. Emb. & xxxx    & xxxx    & xxxx   && xxxx    & xxxx     & xxxx   \\
+                        Gaussian LDA             & 53.7    & 54.3    & 52.3   && xxxx    & xxxx     & xxxx   \\
+                        Gaussian LDA + Avg. Emb. & 77.6    & 76.8    & 76.6   && xxxx    & xxxx     & xxxx   \\
     \bottomrule
     \end{tabular}
   \end{table}
