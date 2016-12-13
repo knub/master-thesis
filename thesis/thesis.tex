@@ -1770,7 +1770,7 @@ The regression is almost constant for all values of $N_{pca}$.
 However, large differences are visible for $N_{pca}$.
 In general, the higher the value, the higher the topic coherence.
 This observation can be explained, as dimensionality reduction always loses information.
-With more dimensions more semantic information can be encoded in the embedding space, and the similarity function between two words becomes more accuracte.
+With more dimensions more semantic information can be encoded in the embedding space, and the similarity function between two words becomes more accurate.
 % TODO: PCA dimensions vs topic similarity evaluation?
 The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
 % TODO: WHY?
@@ -1778,7 +1778,7 @@ The exception to this observation is $N_{pca} = 2$, which performs better than $
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_pca_samples.png}
-       \caption{Topic coherence development for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for higher $N_{top}$}
+       \caption{Topic coherence for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for increasing $N_{top}$. $N_{top}$ does not have a huge influence on the topic coherence. In contrast, the higher $N_{pca}$ the better the topic coherence.}
        \label{fig:welda_gaussian_pca_samples}
 \end{figure}
 
@@ -1811,22 +1811,16 @@ We run standard LDA before WELDA to estimate the topic distributions on already 
 We now evalute the performance of WELDA, when we initialize topics randomly as standard LDA.
 This initial setup has a topic coherence value of $TC = 31.1$.
 As convergence takes longer with random initialization, we ran WELDA for $1500$ iterations on \textsc{20News} with $\lambda = 0.5$.
-The results are displayed in Figure~\ref{fig:standard_lda_as_prerequisite}.
-As expected, WELDA performs far worse than before, reaching only $39.1$ with corpus-specific and $40.0$ with Wikipedia embeddings.
-With random initialization, WELDA is actually harmful, as we do not even reach standard LDA's topic coherence of $41.9$.
-\begin{figure}
-       \centering
-       \includegraphics[width=\textwidth]{figures/welda_gaussian_random_init.png}
-       \caption{WELDA with $\lambda = 0.5$ and random topic initialization. }
-       \label{fig:standard_lda_as_prerequisite}
-\end{figure}
-
+As expected, WELDA performs far worse than before, reaching only $TC = 39.1$ with corpus-specific and $TC = 40.0$ with Wikipedia embeddings.
+With random initialization, WELDA is actually harmful, as we do not even reach standard LDA's topic coherence of $TC = 41.9$.
+The topic coherence development during the $1500$ iterations is displayed in Figure~\ref{fig:standard_lda_as_prerequisite} in Appendix~\ref{sec:appendix_lda_prerequisite}.
 % \subsubsection{Choice of word embeddings} TODO
 % \subsubsection{Strange behaviour for $\lambda_{act} = 1.0$} TODO
 % When the words are spread far apart, and the mean is in the middle of nowhere, things tend to overfit.
 % /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
 % \subsubsection{Top word selection} TODO
+\subsubsection{WELDA with von Mises-Fisher distributions}
 
 
 
@@ -2230,6 +2224,15 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
          \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_200.png}
          \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with Wikipedia as embedding corpus}
          \label{fig:welda_gaussian_nips_200}
+  \end{figure}
+
+  \subsection{LDA as prerequisite}
+  \label{sec:appendix_lda_prerequisite}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{figures/welda_gaussian_random_init.png}
+         \caption{WELDA with $\lambda = 0.5$ and random topic initialization. }
+         \label{fig:standard_lda_as_prerequisite}
   \end{figure}
 
   \section{Comparative Evaluation}
