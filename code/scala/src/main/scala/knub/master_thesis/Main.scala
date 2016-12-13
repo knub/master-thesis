@@ -487,21 +487,22 @@ object Main {
                     )
                 runCases(cases, 15, new GaussianMixtureWELDA(_))
             case "welda-vmf" =>
-                val lambdas = List(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0)
-                val kappaFactors = List(1, 2, 3, 5, 10, 20, 50, 100)
+                val lambdas = List(0.2, 0.4, 0.5, 0.6, 0.8)
+                val kappaFactors = List(1, 3)
                 val samplingParams = List((10, 20))
-                val cases = for (embedding <- embeddings; lambda <- lambdas; kappaFactor <- kappaFactors; samplingParam <- samplingParams)
+                val cases = for (embedding <- embeddings.take(1); lambda <- lambdas; kappaFactor <- kappaFactors; samplingParam <- samplingParams)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
                         kappaFactor = kappaFactor,
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2,
-                        modelNamePrefix = s"welda-vmf",
+                        numIterations = 500,
+                        modelNamePrefix = s"welda-vmf-run2",
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 10, new VmfWELDA(_))
+                runCases(cases, 20, new VmfWELDA(_))
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "word-intrusion" =>
