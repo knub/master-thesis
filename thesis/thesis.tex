@@ -219,7 +219,7 @@ The state of the art is Latent Dirichlet Allocation (LDA) by Blei et al.~\cite{B
 Topic models are probabilistic models, which means they provide probability distributions as the result.
 Therefore, the topics can be easily interpreted by humans.
 Topic models have several applications, mostly in information retrieval, where they can help navigate large corpora or augment search queries.
-Topics models have also been applied in bioinformatics, where they help understand evolution~\ref{Pritchard2000}.
+Topics models have also been applied in bioinformatics, where they help understand evolution~\cite{Pritchard2000}.
 
 The idea of word embeddings is to assign each word in a vocabulary a vector in high-dimensional vector space, the so-called word embeddings.
 Typical vector space sizes range from $50$ to $600$~\cite{Mikolov2013}.
@@ -639,7 +639,7 @@ With a word vector of $[0~0~0.2~0.8]$ and given the meanings of a topic, a word 
 When working with word embeddings, a vector like $[{-2.4}~0.3~1.3~{-0.1}]$ is not interpretable.
 The arbitrary dimensions and values of a word embedding vector cannot be understood by humans.
 
-Regarding the performance, LDA operates much slower than word embeddings.
+Regarding the performance, LDA operates much slower than word embeddings, when the training set size is equal.
 LDA becomes very expensive on large data sets, because it needs to repeatedly iterate over the entire corpus.
 The method by Mikolov has been successfully trained on a corpus with about 100 billion words.
 
@@ -992,9 +992,9 @@ Embedding models, on the other hand, assign high similarity to immediately obvio
        High similarity indicates a similarity value in the upper quartile, low similarity corresponds to a value in the lower quartile.}
        \begin{tabular}{p{2cm}cp{2cm}p{4cm}p{4cm}}
        \toprule
-         \textbf{}                                                                                  &  & \textbf{} & \multicolumn{2}{c}{\textbf{Word embedding similarity}} \\
+         \textbf{}                                                                                  &  & \textbf{} & \multicolumn{2}{c}{Word embedding similarity} \\
                                                                                                   &&           & High                      & Low                       \\ \midrule
-         \multirow{2}{*}{\textbf{\begin{tabular}[c]{@{}c@{}}\\ Topic model\\ similarity\end{tabular}}} && \vspace{0.1cm}High    &
+         \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}\\ Topic model\\ similarity\end{tabular}} && \vspace{0.1cm}High    &
            disease, diseases \newline
            professor, lecturer \newline
            poetry, prose
@@ -1323,7 +1323,7 @@ We see, that a value of fifteen is sufficient, so that the background topic occu
   \label{table:alpha0_boost}
   \begin{tabular}{ccccccccccc}
     \toprule
-    $\boldsymbol{\alpha_0^{boost}}$                & \textbf{1}     & \textbf{2}     & \textbf{3}     & \textbf{5}     & \textbf{7}     & \textbf{9}     & \textbf{10}    & \textbf{15}    & \textbf{20}    & \textbf{30}    \\
+    $\alpha_0^{boost}$                & 1     & 2     & 3     & 5     & 7     & 9     & 10    & 15    & 20    & 30    \\
     \midrule
   doc. containing background topic  & 11  & 23  & 39  & 47  & 56  & 65  & 79  & 90  & 91  & 91  \\
   words in background topic & 2   & 4   & 8   & 10  & 13  & 16  & 19  & 24  & 24  & 24 \\
@@ -1374,9 +1374,13 @@ WELDA will not work in this case.
 \subsection{Software}
 
 Our WELDA implementation is written in Scala and available on GitHub\footnote{\url{https://github.com/knub/master-thesis}}.
-The initial LDA is run with Mallet~\cite{McCallum2002}.
-The word vectors are trained using gensim~\cite{Rehurek2010}.
-For loading the word vectors for WELDA, we use the Deeplearning4j\footnote{\url{https://deeplearning4j.org/}} library.
+The initial LDA model is inferred  with Mallet~\cite{McCallum2002}.
+The word embeddings are trained with gensim~\cite{Rehurek2010}.
+For loading the word vectors for WELDA, we use the Deeplearning4j~\cite{DL4J2016} library.
+The parameters for the Gaussian and von Mises-Fisher distribution can be estimated analytically.
+For the Gaussian mixtures, we use the implementation from the scikit-learn~\cite{Pedregosa2012} Python library, which uses an expectation-maximization algorithm.
+As LSH implementation, we use TarsosLSH by Six~\cite{Six2016}.
+
 
 \chapter{WELDA discussion}
 \label{sec:welda_discussion}
@@ -1487,13 +1491,13 @@ This can be explained by the fact, that both \textsc{20News} and \textsc{Nips} a
 \begin{table}[]
   \ra{1.3}
   \centering
-  \caption{Comparison over the different word embeddings, which we trained for this work.
+  \caption{Comparison of the different word embeddings, which we trained for this work.
   The last column indicates the performance in an analogy reasoning (AR) benchmark published by Mikolov et al.~\cite{Mikolov2013b}.
   We also added the Google News embeddings, which were published by Google for comparison.}
   \label{table:word_embeddings_performance}
   \begin{tabular}{ccccc}
     \toprule
-    \textbf{Data set} & \textbf{Dimensions} & \textbf{\# words} & \textbf{\# sentences} & \textbf{Accuracy AR} \\
+    Data set & Dimensions & \# words & \# sentences & Accuracy AR \\
     \midrule
     English Wikipedia & 200                 & 1,787,888,109     & 93,322,949            & 56.5 \%              \\
     English Wikipedia & 50                  & 1,787,888,109     & 93,322,949            & 40.4 \%              \\
@@ -1595,7 +1599,7 @@ Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured 
   \caption{Best and worst topics in our best topic model on the \textsc{20News}-corpus with 50 topics according to $C_V$}
   \begin{tabular}{ll}
   \toprule
-  $\mathbf{C_V}$ & \textbf{Top words} \\ \midrule
+  $C_V$ & Top words \\ \midrule
   79.2               & god, faith, moral, morality, truth, christians, religion, atheists, belief, bible \\
   76.4               & team, hockey, players, season, game, nhl, league, teams, games, play \\
   ...                &                    \\
@@ -1666,12 +1670,12 @@ The $\lambda_{act}$ values are slightly higher than the original $\lambda$ value
 \begin{table}[]
   \ra{1.2}
   \centering
-  \caption{Comparison of $\lambda$ and $\lambda_{act}$}
+  \caption{Comparison of $\lambda$ and $\lambda_{act}$. $\lambda_{act}$ is always greater than $\lambda$ with diminishing differences for higher $\lambda$}
   \label{table:actual_lambda}
   \begin{tabular}{lrrrrrrrrrrrr}
     \toprule
-    $\boldsymbol{\lambda}$     & 0.00 & 0.001 & 0.10  & 0.20  & 0.30  & 0.40  & 0.50  & 0.60  & 0.70  & 0.80  & 0.90  & 1.0 \\
-    $\boldsymbol{\lambda_{act}}$ & 0.00 & 0.11  & 0.20 & 0.29 & 0.38 & 0.46 & 0.55 & 0.64 & 0.73 & 0.82 & 0.91 & 1.0 \\
+    $\lambda$     & 0.00 & 0.001 & 0.10  & 0.20  & 0.30  & 0.40  & 0.50  & 0.60  & 0.70  & 0.80  & 0.90  & 1.00 \\
+    $\lambda_{act}$ & 0.00 & 0.11  & 0.20 & 0.29 & 0.38 & 0.46 & 0.55 & 0.64 & 0.73 & 0.82 & 0.91 & 1.00 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -1768,16 +1772,19 @@ The first observation is, that $N_{top}$ does not have a large influence on the 
 The regression is almost constant for all values of $N_{pca}$.
 However, large differences are visible for $N_{pca}$.
 In general, the higher the value, the higher the topic coherence.
+The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
+It seems that the first two dimensions encode already a lot information for WELDA.
+Still, in general the trend shows higher topic coherence for higher values of $N_{pca}$.
 This observation can be explained, as dimensionality reduction always loses information.
 With more dimensions more semantic information can be encoded in the embedding space, and the similarity function between two words becomes more accurate.
-% TODO: PCA dimensions vs topic similarity evaluation?
-The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
-% TODO: WHY?
+We illustrate this in Figure~\ref{fig:embedding_model_dimensions_vs_similarity_corr} in Appendix~\ref{sec:embedding_model_dimensions_vs_similarity_corr}.
+There, we project the Wikipedia embeddings to fewer dimensions using principal component analysis and then evaluate the word similarity correlation with human ratings from the \textsc{WordSim-353}~\cite{Agirre2009} data set.
+There is a clear trend towards higher correlation with more dimensions.
 
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_pca_samples.png}
-       \caption{Final topic coherence values for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for increasing $N_{top}$. $N_{top}$ does not have a huge influence on the topic coherence. In contrast, the higher $N_{pca}$ the better the topic coherence.}
+       \caption{Final topic coherence values after 200 iterations for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for increasing $N_{top}$. $N_{top}$ does not have a huge influence on the topic coherence. In contrast, the higher $N_{pca}$ the better the topic coherence.}
        \label{fig:welda_gaussian_pca_samples}
 \end{figure}
 
@@ -1905,7 +1912,7 @@ The information contained in the bag-of-words and exploited by LDA is still very
   \label{table:raw_we_tm}
   \begin{tabular}{ccc}
     \toprule
-    \textbf{search word}     & \textbf{200-dim., \textsc{Wikipedia}} & \textbf{50-dim., \textsc{20News}} \\
+    search word     & 200-dim., \textsc{Wikipedia} & 50-dim., \textsc{20News} \\
     \midrule
     top word                 & 0.414                        & 0.410                    \\
     average of top ten words & 0.419                        & 0.389 \\
@@ -2001,7 +2008,7 @@ In each fold, we used a linear \emph{l}-1 regularized SVM classifier, where we t
 The results for the different classes were macro-averaged.
 The results for the three folds were macro-averaged again.
 We will report this number in the tables in the following sections.
-We used the \emph{LinearSVC} implementation from the Python scikit-learn \cite{Pedregosa2012} library.
+We used the \emph{LinearSVC} implementation from the Python scikit-learn~\cite{Pedregosa2012} library.
 
 Additionally, we wanted to analyze the effect of raw word embeddings for document classification.
 For this, we conducted additional experiments, where we added the average word embedding of each document to the features.
@@ -2231,6 +2238,7 @@ Topic specific replacement
 \section{Other notes}
 Concept categorization
 Visualize in tsne
+
 Hyperparameter optimization
 Motivation: topic with countries
 Paper: Schwächen, Stärken, ausführlich
@@ -2240,7 +2248,7 @@ curse of dimensionality for nearest neighbour search
 fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
-% \printbibliography
+\printbibliography
 
 \begin{appendices}
   \chapter{Plots}
@@ -2269,6 +2277,15 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
          \label{fig:standard_lda_as_prerequisite}
   \end{figure}
 
+  \subsection{Accuracy of word similarity depending on the number of dimensions in the embedding model}
+  \label{sec:embedding_model_dimensions_vs_similarity_corr}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{figures/embedding_model_dimensions_vs_similarity_corr.png}
+         \caption{We used the 200-dimensional Wikipedia embeddings and projected them down to fewer dimensions. Then for each dimensionality, we evaluated the correlation with human similarity ratings from the \textsc{WordSim-353}~\cite{Agirre2009} data set. The trend shows, that more dimensions help to capture the word similarity better. Starting at around dimensionality 100, the improvements are only marginal. We use a randomized PCA algorithm, therefore the correlation is not strictly monotonously increasing.}
+         \label{fig:embedding_model_dimensions_vs_similarity_corr}
+  \end{figure}
+
   \subsection{WELDA with von Mises-Fisher distributions}
   \label{sec:appendix_welda_vmf}
   \begin{figure}[H]
@@ -2279,7 +2296,7 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
   \end{figure}
 
   \section{Comparative Evaluation}
-  \subsection{Document classification on 20News with corpus-specific embeddings}
+  \subsection{Document classification on 20N{\footnotesize EWS} with corpus-specific embeddings}
   \label{sec:appendix_document_classification_corpus_specific}
   \begin{table}[]
     \ra{1.3}
