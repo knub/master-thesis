@@ -1777,7 +1777,7 @@ The exception to this observation is $N_{pca} = 2$, which performs better than $
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/welda_gaussian_pca_samples.png}
-       \caption{Topic coherence for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for increasing $N_{top}$. $N_{top}$ does not have a huge influence on the topic coherence. In contrast, the higher $N_{pca}$ the better the topic coherence.}
+       \caption{Final topic coherence values for different values of $N_{pca}$ and $N_{top}$. We also plotted a regression line indicating the development for increasing $N_{top}$. $N_{top}$ does not have a huge influence on the topic coherence. In contrast, the higher $N_{pca}$ the better the topic coherence.}
        \label{fig:welda_gaussian_pca_samples}
 \end{figure}
 
@@ -1823,28 +1823,32 @@ The topic coherence development during the $1500$ iterations is displayed in Fig
 \subsubsection{WELDA with von Mises-Fisher distributions}
 
 So far, all experiments were executed with Gaussian distributions as the topic distributions.
-We now evaluate WELDA with von Mises-Fisher distributions.
+We now evaluate WELDA with von Mises-Fisher distributions (vMF).
 We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $N_{top} = 20$.
 The results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_vmf}.
-
 In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations.
-TODO
+Interestingly, the results are different depending on the embedding used.
+WELDA vMF performs worse than Gaussian WELDA when using corpus-specific embeddings.
+
 
 \begin{table}[]
   \centering
-  \caption{Comparison of WELDA's topic coherence with Gaussian distributions and with von Mises-Fisher (vMF) distributions on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions are worse.}
+  \caption{Comparison of WELDA's topic coherence with Gaussian distributions and with von Mises-Fisher (vMF) distributions on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions perform worse.}
   \label{table:welda_vmf}
   \begin{tabular}{@{}ccccccc@{}}
     \toprule
-           &           & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{Wikipedia} \\ \cmidrule{3-4} \cmidrule{6-7}
-
-           $\lambda$ & $\lambda_{act}$ & $TC~vMF$             & $\Delta TC$&           & $TC~vMF$         & $\Delta TC$      \\
+                     &                 & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{Wikipedia} \\
+           \cmidrule{3-4} \cmidrule{6-7}
+           $\lambda$ & $\lambda_{act}$ & $TC~vMF$        & $TC~GM$ &           & $TC~vMF$         & $\Delta TC$      \\
            \midrule
-           0.2    & 0.29      & $45.8$         & $\pm 0.0$         && 45.7       & $+0.7$           \\
-           0.4    & 0.47      & 45.3           & $-1.8$            && 45.9       & $+0.3$           \\
-           0.5    & 0.56      & 45.6           & $-1.1$            && 46.0       & $+0.5$           \\
-           0.6    & 0.64      & 45.1           & $-0.4$            && 45.4       & $+0.6$           \\
-           0.8    & 0.82      & 45.0           & $-0.9$            && 44.8       & $+1.4$           \\ \bottomrule
+           0.2       & 0.29            & 45.8 $\pm 0.0$  &      && 46.1       & $+1.1$           \\
+           0.4       & 0.47            & 45.3 $-1.8$     &      && 45.9       & $+0.3$           \\
+           0.5       & 0.56            & 45.6 $-1.1$     &      && 46.0       & $+0.5$           \\
+           0.6       & 0.64            & 45.1 $-0.4$     &      && 45.6       & $+0.8$           \\
+           0.8       & 0.82            & 45.0 $-0.9$     &      && 44.8       & $+1.4$           \\ \bottomrule
+           % some of these were run with 300 iterations, see welda-vmf-longer.log
+                     % &                 & \multicolumn{4}{c}{\textsc{20News}} && \multicolumn{4}{c}{Wikipedia} \\ \cmidrule{3-6} \cmidrule{8-11}
+           % $\lambda$ & $\lambda_{act}$ & $TC~vMF$             & $\Delta TC$ & $TC~GM$             & $\Delta TC GM$ &          & $TC~vMF$   & $\Delta TC vMF$ & $TC~GM$  & $\Delta TC GM$      \\
   \end{tabular}
 \end{table}
 
@@ -2205,7 +2209,8 @@ Especially LFTM is very slow with 200-dimensional embeddings, making it infeasib
                  LFTM, $\lambda = 0.6$  & ~~~~~~~~~~~~~~~~\xmark                                 & 61.2 h          & 71 min \\
                  TopicVec               & ~~~~~~~~~~~~~~~~\cmark                                 & 178 min         & \\
                  Gaussian LDA           & ~~~~~~~~~~~~~~~~\xmark                                 & 14.1 h          & \\ % 50713 seconds
-                 WELDA, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                                 & 67 min          & \\ \bottomrule % 4027 sec,
+                 WELDA Gaussian, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                        & 67 min          & \\ \bottomrule % 4027 sec,
+                 WELDA vMF, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                             & 101 min          & \\ \bottomrule
   \end{tabular}
 \end{table}
 
