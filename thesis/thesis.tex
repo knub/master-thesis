@@ -129,7 +129,7 @@
 
 \titlehead{
 \includegraphics{figures/hpi_logo_cmyk_wb_sl2}
-} \subject{Masterarbeit}
+} \subject{Master Thesis}
 \title{Improving Probabilistic Topic Models using Word Embeddings
 \\ \bigskip
 \large{Verbessern von probabilistischen Themenmodellen mithilfe von Vektorrepräsentationen von Wörtern}}
@@ -293,9 +293,14 @@ We will end with a comparison of the two models and existing combinations betwee
 
 \section{Topic modeling}
 Many methods for modeling natural language text have been proposed.
-An early popular method was the tf-idf~\cite{SparckJones1972} scheme, which reduced each document in a corpus to a vector of term frequencies normalized by inverse document frequencies.
-Together, this would form a large matrix with the rows being the documents and the columns being the words.
+An early popular method was the tf-idf~\cite{SparckJones1972} scheme.
+This method represents a document with the counts of the terms occuring the document (tf: term frequency).
+The counts are normalized by the number of documents a term occurs in the corpus (idf: inverse document frequency).
+A high value in tf-idf is reached, when a word occurs in a document often, but only in a few documents in the entire collection at all.
+When applying this method to an entire corpus, this method forms a large matrix with the rows representing the documents, the columns representing the words and the cells containing the tf-idf values.
 Later, latent semantic analysis (LSA)~\cite{Deerwester1990} was proposed to reduce this large matrix to a smaller subspace using singular value decomposition.
+This can capture ``some aspects of linguistic notions such as polysemy and synonymy''~\cite{Blei2003}.
+
 While these approaches have their origins in linear algebra, topic models have been developed from a probabilistic view to allow better interpretation.
 Topic models are generative probabilistic models of a document collection, which assume hidden topics have guided the generation of the text.
 In this way of thinking, an author picks certain topics to write about, and then picks words associated with these topics for a specific document.
@@ -305,7 +310,9 @@ All of these approaches have in common that they assume a bag-of-words represent
 \subsection{Early approaches}
 A basic generative topic model is the mixture of unigrams model~\cite{Nigam2000}.
 In this model, a topic is a fixed probability distribution over the vocabulary.
-However, only one topic is allowed per document, which limits its predictive power.
+A document is created by choosing a topic and then picking words from this topic.
+However, this method allows only one topic per document, which limits its predictive power.
+Also, some documents inherently contain more than one topic, imagine for example a document about ``corruption in football''.
 
 A more sophisticated topic model is probabilistic latent semantic analysis (pLSA), which allows multiple topics per document.
 The model is fitted with an expectation-maximization algorithm.
@@ -1306,11 +1313,12 @@ We discard all words that we cannot match in this way.
 \subsection{Background topic for corpus-specific stop words}
 \label{sec:background_topic}
 To speed up the topic improvement process, we detect corpus-specific stop words in addition to the general English-language stop words we use (see Section~\ref{sec:data_sets}).
-We detect this stop words automatically during the initial LDA Gibbs sampling.
+We detect these stop words automatically during the initial LDA Gibbs sampling.
 Instead of using a symmetric Dirichlet $\alpha$ prior for all topics, we multiply the $\alpha_0$ prior by a factor $\alpha_0^{boost}$.
 By increasing the value of $\alpha_0$ we force the first topic to appear in almost all documents.
 This forces LDA to put words in this topic, which occur in many documents and are very generic.
 We call this first topic the \emph{background topic}, because it occurs in many documents as the generic word background for the more informative topics.
+We call the corpus-specific stop words background words.
 
 We experimented with different values of $\alpha_0^{boost}$ and show the results in Table~\ref{table:alpha0_boost}.
 The second row shows the percentage of documents containing the background topic and the third row shows the percentage of words in the background topic.
@@ -1373,14 +1381,15 @@ WELDA will not work in this case.
 
 \subsection{Software}
 
-Our WELDA implementation is written in Scala and available on GitHub\footnote{\url{https://github.com/knub/master-thesis}}.
+Our WELDA implementation is written in Scala with the help of ScalaNLP~\cite{ScalaNlp2009}.
+It is available on GitHub\footnote{\url{https://github.com/knub/master-thesis}}.
 The initial LDA model is inferred  with Mallet~\cite{McCallum2002}.
 The word embeddings are trained with gensim~\cite{Rehurek2010}.
 For loading the word vectors for WELDA, we use the Deeplearning4j~\cite{DL4J2016} library.
 The parameters for the Gaussian and von Mises-Fisher distribution can be estimated analytically.
 For the Gaussian mixtures, we use the implementation from the scikit-learn~\cite{Pedregosa2012} Python library, which uses an expectation-maximization algorithm.
 As LSH implementation, we use TarsosLSH by Six~\cite{Six2016}.
-
+The k-d tree implementation stems from Weka~\cite{Hall2009}.
 
 \chapter{WELDA discussion}
 \label{sec:welda_discussion}
@@ -1418,7 +1427,7 @@ There are twenty different classes, which are shown in Table~\ref{table:20news}.
 The \textsc{Nips} corpus is a collection of scientific papers from the proceedings of Neural Information Processing Systems.
 The papers focus on neural computation, learning theory, algorithms and architectures, cognitive science, information theory, neuroscience, vision, speech, control and diverse applications.
 We removed everything before the abstract except the title, as this part mostly contains names and email addresses.
-For the topic models, this is only noise and we do not want this noise in the topics.
+For the topic models, this is only noise, that we do not want to occur in the topics.
 The same holds for the references, which we also removed.
 
 We chose these two data sets, because they represent two different type of corpora.
@@ -1622,7 +1631,7 @@ Unless noted otherwise, all our experiments are run with $1500$ standard LDA ite
 \begin{figure}
        \centering
        \includegraphics[width=12cm]{figures/standard_lda_alpha_beta.png}
-       \caption{Average topic coherence for a fixed $\alpha$ respectively $\beta$, while averaging over all values of $\beta$ respectively $\alpha$. There is no trend recognizable beyond random fluctuations. Therefore, $\alpha$ and $\beta$ have no influence on the topic coherence.}
+       \caption{Average topic coherence for a fixed $\alpha$ respectively $\beta$, while averaging over all values of $\beta$ respectively $\alpha$. There is no trend recognizable, only random fluctuations. Therefore, $\alpha$ and $\beta$ have no influence on the topic coherence.}
        \label{fig:standard_lda_alpha_beta}
 \end{figure}
 As a baseline, we started with evaluating the topic coherence $TC$ of the standard LDA algorithm on the \textsc{20News} corpus.
@@ -1643,7 +1652,7 @@ We again choose $\alpha = \beta = 0.02$ and start with a topic coherence baselin
 \begin{figure}
        \centering
        \includegraphics[width=12cm]{figures/lda_20news_tc_development.png}
-       \caption{Development of the topic coherence for LDA on the \textsc{20News} corpus. The highest improvements occur in the first 200 iterations. After iteration 800, the topic coherence is constant beyond random fluctuations.}
+       \caption{Development of the topic coherence for LDA on the \textsc{20News} corpus. The highest improvements occur in the first 200 iterations. After iteration 800, the topic coherence is constant except of random fluctuations.}
        \label{fig:lda_20news_tc_development}
 \end{figure}
 
@@ -1665,7 +1674,8 @@ In the following experiments, we ran each parameter setting three times.
 We started the evaluation with the influence of the $\lambda$ parameter.
 It must be noted, that the $\lambda$ parameter the algorithm is configured with at the beginning, is not the final $\lambda$ parameter.
 This is because in addition to resampling when the coin flip succeeds, we also resample when corpus-specific stop words occur, that were identified from the background topic.
-The plots in the following sections always use the actual $\lambda_{act}$, i.e. how often was a word replaced during sampling, either because it was a stop word or because the coin toss was successful.
+The plots in the following sections always use the actual $\lambda$, which we call $\lambda_{act}$.
+This variable represents how often a word was replaced during sampling, either because it was a background word or because the coin toss was successful.
 The $\lambda_{act}$ values are slightly higher than the original $\lambda$ values, with diminishing differences for higher $\lambda$. See Table~\ref{table:actual_lambda} for the differences.
 \begin{table}[]
   \ra{1.2}
@@ -1693,7 +1703,7 @@ We start with the analysis of the topic models using the embeddings trained on t
 We tested with $\lambda \in \{ 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0 \}$.
 The results with the corresponding $\lambda_{act}$ values in the legend are plotted in Figure~\ref{fig:welda_gaussian_lambda_20news}.
 All runs start with the same value $TC = 41.9$ at iteration 0, because the models are initialized with the topic assignments from LDA.
-For $\lambda = 0.0$ the topic coherence does not change afterwards beyond random fluctuations.
+For $\lambda = 0.0$ the topic coherence does not change afterwards except of random fluctuations.
 This behaviour is expected, as WELDA with no replacement corresponds to standard LDA.
 The same low topic coherence values can be observed when $\lambda = 1.0$, i.e. when all words are replaced.
 This observation indicates, that just relying on the word embeddings to achieve good topics and completely disregarding the standard LDA structure, does not work.
@@ -1764,13 +1774,15 @@ For both corpora, we picked the best model from above and compared it to standar
 \subsubsection{Influence of parameters $N_{pca}$ and $N_{top}$}
 
 We will evaluate the influence of the parameters $N_{pca}$ and $N_{top}$ together in this section, as these parameters depend on each other.
+$N_{pca}$ represents to which dimensionality we project the word embeddings using principal component analysis.
+$N_{top}$ represents the number of top words in a topic used for estimating the topic distributions.
 The larger $N_{pca}$ the larger $N_{top}$ needs to be, i.e. $N_{top} \geq N_{pca}$.
 We conducted experiments with $\lambda = 0.5$ and the Wikipedia embeddings on the \textsc{20News} corpus.
 We illustrate the results in Figure~\ref{fig:welda_gaussian_pca_samples}.
 We plot the development of the topic coherence with different fixed values of $N_{pca}$ against $N_{top}$.
 The first observation is, that $N_{top}$ does not have a large influence on the topic coherence.
 The regression is almost constant for all values of $N_{pca}$.
-However, large differences are visible for $N_{pca}$.
+However, large differences are visible for different values of $N_{pca}$.
 In general, the higher the value, the higher the topic coherence.
 The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
 It seems that the first two dimensions encode already a lot information for WELDA.
@@ -1793,10 +1805,11 @@ There is a clear trend towards higher correlation with more dimensions.
 
 We will now analyze the influence of the background topic.
 When using background topic sampling, we also replace every occurrence of one of the top thirty words in the background topic in addition to all words, which had a successful coin flip.
-When we replace these words, the $\lambda$ is not equal to the actual $\lambda_{act}$, as we replace more words in that case.
-We tested with $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$.
-To ensure similar values when using background word sampling and to not influence the results by different $\lambda$ values, we tested different $\lambda$ parameters.
-After same experiments, we found $\lambda = 0.10$ and $\lambda = 0.45$ to result in $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$.
+When we replace these background words, the $\lambda$ is not equal to the actual $\lambda_{act}$, as we replace more words in that case.
+When we do not use background topic sampling, the $\lambda$ is equal to $\lambda_{act}$.
+We tested the influence of the background topic with $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$.
+To ensure similar $\lambda_{act}$ values with and without using background word sampling and to not influence the results by different $\lambda$ values, we tested different $\lambda$ parameters.
+After some experiments, we found $\lambda = 0.10$ and $\lambda = 0.45$ to result in $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$ when using background sampling.
 Experiments were conducted on the \textsc{20News} corpus with Wikipedia embeddings.
 
 Figure~\ref{fig:welda_gaussian_background_topic} confirms both facts of our initial hypothesis (see Section~\ref{sec:background_topic}).
@@ -1813,11 +1826,14 @@ Second, similar topic coherence values are achieved in the end, as WELDA natural
 
 \subsubsection{Running LDA as a prerequisite}
 
-We run standard LDA before WELDA to estimate the topic distributions on already good topics.
+We run standard LDA before WELDA to estimate the topic distributions on already well-defined topics.
 We now evalute the performance of WELDA, when we initialize topics randomly as standard LDA.
 This initial setup has a topic coherence value of $TC = 31.1$.
 As convergence takes longer with random initialization, we ran WELDA for $1500$ iterations on \textsc{20News} with $\lambda = 0.5$.
 As expected, WELDA performs far worse than before, reaching only $TC = 39.1$ with corpus-specific and $TC = 40.0$ with Wikipedia embeddings.
+
+
+
 With random initialization, WELDA is actually harmful, as we do not even reach standard LDA's topic coherence of $TC = 41.9$.
 The topic coherence development during the $1500$ iterations is displayed in Figure~\ref{fig:standard_lda_as_prerequisite} in Appendix~\ref{sec:appendix_lda_prerequisite}.
 % \subsubsection{Choice of word embeddings} TODO
@@ -2325,5 +2341,20 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
 
 \end{appendices}
 
-%\include{chapters/eigenstaendigkeit}
+\cleardoublepage
+\section*{Declaration}
+\label{sec:declaration}
+
+
+I hereby declare in lieu of oath that I composed this thesis independently and without inadmissible help from outside. The sources used are quoted in full and parts that are direct quotations or paraphrases are identified as such.
+
+\vspace{14mm}
+
+Potsdam, December 23rd, 2016
+
+\vspace{20 mm}
+
+Stefan Bunk
+
+
 \end{document}
