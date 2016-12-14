@@ -561,7 +561,7 @@ object Main {
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 5, new GaussianMixtureWELDA(_))
+                runCases(cases, 8, new GaussianMixtureWELDA(_))
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "word-intrusion" =>
