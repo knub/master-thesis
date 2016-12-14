@@ -157,6 +157,8 @@ Betreuung: Dr. Ralf Krestel}
 % \mainmatter
 
 \chapter{Introduction}
+% TODO: Wofür werden topic models gebraucht? help navigate large corpora? industry: zum Beispiel wenn man bei Google nach etwas suchst
+
 \label{sec:introduction}
 % \begin{algorithm}
 %   \caption{Gibbs sampling in LDA}
@@ -225,10 +227,10 @@ The idea of word embeddings is to assign each word in a vocabulary a vector in h
 Typical vector space sizes range from $50$ to $600$~\cite{Mikolov2013}.
 These vectors are automatically learned using neural networks.
 Although the idea is quite old~\cite{Rumelhart1988,Bengio2003}, the model has recently gained a lot of popularity in the research community.
-This is because of the performance improvements of CPUs and GPUs and because of better training algorithms.
+This is because of performance improvements of CPUs and GPUs and because of better training algorithms, which made training these models on huge amounts of data feasible in recent years.
 Especially the work of Mikolov et al.~\cite{Mikolov2013,Mikolov2013a,Mikolov2013b} and the publication of the open-source tool \emph{word2vec}, which allows to train on billions of words in a realistic time frame, must be mentioned.
 The training in \emph{word2vec} works in a supervised manner.
-A sliding window is run over the text, and each word must try to predict its surrounding words.
+A sliding window runs over the text and each word must try to predict its surrounding words.
 This way, the context of a word is encoded in the vector representation of a word.
 Using a clever network architecture and by training on many samples, these vectors exhibit interesting properties.
 First, similar words tend to be in similar positions in the vector space.
@@ -236,6 +238,7 @@ For example, when looking for the most similar words for ``France'' using cosine
 Second, the word vectors exhibit interesting linear relationships.
 For example, when calculating the vector $vector("king") - vector("man") + vector("woman")$ and looking for the closest word to the vector result, the result is the word ``queen''~\cite{Mikolov2013b}.
 
+\section{Motivation}
 The two approaches have different origins.
 Word embeddings have their roots in the neural network and deep learning community, while topic modeling stems from Bayesian statistics, which is why traditionally there is not much research combining the two methods.
 In this master thesis, we aim to explore potential synergies between these technologies.
@@ -247,6 +250,7 @@ In particular, it might be useful to investigate ``whether the two types of mode
 In general, there are two ways of combining these two methods: one can create better topic models or one can create better word embeddings.
 In this thesis, we focus on the former.
 
+\section{Contributions}
 The contributions of this thesis are:
 \begin{itemize}
   \item
@@ -266,7 +270,8 @@ The contributions of this thesis are:
     However, when evaluating embeddings with respect to typical topic model metrics like topic coherence or document classification, embeddings trained on the small corpora itself can be superior.
 \end{itemize}
 
-This master thesis is structured as follows:
+\section{Structure}
+% This master thesis is structured as follows:
 
 \noindent Chapter~\ref{sec:related_work} shows related work.
 We will introduce topic models and word embeddings and show how they are trained.
@@ -303,7 +308,7 @@ This can capture ``some aspects of linguistic notions such as polysemy and synon
 
 While these approaches have their origins in linear algebra, topic models have been developed from a probabilistic view to allow better interpretation.
 Topic models are generative probabilistic models of a document collection, which assume hidden topics have guided the generation of the text.
-In this way of thinking, an author picks certain topics to write about, and then picks words associated with these topics for a specific document.
+In this way of thinking, an author picks certain topics to write about and then picks words associated with these topics for a specific document.
 The goal is then to uncover the unseen, so called ``latent'', topics from a text corpus.
 All of these approaches have in common that they assume a bag-of-words representation of documents, i.e. the order of the words in the document is discarded.
 
@@ -312,7 +317,7 @@ A basic generative topic model is the mixture of unigrams model~\cite{Nigam2000}
 In this model, a topic is a fixed probability distribution over the vocabulary.
 A document is created by choosing a topic and then picking words from this topic.
 However, this method allows only one topic per document, which limits its predictive power.
-Also, some documents inherently contain more than one topic, imagine for example a document about ``corruption in football''.
+Also, some documents inherently contain more than one topic, imagine for example a document about ``corruption in football'', which will contain words from a \emph{politics} as well as a \emph{sports} topic.
 
 A more sophisticated topic model is probabilistic latent semantic analysis (pLSA), which allows multiple topics per document.
 The model is fitted with an expectation-maximization algorithm.
@@ -359,7 +364,7 @@ With these two hyperparameters, the generative document creation process of LDA 
 This process is also illustrated in the probabilistic graphical model in plate notation in Figure \ref{fig:lda}.
 This model can also be seen as a soft-classification of documents: instead of assuming exactly one topic per document, each word in a document can potentially come from a different topic.
 
-In reality, we only observe the words in the documents, and need to reverse engineer the hidden, ``latent'' parameters of the model, namely the word distribution per topic $\phi$, the topic distribution per document $\theta$ and the word-topic assignments $z$.
+In reality, we only observe the words in the documents and need to reverse engineer the hidden, ``latent'' parameters of the model, namely the word distribution per topic $\phi$, the topic distribution per document $\theta$ and the word-topic assignments $z$.
 In this process, called \emph{inference}, we try to find the most probable parameter assignments, which could have generated our document collection.
 Computationally, this is equivalent to finding the posterior distribution of the parameters given the observed words:
 \begin{equation*}
@@ -390,7 +395,7 @@ $V$ represents the vocabulary size and $\alpha_t$ the Dirichlet prior for topic 
 Usually, the Dirichlet prior is symmetric and all $\alpha_t$ are identical.
 $\beta$ represents the Dirichlet prior for the topic-word distributions in each topic.
 $Z_{d}^{t}$ is the number of times the topic $t$ occurred in the current topic, $Z^{t, w}$ is the number of times the current word $w$ occurred with topic $t$ and $Z^t$ is the number of times topic $t$ occurred in all documents.
-Intuitively, a topic is more likely, if many words of the topic occur in the current document, and if the word already occurred often with the topic.
+Intuitively, a topic is more likely, if many words of the topic occur in the current document and if the word already occurred often with the topic.
 
 All of these variables can be computed directly from the topic-assignment matrix $Z$, however in the implementation all three of them are also stored as separate matrices for fast access and manipulation.
 An important point for the topic distribution is, that only the topics of all other words are relevant.
@@ -509,7 +514,7 @@ Boyd-Graber et al.~\cite{Boyd-graber2014} identify different types of bad topics
 Topic coherence can be evaluated by humans.
 Given the top words of a topic, human annotators can rate the topic on a three-point Likert scale 1-3 as either ``useless'', ``average'', or ``useful''~\cite{Aletras2013}.
 Averaging the annotations from several annotators yields the gold standard for the topic coherence of a set of words.
-However, this an extensive and time-consuming approach in itself, and then needs to be done again for every new topic model with its own new topics.
+However, this an extensive and time-consuming approach in itself and then needs to be done again for every new topic model with its own new topics.
 
 The goal of a automatic topic coherence metric is to capture the usefulness of a topic for a human user automatically without depending on human annotators.
 The base idea for such a automatic measure was introduced by Newman et al.~\cite{Newman2010}.
@@ -520,7 +525,7 @@ Correlation is measured using Pearson's correlation.
 Basically, the human ratings are used as training data to decide, which automatic measure is the best.
 
 To evaluate topic coherence automatically, all measures need an external knowledge base or corpus.
-Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-co-occurrences in Wikipedia articles, and found that using Wikipedia provides the best metric.
+Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-co-occurrences in Wikipedia articles and found that using Wikipedia provides the best metric.
 
 Röder et al.~\cite{Roder2015} built on this idea and developed an extensive survey to find the best method to combine the word-co-occurrences from Wikipedia into a coherence measure.
 Using previously published topic ratings~\cite{Aletras2013,Chang2009,Newman2010,Rosner2013}, they could find the topic coherence measure with the highest correlation.
@@ -557,9 +562,9 @@ If one would employ cosine distance or euclidean distance to assess similarity i
 In contrast to this, the idea of \emph{distributed representations} is to not represent objects by discrete counts but rather by continuous points in a vector space $\mathbb{R}^m$, where $m$ is much smaller than $|V|$.
 The idea of distributed representations has a long history, dating back to the mid-eighties with work from Hinton and Rumelhart~\cite{Hinton1986,Rumelhart1988}.
 Intuitively, instead of using one dimension for each atomic unit, distributed representations assign meanings to the dimensions and then recombine these meanings for a specific object.
+For example, if one dimension indicates how green an object is and another dimension indicates whether an object is a flower, then one could represent a green flower with high values in both dimensions instead of requiring one dimension for red, blue and green flowers and another dimension for red, blue and green cars.
 %For example to represent , one dimension could indicate the size of an object, another one the color.
 %With just three dimensions, one could represent small
-%If one dimension indicates how green an object is and another dimension indicates whether an object is a flower, then one could represent a green flower with high values in both dimensions instead of requiring one dimension for red, blue, and green flowers.
 Recently, the term \emph{word embeddings} was also used to describe the approach of embedding words in a vector space.
 We will use the terms \emph{distributed representation}, \emph{word vectors} and \emph{word embeddings} interchangeably in this document.
 
