@@ -96,18 +96,6 @@
             <artifactId>mallet</artifactId>
             <version>2.0.8</version>
         </dependency>
-        <!-- http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp -->
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-        <!-- http://mvnrepository.com/artifact/edu.stanford.nlp/stanford-parser -->
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-parser</artifactId>
-            <version>3.6.0</version>
-        </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
