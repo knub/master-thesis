@@ -52,6 +52,7 @@
 
 \bibliography{library}
 
+\usepackage{chngcntr}
 \usepackage{paralist}
 % \usepackage{bold-extra}
 \usepackage{tabularx}
@@ -250,6 +251,17 @@ In particular, it might be useful to investigate ``whether the two types of mode
 In general, there are two ways of combining these two methods: one can create better topic models or one can create better word embeddings.
 In this thesis, we focus on the former.
 
+We illustrate in Figure~\ref{fig:figure1}
+
+\counterwithout{figure}{chapter}
+\begin{figure}
+       \centering
+       \includegraphics[width=\textwidth]{figures/figure1.png}
+       \caption{This is our figure 1 TODO}
+       \label{fig:figure1}
+\end{figure}
+\counterwithin{figure}{chapter}
+
 \section{Contributions}
 The contributions of this thesis are:
 \begin{itemize}
@@ -271,8 +283,7 @@ The contributions of this thesis are:
 \end{itemize}
 
 \section{Structure}
-% This master thesis is structured as follows:
-
+This master thesis is structured as follows: \\
 \noindent Chapter~\ref{sec:related_work} shows related work.
 We will introduce topic models and word embeddings and show how they are trained.
 We will then compare the two techniques and present existing combinations of both.
@@ -453,7 +464,7 @@ The output of running LDA on a corpus is three-fold:
 LDA has been applied to many domains, namely document modeling, text classification, collaborative filtering~\cite{Blei2003} and document summarization~\cite{Wang2009}.
 Other use cases include population genetics~\cite{Pritchard2000} and computer vision~\cite{LiFei-Fei2005}.
 
-\paragraph{Implementations}
+\subsubsection*{Implementations}
 There exist implementations of LDA in Java, C/C++, Python and Matlab.
 In this thesis, we will use two particularly fast and robust implementations:
 \begin{itemize}
@@ -613,7 +624,7 @@ These paragraph vectors can then be viewed as a summary of the meaning of the en
 %for sentiment analysis by training logistic regression classifier on the vectors.
 % http://sentic.net/sentire2011ott.pdf
 
-\paragraph{Implementations}
+\subsubsection*{Implementations}
 The original implementation of the approach by Mikolov et al.~was open sourced under the name \emph{word2vec}.
 It is implemented in C and can be used as a command line tool.
 There also exists another implementation in the gensim package by {\v R}eh{\r u}{\v r}ek~\cite{Rehurek2010}.
@@ -658,7 +669,7 @@ The method by Mikolov has been successfully trained on a corpus with about 100 b
 % TODO: both somewhat use vector space model, add seminal reference
 % distributional semantic models (DSMs)
 
-\paragraph{Typical operations}
+\subsubsection*{Typical operations}
 Both models have different operations in which they perform well, which are standard operations for the respective models.
 
 Word embeddings: find similar words
@@ -713,7 +724,7 @@ In the rest of section we will present some models in detail.
 \subsection{Improved topic models}
 
 We will focus on models, which yield improved topic models and present them in the following paragraphs.
-\paragraph{Gaussian LDA}
+\subsubsection{Gaussian LDA}
 Das et al.~\cite{Das2015} proposed a method named Gaussian LDA.
 In this approach, a topic is no longer a distribution over words in the vocabulary, but a Gaussian distribution in the word embedding space.
 Also, words are no longer atomic units, but are represented by their corresponding pre-trained word embeddings.
@@ -751,7 +762,7 @@ Also, this parameters need to be updated after each word.
 Even though the authors provide some performance improvements using linear algebra identities, inference in Gaussian LDA is very slow.
 We will compare the runtime with other models in Section~\ref{sec:runtime}.
 
-\paragraph{Latent Feature Topic Models (LFTM)}
+\subsubsection{Latent Feature Topic Models (LFTM)}
 Another approach, called Latent Feature Topic Models, is taken by Nguyen et al.~\cite{Nguyen2015}.
 They use word embeddings to sample words not only from the multinomial topic distribution, but also from the embedding space.
 Instead of directly sampling a word from the topic-word distribution of the chosen topic, they introduce a Bernoulli parameter $s \sim Ber(\lambda)$.
@@ -790,7 +801,7 @@ Using the topic vectors, the generative process can be summarized as follows:
 \end{enumerate}
 The authors use pretrained vectors from \emph{word2vec}~\cite{Mikolov2013a} and \emph{GloVe}~\cite{Pennington2014} and conclude that none of these works better than the other.
 
-\paragraph{Nonparametric Spherical Topic Model (NSTM)}
+\subsubsection{Nonparametric Spherical Topic Model (NSTM)}
 Batmanghelich et al.~\cite{Batmanghelich2016} introduce a  introduce nonparametric spherical topic modeling.
 They build on top of Gaussian LDA, but argue that Gaussian distributions do not capture the embedding space very well.
 Instead they propose the von Mises-Fisher distribution to capture topics in the embedding space.
@@ -826,7 +837,7 @@ All together, the generative process looks as follows:
 The authors use 50-dimensional word embeddings, which they trained on Wikipedia.
 The word vectors are not available.
 
-\paragraph{Generative Topic Embedding (TopicVec)}
+\subsubsection{Generative Topic Embedding (TopicVec)}
 Li et al.~\cite{Li2016} propose generative topic embeddings and call their system TopicVec.
 The main idea compared to LDA is to take the immediate context of a word into account and not only the bag-of-words information.
 While LDA picks a word from one of the $K$ multinomial topic distributions, TopicVec defines this distribution based on the context words, similar to the word2vec skip-gram architecture.
@@ -860,7 +871,7 @@ However, as no other method offers this possibility, we will evaluate TopicVec w
 In their paper, the authors evaluated the model only on a document classification task.
 We will also evaluate topic coherence.
 
-\paragraph{Gaussian Mixture Model in Embedding Space}
+\subsubsection{Gaussian Mixture Model in Embedding Space}
 Another idea is proposed by Sridhar~\cite{Sridhar2015}.
 They start by training word embeddings.
 Afterwards they fit a Gaussian mixture model directly on the word embedding space.
@@ -1860,6 +1871,7 @@ WELDA vMF performs worse than Gaussian WELDA when using corpus-specific embeddin
 
 
 \begin{table}[]
+  \ra{1.3}
   \centering
   \caption{Comparison of WELDA's topic coherence with Gaussian distributions and with von Mises-Fisher (vMF) distributions on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions perform worse.}
   \label{table:welda_vmf}
@@ -1867,13 +1879,13 @@ WELDA vMF performs worse than Gaussian WELDA when using corpus-specific embeddin
     \toprule
                      &                 & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{Wikipedia} \\
            \cmidrule{3-4} \cmidrule{6-7}
-           $\lambda$ & $\lambda_{act}$ & $TC~vMF$        & $TC~GM$ &           & $TC~vMF$         & $\Delta TC$      \\
+           $\lambda$ & $\lambda_{act}$ & $TC~vMF$        & $TC~GM$ &           & $TC~vMF$         & $TC~GM$      \\
            \midrule
-           0.2       & 0.29            & 45.8 $\pm 0.0$  &      && 46.1       & $+1.1$           \\
-           0.4       & 0.47            & 45.3 $-1.8$     &      && 45.9       & $+0.3$           \\
-           0.5       & 0.56            & 45.6 $-1.1$     &      && 46.0       & $+0.5$           \\
-           0.6       & 0.64            & 45.1 $-0.4$     &      && 45.6       & $+0.8$           \\
-           0.8       & 0.82            & 45.0 $-0.9$     &      && 44.8       & $+1.4$           \\ \bottomrule
+           0.2       & 0.29            & 45.8 $\pm 0.0$  &      && 46.1        $+1.1$    &       \\
+           0.4       & 0.47            & 45.3 $-1.8$     &      && 45.9        $+0.3$    &       \\
+           0.5       & 0.56            & 45.6 $-1.1$     &      && 46.0        $+0.5$    &       \\
+           0.6       & 0.64            & 45.1 $-0.4$     &      && 45.6        $+0.8$    &       \\
+           0.8       & 0.82            & 45.0 $-0.9$     &      && 44.8        $+1.4$    &       \\ \bottomrule
            % some of these were run with 300 iterations, see welda-vmf-longer.log
                      % &                 & \multicolumn{4}{c}{\textsc{20News}} && \multicolumn{4}{c}{Wikipedia} \\ \cmidrule{3-6} \cmidrule{8-11}
            % $\lambda$ & $\lambda_{act}$ & $TC~vMF$             & $\Delta TC$ & $TC~GM$             & $\Delta TC GM$ &          & $TC~vMF$   & $\Delta TC vMF$ & $TC~GM$  & $\Delta TC GM$      \\
@@ -2256,7 +2268,8 @@ Especially LFTM is very slow with 200-dimensional embeddings, making it infeasib
 
 Document classification
 Topic specific replacement
-\section{Other notes}
+
+% \section{Other notes}
 Concept categorization
 Visualize in tsne
 
