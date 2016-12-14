@@ -78,6 +78,7 @@ object Main {
             "welda-gaussian-background-topic",
             "welda-gaussian-nips-pca-samples",
             "welda-gaussian-mixture-lambdas-pca-samples",
+            "welda-gaussian-mixture-lambdas",
             "welda-gaussian-mixture-nips-lambdas-pca-samples",
             "welda-gaussian-nips-topics-20",
             "welda-gaussian-250-topics-20news",
@@ -546,6 +547,21 @@ object Main {
                         distributionEstimationSamples = samplingParam._2
                     )
                 runCases(cases, 20, new VmfWELDA(_))
+            case "welda-gaussian-mixture-lambdas" =>
+                val lambdas = List(0.2, 0.4, 0.5, 0.6, 0.8)
+                val samplingParams = List((10, 20))
+                val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams; i <- 0 to 1)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        numIterations = 300,
+                        modelNamePrefix = s"welda-gaussian-mixture-lambdas.run-$i",
+                        pcaDimensions = samplingParam._1,
+                        distributionEstimationSamples = samplingParam._2
+                    )
+                runCases(cases, 5, new GaussianMixtureWELDA(_))
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "word-intrusion" =>
