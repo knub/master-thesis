@@ -549,7 +549,7 @@ object Main {
                 runCases(cases, 20, new VmfWELDA(_))
             case "welda-gaussian-mixture-lambdas" =>
                 val lambdas = List(0.2, 0.4, 0.5, 0.6, 0.8)
-                val samplingParams = List((10, 20))
+                val samplingParams = List((50, 200))
                 val cases = for (embedding <- embeddings; lambda <- lambdas; samplingParam <- samplingParams; i <- 0 to 1)
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
@@ -561,7 +561,7 @@ object Main {
                         pcaDimensions = samplingParam._1,
                         distributionEstimationSamples = samplingParam._2
                     )
-                runCases(cases, 8, new GaussianMixtureWELDA(_))
+                runCases(cases, 15, new GaussianMixtureWELDA(_))
             case "inspect-topic-evolution" =>
                 inspectTopicEvolution(args)
             case "word-intrusion" =>
