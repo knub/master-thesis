@@ -22,7 +22,7 @@ For example, the vector which is closest to ``king - man + woman`` is the vector
 
 In traditional topic modelling, each word is treated as an atomic unit, and no relationship between words exist a priori.
 All the information about the topics is extracted from co-occurrence counts.
-Using word embeddings, it is possible to encode semantic similarity between words a priori.,
+Using word embeddings, it is possible to encode semantic similarity between words a priori.
 In this master thesis, I will improve the existing topic modeling approaches by incorporating word embeddings in the model, ultimately leading to more useful topic models.
 
 ## Status
@@ -33,12 +33,11 @@ I started working on my master thesis in June 2016 and will finish by the end of
 
 * ``code``: includes Python and Scala code for data processing, models and my experiments
 * ``data``: contains evaluation data sets
-* ``expose``: contains the expose (first draft about the the topic at the beginning of the project)
-* ``models``: the place for trained models
+* ``expose``: contains the expose (first draft about the thesis at the beginning of the project)
 * ``notebooks``: contains Jupyter notebooks I use for analyzing and visualizing experiments
-* ``notes``: contains small notes, ideas, everything that does not fit somewhere else
-* ``results``: contains results data sets, mostly in .csv or .tsv
+* ``presentation``: contains images used in presentations about my thesis
 * ``thesis``: contains the thesis text
+* ``webapp``: contains the webapp used for the word intrusion study
 
 ## Contact
 
