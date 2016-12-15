@@ -51,8 +51,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 
     def getFolderName(): String
 
-    // Needs to be taken from stopword topic
-    val newStopwords = List(
+    val stopWords = List(
         "1", "2", "also", "anyone", "article", "back", "believe", "ca", "'d", "even",
         "find", "first", "get", "go", "going", "good", "got", "know", "last", "like",
         "'ll", "'m", "make", "many", "may", "much", "never", "new", "one", "people",
@@ -103,7 +102,7 @@ abstract class ReplacementWELDA(p: Args) extends BaseWELDA(p) {
 //            }
 //        }
 
-        newStopwordIds = newStopwords.flatMap { word =>
+        newStopwordIds = stopWords.flatMap { word =>
             val id = word2IdVocabulary.get(word)
 //            if (id.isEmpty)
 //                println(word)
