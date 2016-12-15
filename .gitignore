@@ -6,3 +6,4 @@ data/
 */.ipynb_checkpoints/*
 models/
 *.bin
+notes/
