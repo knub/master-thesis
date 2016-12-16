@@ -855,9 +855,9 @@ As Li et al.~\cite{Li2016} state, ``the implementation is slow and infeasible wh
 \subsubsection{Nonparametric Spherical Topic Model (NSTM)}
 Batmanghelich et al.~\cite{Batmanghelich2016} introduce nonparametric spherical topic modeling.
 They build on top of Gaussian LDA, but argue that Gaussian distributions do not capture the distribution of words in the embedding space well.
-
-
-Instead they propose the von Mises-Fisher distribution to capture topics in the embedding space.
+Indeed, in Gaussian distributions the similarity between samples is estimated by Euclidean distance.
+However, in the word2vec approach proposed by Mikolov~\cite{Mikolov2013}, semantic relatedness between words is calculated using cosine similarity.
+Because of that, they instead propose the von Mises-Fisher distribution to capture topics in the embedding space, which relies on the cosine similarity.
 The von Mises-Fisher distribution is a distribution on the hypersphere with a mean direction $\mu$ and a concentration parameter $\kappa$.
 If there are only two dimensions, the distribution reduces to the von Mises distribution on the circle.
 Using the von-Mises Fisher distribution requires all word vectors to be normalized so they lie on the $M$-dimensional unit hypersphere.
