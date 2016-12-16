@@ -3,7 +3,8 @@
         a4paper,
         titlepage,
         twoside,
-        parskip
+        parskip,
+        numbers=noenddot
         ]{scrbook}
 \setlength{\parskip}{6pt}
 \setlength{\parindent}{15pt}
@@ -21,7 +22,6 @@
 % \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{pifont}
-\usepackage{rotating} % TODO
 \usepackage{booktabs}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 \usepackage{textcomp}
@@ -44,7 +44,7 @@
 \graphicspath{{./figures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \usepackage{rotating}
-\usepackage{caption}
+\usepackage[labelsep=colon]{caption}
 \usepackage{subcaption}
 \usepackage{threeparttable}
 
@@ -218,19 +218,20 @@ This assumption, also known as the distributional hypothesis, has driven the dev
 
 Two of these models are topic models and word embeddings, which we will focus on in this thesis.
 Topic modeling tries to reconstruct the topics in a collection of text with an unsupervised learning approach.
-It assumes that an author has certain topics in mind when writing a document, which are chosen beforehand any documents are written.
+It assumes that an author has certain topics in mind when writing a document, which are chosen before any documents are written.
 For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then picks the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
 Topic modeling techniques try to recover the hidden topics in large corpora, i.e.\ find out that ``soccer'' and ``ball'' come from the same topic.
 The state of the art is Latent Dirichlet Allocation (LDA) by Blei et al.~\cite{Blei2003}.
 Topic models are probabilistic models, which means they provide probability distributions as the result.
 Therefore, the topics can be easily interpreted by humans.
 Topic models have several applications, mostly in information retrieval, where they can help navigate large corpora or augment search queries.
-Topics models have also been applied in bioinformatics, where they help understand evolution~\cite{Pritchard2000}.
+Topic models have also been applied in bioinformatics, where they help understand evolution~\cite{Pritchard2000}.
 
-The idea of word embeddings is to assign each word in a vocabulary a vector in high-dimensional vector space, the so-called word embeddings.
-Typical vector space sizes range from $50$ to $600$~\cite{Mikolov2013}.
-These vectors are automatically learned using neural networks.
-Although the idea is quite old~\cite{Bengio2003,Rumelhart1988}, the model has recently gained a lot of popularity in the research community.
+The idea of word embeddings is to assign each word in a vocabulary a vector in a high-dimensional vector space.
+This vector representation of the word is called the embedding of the word.
+Typically, the vector space contains $50$ to $600$ dimensions~\cite{Mikolov2013}.
+The word embeddings are learned automatically using neural networks.
+Although the idea is quite old~\cite{Bengio2003,Rumelhart1988}, the method has recently gained a lot of popularity in the research community~\cite{Levy2014,Levy2014a,Mikolov2013b}.
 This is because of performance improvements of CPUs and GPUs and because of better training algorithms, which made training these models on huge amounts of data feasible in recent years.
 Especially the work of Mikolov et al.~\cite{Mikolov2013b,Mikolov2013,Mikolov2013a} and the publication of the open-source tool \emph{word2vec}, which allows to train on billions of words in a realistic time frame, must be mentioned.
 The training in word2vec works in a supervised manner.
@@ -250,13 +251,14 @@ Combining the two methods is a promising direction for research, because of seve
 First, the two models capture different notions of similarity: the word-based embedding models focus on semantic similarity, e.g. ``lecturer'' and ``teacher'', while the document-based topic models capture relatedness, e.g. ``teacher'' and ``school''.
 Second, word2vec can be trained on much larger corpora than topic models, thereby allowing more semantic information to be used during the topic model inference.
 Third, word embeddings lack human interpretability, which is where the probabilistic view of topic models can help.
-In particular, it might be useful to investigate ``whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
+In particular, it might be useful to investigate Baroni's question ``whether the two types of models are complementary in the errors they make, in which case combined models could be an interesting avenue for future work''~\cite{Baroni2014}.
 In general, there are two ways of combining these two methods: one can create better topic models or one can create better word embeddings.
 In this thesis, we focus on the former.
 
 We illustrate in Figure~\ref{fig:figure1} how word embeddings can help to improve topic models.
 The figure shows a section of a word embedding space, which we projected down to two dimensions via principal component analysis.
 The words marked by black crosses and by the red minuses form the top ten words of a topic learned by LDA.
+They grey dots in the background represent other words in the embedding space.
 If one plots a probability distribution for the words in the embedding space (grey isolines), it is noticeable, that the words with the lowest probabilities are also the words which fit the least into the topic (the words ``one'', ``question'' and ``claim'').
 The topic could be improved by picking words in the embedding space, which are close to the existing words in the topic.
 In the figure, we illustrated this with the words ``existence'', ``faith'' and ``life'', which form a stronger topic with the rest of the words.
@@ -266,7 +268,9 @@ We want to build a model, which leverages this information from the embedding sp
 \begin{figure}
        \centering
        \includegraphics[width=\textwidth]{figures/figure1.png}
-       \caption{Illustration of an LDA topic in the word embedding space, which we projected down to two dimensions. By picking new words (green pluses) close to existing words in the embedding space, weaker words (red minuses) can be removed from the topic. This process makes the topic more helpful and easier understandable.}
+       \caption{Illustration of an LDA topic in the word embedding space, which we projected down to two dimensions.
+       % The grey isolines show a probability distribution learned from the words.
+       By picking new words (green pluses) close to the existing words in the embedding space, weaker words (red minuses) can be removed from the topic. This process makes the topic more helpful and easier understandable.}
        \label{fig:figure1}
 \end{figure}
 \counterwithin{figure}{chapter}
@@ -280,8 +284,8 @@ The contributions of this thesis are:
     This distribution is then used to sample new, similar words for existing topics, thus improving the topics.
     We will present the full inference algorithm, discuss the implementation details and thoroughly evaluate WELDA.
   \item
-    Recently, there has been a lot of research on combining these topic models and word embeddings~\cite{Batmanghelich2016,Das2015,Li2016,Nguyen2015}.
-    We run an exhaustive evaluation of existing models and WELDA on two tasks.
+    Recently, there has been a lot of research on combining topic models and word embeddings for improved topic models~\cite{Batmanghelich2016,Das2015,Li2016,Nguyen2015} .
+    We run an exhaustive evaluation of these models and WELDA on two tasks.
     The first, topic coherence, evaluates the top words in a topic with respect to interpretability by humans, i.e. how helpful and understandable are the topics.
     The second task, document classification, uses the topic model output for text classification.
     To complete the evaluation, we also ran a manual evaluation on the word intrusion task~\cite{Chang2009}.
@@ -292,7 +296,8 @@ The contributions of this thesis are:
 \end{itemize}
 
 \section{Structure}
-This master thesis is structured as follows: \\
+This master thesis is structured as follows:
+
 \noindent Chapter~\ref{sec:related_work} shows related work.
 We will introduce topic models and word embeddings and show how they are trained.
 We will then compare the two techniques and present existing combinations of both.
@@ -359,7 +364,7 @@ Also, as the number of parameters grows linearly with the number of training doc
 LDA was proposed by Blei et al.~\cite{Blei2003} for modeling text corpora and other collections of discrete data.
 It is an unsupervised algorithm, which provides a full generative model for documents.
 It can automatically detect similarities between words and group them in one topic.
-The number $K$ of topics is fixed for the model and must be chosen beforehand.
+The number of topics $K$ is fixed for the model and must be chosen beforehand.
 LDA defines a topic as a distribution over a fixed vocabulary.
 Different topics assign different probabilities to the same word, for example, the word ``soccer'' would have a much higher probability in a \emph{sports} topic than in a \emph{politics} topics.
 The opposite would hold for the word ``president''.
@@ -726,7 +731,7 @@ When working with word embeddings, a vector like $[{\text{-}2.4}~0.3~1.3~{\text{
 The arbitrary dimensions and values of a word embedding vector cannot be understood by humans.
 
 Regarding the performance, LDA operates much slower than word embeddings, when the training set size is equal.
-LDA becomes expensive on large data sets, partially because the inference problem is NP-hard~\cite{Sontag2011}.
+LDA becomes expensive on large data sets, partially because the inference problem is NP-hard~\cite{Sontag2011a}.
 For training, the entire corpus and the topic assignments have to fit in main memory.
 Also, when the number of documents is increased, the number of topics to represent the corpus usually needs to be increased as well, which further slows down the inference.
 The method by Mikolov et al.\ has been successfully trained on a corpus with about 100 billion words, thus showing that it scales to large data sets.
@@ -905,7 +910,7 @@ The main idea compared to LDA is to take the immediate context of a word into ac
 While LDA picks a word from one of the $K$ multinomial topic distributions, TopicVec defines this distribution based on the context words, similar to the word2vec skip-gram architecture.
 For that, they encode a topic with a vector $t_k$ in the embedding space.
 This vector is called the ``topic embedding'' of topic $k$.
-With these topic embeddings and given the preceding context words, the document and the topic, TopicVec defines the multinomial distribution for a word as following:
+With these topic embeddings and given the preceding context words, the document and the topic, TopicVec defines the multinomial distribution for a word as follows:
 \begin{equation}
   \label{eq:topicvec}
   P(w_c | w_0 : w_{c - 1}, z_c, d_i) \propto \exp \bigg( v_{w_{c}}^T * \Big( \sum\limits_{l=0}^{c-1} v_{w_l} + t_{z_c} \Big) + \sum\limits_{l=0}^{c - 1} a_{w_{l} w_c}  + r_{z_c} \bigg),
@@ -1598,7 +1603,7 @@ We will use topic coherence as a metric to evaluate the quality of our topics.
 As a topic coherence metric, we use the $C_V$ metric from Röder et al.~\cite{Roder2015}, who did an extensive survey on topic coherence metrics.
 Their $C_V$ metric had the highest correlation with human annotators ($r_{Pearson} = 0.731$).
 
-At first, the number $N$ of top words to be considered for the measure must be chosen.
+At first, the number of top words $N$ to be considered for the measure must be chosen.
 We choose $N=10$, because ``the evaluation of topic quality is harder, if the number of top words $N$ is small''~\cite{Roder2015} and because it is a common choice in the literature~\cite{Aletras2013,Roder2015}.
 We denote the set of top words with $W$.
 The topic coherence evaluation for one set of ten top words is calculated in four steps:
@@ -1648,7 +1653,7 @@ The topic coherence evaluation for one set of ten top words is calculated in fou
         NPMI(car, fuel) + NPMI(fuel, fuel) \\
       \end{pmatrix}
     \end{equation*}
-    The dimension of the vector $\vec{v}$ is always equal to the number $N$ of top words.
+    The dimension of the vector $\vec{v}$ is always equal to the number of top words $N$.
     Using these context coherence vectors, the coherence of a pair $(W', W^*)$ is computed using cosine similarity:
     \begin{equation*}
       \vec{u} = \vec{v}(W')
