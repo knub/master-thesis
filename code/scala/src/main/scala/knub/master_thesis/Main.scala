@@ -72,6 +72,7 @@ object Main {
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf",
+            "welda-vmf-pca",
             "welda-gaussian-lambda", "welda-gaussian-random-init",
             "welda-gaussian-pca-samples", "welda-gaussian-nips",
             "welda-gaussian-runtime",
@@ -547,6 +548,23 @@ object Main {
                         distributionEstimationSamples = samplingParam._2
                     )
                 runCases(cases, 20, new VmfWELDA(_))
+            case "welda-vmf-pca" =>
+                val lambdas = List(0.2, 0.4, 0.5, 0.6, 0.8)
+                val kappaFactors = List(1, 3, 5)
+                val samplingParams = List((30, 100), (50, 200))
+                val cases = for (embedding <- embeddings; lambda <- lambdas; kappaFactor <- kappaFactors; samplingParam <- samplingParams; i <- 0 to 1)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        kappaFactor = kappaFactor,
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2,
+                        numIterations = 300,
+                        modelNamePrefix = s"welda-vmf-pca.run-$i",
+                        pcaDimensions = samplingParam._1,
+                        distributionEstimationSamples = samplingParam._2
+                    )
+                runCases(cases, 15, new VmfWELDA(_))
             case "welda-gaussian-mixture-lambdas" =>
                 val lambdas = List(0.2, 0.4, 0.5, 0.6, 0.8)
                 val samplingParams = List((50, 200))
