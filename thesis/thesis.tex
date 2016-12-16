@@ -1107,7 +1107,7 @@ To summarize, syntactic variations and more direct connectedness play a bigger r
 Embedding models are good at assessing similarity between words.
 These observations make us believe that word embeddings can help create more coherent topic models.
 % We take this as motivation to create topic models, whose topics 
-Our goal is to strengthen the topic themes by augmenting the top topic words with similar words from the word embedding space, but at the same not disregarding the bag-of-words collocation information in the documents completely.
+Our goal is to strengthen the topic themes by augmenting the top topic words with similar words from the word embedding space, but at the same time not disregarding the bag-of-words collocation information in the documents completely.
 This way, we help the user understand the common theme in a topic better, while still creating an overview over the entire corpus by looking at all topics.
 
 \subsection{WELDA Algorithm}
@@ -1124,7 +1124,7 @@ We call each of this distributions a \emph{topic distribution}.
 This topic distribution is estimated from the top words of each topic and their representation in the embedding space.
 % By sampling new words from this distribution during the Gibbs sampling, we make
 We then selectively replace words in the text with words from the topic distribution.
-We achieve this by sampling a new word in the innermost loop of the Gibbs sampling algorithm (see Section~\ref{sec:lda}) and then proceeding as if that newly sampled word appeared.
+We achieve this by sampling a new word in the innermost loop of the Gibbs sampling algorithm and then proceeding as if that newly sampled word appeared.
 These words have a high similarity to the top words in the topic.
 
 We now describe the algorithm in more detail.
@@ -1141,9 +1141,6 @@ We will explain this implementation detail later.
 % Two highly similar brands
 % however, never occuring together
 % but in very similar contexts
-
-% Often it is only a few words, which make out a topic.
-% For example, the topic words TODO make out only x percent of the words in the documents, where this topic is the dominating one.
 
 \begin{algorithm}
   \caption{Initialization for the WELDA model, to be run before the Gibbs sampling}
@@ -1167,9 +1164,9 @@ Only then we will run some additional Gibbs sampling iterations using our modifi
 We run LDA first to obtain stable topic assignments and to start with relatively good topics as a baseline.
 This is important, because before each Gibbs sampling iteration we estimate the topic distributions for all topics (line 4).
 We use this topic distributions later in the innermost loop of the sampling algorithm.
-If a coin flip with success probability $\lambda$ succeeds (line 12), we sample a new word from the word embedding space (line 13), based on the topic distribution of the new topic of the current word.
-We use the previously initialized LSH or k-d tree data structure to find the nearest word near our drawn sample (line 14).
-We then update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word and not the word we observed in the text (lines 15-16).
+If a coin flip with success probability $\lambda$ succeeds (line 12), we sample a vector from the word embedding space (line 13), based on the topic distribution of the new topic of the current word.
+We then use the previously initialized LSH or k-d tree data structure to find the nearest word to our drawn sample (line 14).
+Afterwards, we update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word and not the word we observed in the text (lines 15-16).
 
 \begin{algorithm}
   \caption{Gibbs sampling algorithm for the WELDA model}
@@ -1222,9 +1219,9 @@ There are several configurable parameters in the algorithm, which we will detail
 \begin{itemize}
   \item \textbf{Choice of topic distribution} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 13 and Algorithm~\ref{alg:welda_parameter_estimation}, line 5):
     We tested three distributions for the topic distributions.
-    First, the well-known multivariate Gaussian distribution.
-    Second, we also apply a Gaussian mixture model.
-    Last, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we use the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
+    First, we used the well-known multivariate Gaussian distribution.
+    Second, we also tested a Gaussian mixture model.
+    Last, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we used the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
     According to the authors, this distribution is ``well suited for directional data'' and can leverage word similarity correlations better \cite{Batmanghelich2016}.
     We demonstrate these three in detail in the next sections.
   \item \textbf{Resampling probability $\boldsymbol{\lambda}$} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 12):
@@ -1244,9 +1241,9 @@ There are several configurable parameters in the algorithm, which we will detail
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
   \item \textbf{Dimensionality reduction method} (Algorithm~\ref{alg:welda_init}, line 5):
     We use principal component analysis (PCA) to reduce the number of dimensions while maximizing the variance for all remaining dimensions.
-  \item \textbf{Distance function for the nearest neighbour search} (Algorithm~\ref{alg:welda_init}, line 6):
-    For the nearest neighbour search, ``near'' can be defined by either euclidean distance or cosine similarity.
-    We expect cosine distance to perform better as it is usually used for evaluating similarity in the embedding space.
+  % \item \textbf{Distance function for the nearest neighbour search} (Algorithm~\ref{alg:welda_init}, line 6):
+  %   For the nearest neighbour search, ``near'' can be defined by either euclidean distance or cosine similarity.
+  %   We expect cosine distance to perform better as it is usually used for evaluating similarity in the embedding space.
   \item \textbf{Number of iterations to run LDA} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 2):
     We usually run $M = 1500$ iterations, as this yields stable topic assignments and is also used in literature~\cite{Nguyen2015}.
     As visible in Figure~\ref{fig:ll_lda_convergence}, the log-likelihood has already converged with that many iterations.
