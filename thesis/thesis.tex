@@ -340,19 +340,19 @@ In this task, participants were asked to detect a wrong word hidden in the top w
 
 \chapter{Related work}
 \label{sec:related_work}
-In this section we will present topic models and word embeddings.
-We will show their model, how they are trained and how they are evaluated.
-We will end with a comparison of the two models and existing combinations between these two models.
+In this section we will present the theory behind topic models and word embeddings.
+We will show the inference respectively training algorithm and present how the models are evaluated.
+At the end of this chapter, we will compare topic and word embedding models and present existing combinations between the two models.
 
 \section{Topic modeling}
 Many methods for modeling natural language text have been proposed.
 An early popular method was the tf-idf~\cite{SparckJones1972} scheme.
-This method represents a document with the counts of the terms occuring the document (tf: term frequency).
+This method represents a document with the counts of the terms occuring in the document (tf: term frequency).
 The counts are normalized by the number of documents a term occurs in the corpus (idf: inverse document frequency).
-A high value in tf-idf is reached, when a word occurs in a document often, but only in a few documents in the entire collection at all.
+A high value in tf-idf is reached, when a word occurs often in a document, but only in a few documents in the entire collection at all.
 When applying this method to an entire corpus, this method forms a large matrix with the rows representing the documents, the columns representing the words and the cells containing the tf-idf values.
 Later, latent semantic analysis (LSA)~\cite{Deerwester1990} was proposed to reduce this large matrix to a smaller subspace using singular value decomposition.
-This can capture ``some aspects of linguistic notions such as polysemy and synonymy''~\cite{Blei2003}.
+This model can capture ``some aspects of linguistic notions such as polysemy and synonymy''~\cite{Blei2003} and can be seen as a predecessor of modern topic models.
 
 While these approaches have their origins in linear algebra, topic models have been developed from a probabilistic view to allow better interpretation.
 Topic models are generative probabilistic models of a document collection, which assume hidden topics have guided the generation of the text.
@@ -362,8 +362,8 @@ All of these approaches have in common that they assume a bag-of-words represent
 
 \subsection{Early approaches}
 A basic generative topic model is the mixture of unigrams model~\cite{Nigam2000}.
-In this model, a topic is a fixed probability distribution over the vocabulary.
-A document is created by choosing a topic and then picking words from this topic.
+In this model, a document is created by choosing a topic and then picking words from this topic.
+A topic is a fixed probability distribution over the vocabulary.
 However, this method allows only one topic per document, which limits its predictive power.
 Also, some documents inherently contain more than one topic, imagine for example a document about ``corruption in football'', which will contain words from a \emph{politics} as well as a \emph{sports} topic.
 
@@ -386,9 +386,9 @@ Also, as the number of parameters grows linearly with the number of training doc
 
 LDA was proposed by Blei et al.~\cite{Blei2003} for modeling text corpora and other collections of discrete data.
 It is an unsupervised algorithm, which provides a full generative model for documents.
-It can automatically detect similarities between words and group them in one topic.
-The number of topics $K$ is fixed for the model and must be chosen beforehand.
-LDA defines a topic as a distribution over a fixed vocabulary.
+Given a set of documents and a number of topics $K$, LDA automatically detects the hidden topics, that have guided the generation of the documents.
+Similar words are detected and grouped in one topic.
+In LDA, a topic is a multinomial distribution over a fixed vocabulary.
 Different topics assign different probabilities to the same word, for example, the word ``soccer'' would have a much higher probability in a \emph{sports} topic than in a \emph{politics} topics.
 The opposite would hold for the word ``president''.
 Note that a topic is only a distribution over words, i.e.\ LDA does not generate a name or a summary for a topic.
@@ -402,8 +402,9 @@ Note that a topic is only a distribution over words, i.e.\ LDA does not generate
 
 We illustrate the intuition behind LDA in Figure~\ref{fig:lda_showcase}\footnote{Article in the figure taken from \\ \url{http://www.worldpolicy.org/blog/2016/04/27/fifa-story-money-corruption-and-soccer}}.
 In LDA, a document is assumed to consist of one or several topics with a fixed multinomial word distribution.
-A document could be $20~\%$ about \emph{sports} and $80~\%$ percents about \emph{politics}, or $30~\%$ about \emph{climate}, $25~\%$ about \emph{cars} and $45~\%$ about \emph{politics}.
-In general, LDA aims to generate sparse distributions for both cases, i.e.\ a topic should have only a few words (relative to the vocabulary of the entire corpus) with high probability and a document should have only a few topics.
+The example document in the figure talks to $50~\%$ about \emph{scandals}, to $35~\%$ about \emph{sport} and to $15~\%$ about \emph{politics}.
+Then, the words are sampled from the topic-word distributions according to this document-topic distribution.
+In general, LDA aims to generate sparse distributions for both distributions, i.e.\ a document should have only a few topics and a topic should have only a few words (relative to the vocabulary of the entire corpus) with high probability.
 The sparsity is governed by two scalar hyperparameters $\alpha$ and $\beta$, which influence two symmetrical prior Dirichlet distributions:
 $\alpha$ influences the document-topic distributions and $\beta$ influences the topic-word distributions.
 
@@ -471,7 +472,7 @@ This happens in lines 8 and 11.
 After sampling a new topic (line 12), the possibly different counters are incremented again (lines 13-15)
 This repeated sampling is guaranteed to approximate the joint distribution of all variables.
 
-After running the algorithm, the final topic assignment matrix $Z$ can be used.
+After running the algorithm, the final topic assignment matrix $Z$ can be used as the final result.
 However, as this is just one sample from the posterior distribution, it could be an unlikely case.
 Better results can be obtained by averaging several samples from the Gibbs sampling.
 For that, a number of so-called \emph{burn-in} iterations is ran first until the distribution stabilizes.
@@ -491,8 +492,8 @@ $L$ is referred to as the \emph{lag}.
     \For{$n \in \{\textit{ 1 .. M }\}$}
       \For{$d\_idx \in \{\textit{ 1 .. $|D|$ }\}$}
         \State{$d \gets D[d\_idx]$}
-        \For{$w\_idx \in \{\textit{ 1 .. $|doc|$ }\}$}
-          \State{$w \gets doc[w\_idx]$}
+        \For{$w\_idx \in \{\textit{ 1 .. $|d|$ }\}$}
+          \State{$w \gets d[w\_idx]$}
           \State{$t \gets Z[d\_idx][w\_idx]$}
           \State{$Z_{d}^{t} \gets Z_{d}^{t} - 1$}
           \State{$Z^{t} \gets Z^{t} - 1$}
@@ -541,12 +542,13 @@ The intuition was, that the higher this likelihood, the better the topic model.
 However, Chang et al.~\cite{Chang2009} showed, that this held-out likelihood does not correlate with topic interpretability by humans well.
 Thus, another topic model evaluation measure was necessary.
 
-The idea of \emph{topic coherence} is to measure topic models based on the top words of all of its topics.
+A better metric for topic models is \emph{topic coherence}.
+The idea of topic coherence is to measure topic models based on the top words of all of its topics.
 This corresponds to the way, that humans interact with topic models mostly: by looking at the top words in a topic and mentally assigning an umbrella term to a topic.
-Thus, topic coherence measures, how well the top-words in the topics belong together and form a common theme.
-A good topic (examples taken from Boyd-Graber et al.~\cite{Boyd-graber2014}) is: \topicbox{trout fish fly fishing water angler stream rod flies salmon}
-% \hspace*{1cm} \framebox[1.1\width]{trout fish fly fishing water angler stream rod flies salmon} \\
-The words in the topic clearly form a narrow topic, all words belong to the common ``fishing'' theme.
+Thus, topic coherence analyzes, how well the top-words in the topics belong together and form a common theme.
+A good topic (examples taken from Boyd-Graber et al.~\cite{Boyd-graber2014}) is:
+\topicbox{trout fish fly fishing water angler stream rod flies salmon}
+The words in the topic form a narrow topic: all words belong to the common ``fishing'' theme.
 One can easily imagine a document, which contains all of these words.
 On the contrary, an example for a bad topic is:
 \topicbox{notion sense choice situation idea natural explictly explicit definition refer}
@@ -581,16 +583,21 @@ Given the top words of a topic, human annotators can rate the topic on a three-p
 Averaging the annotations from several annotators yields the gold standard for the topic coherence of a set of words.
 However, this is an extensive and time-consuming approach in itself and then needs to be done again for every new topic model with its own new topics.
 
-The goal of a automatic topic coherence metric is to capture the usefulness of a topic for a human user automatically without depending on human annotators.
-The base idea for such a automatic measure was introduced by Newman et al.~\cite{Newman2010}.
-Just as human annotators, an automatic measure outputs a number indicating the coherence of a given topic.
-Usually this yields a value between zero and one.
-The best automatic topic coherence measure is then that measure, which has the highest correlation with human ratings.
-Correlation is measured using Pearson's correlation.
-Basically, the human ratings are used as training data to decide, which automatic measure is the best.
-
+The goal of an automatic topic coherence metric is to capture the usefulness of a topic for a human user automatically without depending on human annotators.
+The base idea for such an automatic measure was introduced by Newman et al.~\cite{Newman2010}.
 To evaluate topic coherence automatically an external knowledge base or corpus is needed.
-Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-co-occurrences in Wikipedia articles and found that using Wikipedia provides the best metric.
+Newman et al.~\cite{Newman2010} tried metrics based on WordNet, Google searches and word-co-occurrences in Wikipedia articles.
+For deciding which metric approximates human ratings the best, they calculated the correlation of the metric with human ratings.
+Correlation was measured using Pearson's correlation.
+The metric based on Wikipedia co-occurrences had the highest correlation.
+% Basically, the human ratings are used as training data to decide, which automatic metric is most accurate.
+
+% Since then, many methods for such automatic metrics were proposed.
+% To decide, which metrics works best, the correlation of the metric's ratings with human ratings is calculated.
+% The best automatic topic coherence measure is then that measure, which has the highest correlation with human ratings.
+% Just as human annotators, an automatic measure outputs a number indicating the coherence of a given topic.
+
+% Usually this yields a value between zero and one.
 
 Röder et al.~\cite{Roder2015} built on this idea and developed an extensive survey to find the best method to combine the word-co-occurrences from Wikipedia into a coherence measure.
 Using previously published topic ratings~\cite{Aletras2013,Chang2009,Newman2010,Rosner2013}, they could find the topic coherence measure with the highest correlation.
@@ -598,7 +605,7 @@ It is important to realize, that they could reuse previously published topic rat
 The topic coherence is solely based on the coherence of a set of words.
 Because of this, an automatic topic coherence measure can be selected based on an arbitrary set of topic ratings by human annotators and then be used for new topic models.
 
-All together, Röder et al.~\cite{Roder2015} evaluated a total of 237912 coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
+All together, Röder et al.~\cite{Roder2015} evaluated a total of $237,912$ coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
 The best metric, called $C_V$ in the original paper, had a correlation of $0.731$ with human ratings.
 This shows, that topics with high values in the $C_V$ metric can usually be easily interpreted by humans.
 We will use the $C_V$ metric in this master thesis to evaluate topic coherence.
@@ -612,8 +619,8 @@ We will also use this method in our evaluation.
 \section{Word embeddings}
 
 After presenting topic models, we will now focus on word embeddings as the second important model in this thesis.
-Word embeddings try to solve an old problem in language modeling.
-In traditional language modeling, words are treated as atomic units by a discrete 1-of-V encoding, sometimes also called one-hot encoding.
+Word embeddings try to solve an old problem in language modeling:
+in traditional language modeling, words are treated as atomic units by a discrete 1-of-V encoding, sometimes also called one-hot encoding.
 Given a vocabulary $V$, each word $w$ gets assigned a vector of length $|V|$ with all values set to zero except one to uniquely identify the word.
 A typical architecture involves $n$-grams, which try to predict the next word based on previous words.
 This approach has two disadvantages.
@@ -629,10 +636,13 @@ In contrast to this, the idea of \emph{distributed representations} is to not re
 Typically, $M$ is between $50$ and $600$.
 The idea of distributed representations has a long history, dating back to the mid-eighties with work from Hinton and Rumelhart~\cite{Hinton1986,Rumelhart1988}.
 Intuitively, instead of using one dimension for each atomic unit, distributed representations assign meanings to the dimensions and then recombine these meanings for a specific object.
-For example, if one dimension indicates how green an object is and another dimension indicates whether an object is a flower, then one could represent a green flower with high values in both dimensions instead of requiring one dimension for red, blue and green flowers and another dimension for red, blue and green cars.
-%For example to represent , one dimension could indicate the size of an object, another one the color.
-%With just three dimensions, one could represent small
-Recently, the term \emph{word embeddings} was also used to describe the approach of embedding words in a vector space.
+Imagine, we want to encode different objects like cars, bikes and trucks (example taken from Goodfellow et al.~\cite{Goodfellow2016}) .
+The objects can have different colors: red, green and blue.
+With a distributed representation, one needs six dimensions to represent each feature.
+A red car can then be represented using high values in the cars and in the redness dimension.
+With a non-distributed representation, we would need one dimension for red cars, one for blue cars, and for the entire cross product.
+In this example, distributed representations already require only six dimensions compared to the nine dimensions of 1-of-V encoding.
+Recently, the term \emph{word embeddings} was also used to describe the approach of training distributed representations for words.
 We will use the terms \emph{distributed representations}, \emph{word vectors} and \emph{word embeddings} interchangeably in this thesis.
 
 The use of distributed representations for words was proposed by Bengio et al.~\cite{Bengio2003}.
@@ -657,14 +667,14 @@ Due to the state-of-the-art performance and the free open source implementation 
 \end{figure}
 
 Mikolov et al.\ presented two models.
-The continuous bag-of-words model works by predicting the center word in a symmetric context window.
-The continuous skip-gram model works the other way round: given a word, it tries to predict the context.
+The \emph{continuous bag-of-words model} works by predicting the center word in a symmetric context window.
+The \emph{continuous skip-gram model} works the other way round: given a word, it tries to predict the context.
 We focus on the skip-gram model in the following, as it had the better evaluation results in the original paper.
 We illustrate its architecture in Figure~\ref{fig:skip_gram_architecture}.
 For each training sample, an input word $w_i$ is required to predict its surrounding words $w_{i - C}$, $w_{i - C + 1}$, ..., $w_{i - 1}$, $w_{i + 1}$, ..., $w_{i + C - 1}$, $w_{i + C}$, where $C$ is the context window size.
 $C$ is typically between 5 and 15.
 The context ends at the end of the sentence so that no cross-sentence training examples are created.
-Both the center word as well as the context words are encoded via 1-of-V encoding.
+Both the center word $w_i$ as well as the context words $w_{i \pm c}$ are encoded via 1-of-V encoding.
 The projection matrix in-between is trained via stochastic gradient descent to predict the context as accurately as possible.
 Because of the 1-of-V encoding one training sample activates exactly one row in the projection matrix during the vector-matrix multiplication.
 This row is used as the word vector representation of the corresponding word.
@@ -682,14 +692,14 @@ In the skip-gram model, surrounding words have to be encoded in the word vector 
 
 A nice property of the trained word vectors is, that linear relationships between words are kept in the vector space.
 It was shown that
-\begin{equation}
+\begin{equation*}
   \vec{v}_{king} - \vec{v}_{man} + \vec{v}_{woman}
-\end{equation}
+\end{equation*}
 is closest to the vector representation of the word ``queen''~\cite{Mikolov2013b}.
 Interestingly, this relationship holds for both semantic and syntactic similarly~\cite{Mikolov2013a}, such as
-\begin{equation}
+\begin{equation*}
   \vec{v}_{houses} - \vec{v}_{house} + \vec{v}_{car}
-\end{equation}
+\end{equation*}
 is closest to $\vec{v}_{cars}$.
 % Quote from webpage: This seems to be a great strength of neural networks: they learn better ways to represent data, automatically. Representing data well, in turn, seems to be essential to success at many machine learning problems. Word embeddings are just a particularly striking example of learning a representation.
 
@@ -728,15 +738,15 @@ When making a prediction for the next word, LDA makes a global prediction based 
 Word embeddings, on the other hand, generate the next word based only on a small context of the word and are per se local.
 %%%% Edited out by Ralf, because of repetition. Probably try to incorporate the important parts from here (local-global, distributional hypothesis) in the earlier chapters.
 
-Both LDA and word embeddings can provide a vector representations for words.
+Both LDA and word embeddings can provide a vector representation for words.
 In LDA, this works by taking the topic distribution for a word as the embedding in the topic space.
 However, this representation is not good at keeping linear relationships~\cite{Mikolov2013b,Mikolov2013a}.
 Also, it tends to yield sparse vectors as LDA tries to keep the number of topics per word small.
 
 The different nature of the models is also represented in the standard evaluation method for each.
-Topic models are typically evaluated using topic coherence, i.e. how well the top words from the topics belong together and have a common, easily identifiable theme.
-Word embeddings, on the contrary, are typically evaluated using word similarity tasks or word analogy reasoning tasks.
-When building new topic models, which use word embeddings, our goal is to incorporate a priori semantic information about words into the topic model.
+Word embeddings are typically evaluated using word similarity tasks or word analogy reasoning tasks.
+Topic models, on the contrary, are typically evaluated using topic coherence, i.e. how well the top words from the topics belong together and have a common, easily identifiable theme.
+When building new topic models, which use word embeddings, our goal is to incorporate a priori semantic information about words into the topic model to increase the coherence of the topics.
 The assumption is, that words which are close to each other in the embedding space should have a higher probability to occur in the same topic together.
 
 Baroni et al.~\cite{Baroni2014} introduce the classification of count-based methods and prediction-based methods in distributional semantic models.
@@ -974,7 +984,7 @@ We will also evaluate topic coherence.
 \subsection{Improved word embeddings}
 We will now give a short overview about word embedding models improved by topic models.
 Liu et al.~\cite{Liu2015} propose topical word embeddings.
-These embeddings make use of word topics inferred via LDA to generate better word vectors.
+These embeddings make use of topics inferred via LDA to generate better word vectors.
 They propose three different architectures.
 The first method regards topic as pseudo words, which are added to the context of each word.
 Thus, an embedding for a word and its topic is learned independently.
@@ -987,7 +997,7 @@ When the model is asked for similar words to the word ``apple'', it returns ``pe
 
 A similar idea is used by Cheng et al.~\cite{Cheng2015}.
 In fact, the first model they propose is the same as the first model from Liu et al.~\cite{Liu2015}.
-Additionally, the propose two models, which do not model the topic and the word independently.
+Additionally, they propose two models, which do not model the topic and the word independently.
 Rather, they divide the task of choosing a word in two steps: ``locating the right concept and then searching for a word underneath the chosen concept''~\cite{Cheng2015}.
 These models, called generative word-concept skip-gram, outperform the skip-gram architecture on paraphrase identification and Q-A relatedness classification.
 
