@@ -1440,7 +1440,7 @@ Indeed, if we look at the top words in the background topic in the \textsc{20New
 would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
 }
 
-We treat the thirty top words in the background topic specially.
+We treat the fifty top words in the background topic specially.
 Whenever one of these words occurs, we always resample the word, even if the coin toss in the WELDA algorithm failed.
 Note that we keep this list fixed during the WELDA iterations.
 The background topic changes quickly due to this approach and a more concrete topic emerges.
@@ -1903,7 +1903,7 @@ The results are similar.
 \subsubsection{Influence of the background topic sampling}
 
 We will now analyze the influence of the background topic.
-When using background topic sampling, we also replace every occurrence of one of the top thirty words in the background topic in addition to all words, which had a successful coin flip.
+When using background topic sampling, we also replace every occurrence of one of the top fifty words in the background topic in addition to all words, which had a successful coin flip.
 When we replace these background words, the $\lambda$ is not equal to the actual $\lambda_{act}$, as we replace more words in that case.
 When we do not use background topic sampling, the $\lambda$ is equal to $\lambda_{act}$.
 We tested the influence of the background topic with $\lambda_{act} = 0.2$ and $\lambda_{act} = 0.5$.
