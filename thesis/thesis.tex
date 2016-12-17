@@ -155,7 +155,28 @@ Supervisor: Dr. Ralf Krestel}
 \maketitle
 \cleardoublepage
 
-\include{abstract}
+\makeatletter
+\@openrightfalse
+
+\chapter*{Abstract}
+Probabilistic topic models, especially Latent Dirichlet Allocation (LDA), have proved to be powerful for detecting hidden topics in large text collections.
+Recently, word embedding methods have gained popularity for language modeling.
+Because of the different background of both methods, few work exists, which uses.
+
+% Given a collection of documents, LDA finds hidden themes
+useful for discovering latent topics in large text collections.
+
+We propose WELDA, a new topic model, which uses word embeddings to improve the topic coherence.
+We extensively evaluate WELDA and compare it with competitive approaches.
+WELDA outperforms other models on topic coherence, while at the same time keeping acceptable performance in document classification.
+
+
+\chapter*{Zusammenfassung}
+Abstract Deutsch
+
+\@openrighttrue
+\makeatother
+
 % TODO: Remove
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{4}
@@ -2006,7 +2027,6 @@ The information contained in the bag-of-words and exploited by LDA is still cruc
   \end{tabular}
 \end{table}
 
-% TODO: Mention later, that only the combination works good
 \subsection{Contenders}
 We now present the different settings for the contenders.
 
