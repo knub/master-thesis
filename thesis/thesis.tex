@@ -1187,9 +1187,9 @@ Only then we will run some additional Gibbs sampling iterations using our modifi
 We run LDA first to obtain stable topic assignments and to start with relatively good topics as a baseline.
 This is important, because before each Gibbs sampling iteration we estimate the topic distributions for all topics (line 4).
 We use this topic distributions later in the innermost loop of the sampling algorithm.
-If a coin flip with success probability $\lambda$ succeeds (line 12), we sample a vector from the word embedding space (line 13), based on the topic distribution of the new topic of the current word.
-We then use the previously initialized LSH or k-d tree data structure to find the nearest word to our drawn sample (line 14).
-Afterwards, we update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word and not the word we observed in the text (lines 15-16).
+If a coin flip with success probability $\lambda$ succeeds (line 10), we sample a vector from the word embedding space (line 11), based on the topic distribution of the new topic of the current word.
+We then use the previously initialized LSH or k-d tree data structure to find the nearest word to our drawn sample (line 13).
+Afterwards, we update the counts in the document-topic matrix and in the topic-word matrix, as if we had observed the sampled word and not the word we observed in the text (lines 14-16).
 
 \begin{algorithm}
   \caption{Gibbs sampling algorithm for the WELDA model}
@@ -1204,13 +1204,13 @@ Afterwards, we update the counts in the document-topic matrix and in the topic-w
         \For{$w\_idx \in \{\textit{ 1 .. $|doc|$ }\}$}
           \State{$w \gets doc[w\_idx]$}
           \State{$t \gets Z[d\_idx][w\_idx]$}
-          \State{\textit{decrement Z counters}}
-          \State{$t \gets sample\_new\_topic(Z)$}
           \If{$coin\_flip(\lambda)\textit{ is successful}$}
             \State{$sample \gets sample\_from\_distribution(t)$}
             \State{$\textit{// update $w$, as if we had seen another word}$}
             \State{$w = nn\_search.find\_nearest\_word(sample)$}
           \EndIf
+          \State{\textit{decrement Z counters}}
+          \State{$t \gets sample\_new\_topic(Z)$}
           \State{\textit{increment Z counters}}
         \EndFor
       \EndFor
@@ -1240,14 +1240,14 @@ We then estimate a multivariate continuous distribution in the embedding space (
 
 There are several configurable parameters in the algorithm, which we will detail in the following:
 \begin{itemize}
-  \item \textbf{Choice of topic distribution} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 13 and Algorithm~\ref{alg:welda_parameter_estimation}, line 5):
+  \item \textbf{Choice of topic distribution} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 11 and Algorithm~\ref{alg:welda_parameter_estimation}, line 5):
     We tested three distributions for the topic distributions.
     First, we used the well-known multivariate Gaussian distribution.
     Second, we also tested a Gaussian mixture model.
     Last, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we used the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
     According to the authors, this distribution is ``well suited for directional data'' and can leverage word similarity correlations better \cite{Batmanghelich2016}.
     We demonstrate these three in detail in the next sections.
-  \item \textbf{Resampling probability $\boldsymbol{\lambda}$} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 12):
+  \item \textbf{Resampling probability $\boldsymbol{\lambda}$} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 10):
     The parameter $\lambda$ governs, how often a word is resampled from the topic distributions.
     Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA and will not have any effect on the model, because we already start with a converged topic model.
     With $\lambda = 1.0$, no single word is taken from the text, rather all words are sampled from the embedding space.
@@ -1344,7 +1344,7 @@ After we presented the main ideas behind WELDA, we now go into detail in some im
 We discuss the nearest neighbour search, how we fix the vocabulary mismatch between embeddings and topic models, how we deal with often occuring words and why we run LDA initially.
 
 \subsection{Nearest neighbour search}
-After we obtained a sample from the topic distribution, we want to find the closest word to our sample in the embedding space (see line in Algorithm~\ref{alg:welda_gibbs_sampling}).
+After we obtained a sample from the topic distribution, we want to find the closest word to our sample in the embedding space (see line 13 in Algorithm~\ref{alg:welda_gibbs_sampling}).
 The naive algorithm uses linear search and evaluates all words in the embedding space.
 This is very expensive, especially because it happens in the innermost loop of Gibbs sampling and is therefore executed very often, approximately $\lambda * N * N_{words}$ times, where $N_{words}$ represents the number of words in the entire corpus.
 However, there are methods with a better runtime: we use two either k-d trees or locality-sensitive hashing depending on the number of dimensions.
