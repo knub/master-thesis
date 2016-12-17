@@ -163,6 +163,8 @@ Probabilistic topic models, especially Latent Dirichlet Allocation (LDA), have p
 Recently, word embedding methods have gained popularity for language modeling.
 Because of the different background of both methods, few work exists, which uses.
 
+Different nature, in which they use the distributional hypothesis.
+
 % Given a collection of documents, LDA finds hidden themes
 useful for discovering latent topics in large text collections.
 
@@ -897,7 +899,7 @@ The length of the word vectors does not matter for the similarity.
 This is exactly what is captured by the von Mises-Fisher distribution.
 
 % The Gaussian LDA model tries to group words in a topic, which are near each other in the embedding space.
-% , where proximity is measured by the euclidean distance (or Mahalanobis distance, if the covariance matrix is not 
+% , where proximity is measured by the euclidean distance (or Mahalanobis distance, if the covariance matrix is not
 % In Gaussian distributions the similarity between samples is estimated by Euclidean distance.
 % However, in the word2vec approach proposed by Mikolov~\cite{Mikolov2013}, semantic relatedness between words is calculated using cosine similarity.
 
@@ -1127,7 +1129,7 @@ Embedding model excel at this task, matching the human ratings with $r_{Pearson}
 To summarize, syntactic variations and more direct connectedness play a bigger role in word embedding models, while topic models often capture more loose relationships.
 Embedding models are good at assessing similarity between words.
 These observations make us believe that word embeddings can help create more coherent topic models.
-% We take this as motivation to create topic models, whose topics 
+% We take this as motivation to create topic models, whose topics
 Our goal is to strengthen the topic themes by augmenting the top topic words with similar words from the word embedding space, but at the same time not disregarding the bag-of-words collocation information in the documents completely.
 This way, we help the user understand the common theme in a topic better, while still creating an overview over the entire corpus by looking at all topics.
 
@@ -2382,7 +2384,7 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
          \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with Wikipedia as embedding corpus}
          \label{fig:welda_gaussian_nips_200}
   \end{figure}
-  
+
   \subsection{Influence of the parameters $N_{pca}$ and $N_{top}$ on the N{\footnotesize IPS} corpus}
   \label{sec:appendix_welda_gaussian_nips_pca_samples}
 
