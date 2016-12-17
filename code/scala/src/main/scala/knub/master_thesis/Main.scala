@@ -550,7 +550,7 @@ object Main {
                 runCases(cases, 20, new VmfWELDA(_))
             case "welda-vmf-pca" =>
                 val lambdas = List(0.4, 0.5)
-                val kappaFactors = List(10, 50)
+                val kappaFactors = List(100, 300)
                 val samplingParams = List((30, 100), (50, 200))
                 val cases = for (embedding <- embeddings.take(1); lambda <- lambdas; kappaFactor <- kappaFactors; samplingParam <- samplingParams)
                     yield args.copy(
