@@ -2233,17 +2233,19 @@ While this method is cheap and many models can be evaluated, the correlation wit
 Also, it is based on co-occurrence statistics from the English Wikipedia under the assumption, that this corpus contains a large number of topics and can therefore be used as a reference corpus.
 In the case of the \textsc{20News} corpus with its wide range of general topics, this assumption holds.
 However, it is questionable for the \textsc{Nips} corpus.
-The \textsc{Nips} with its scientific papers and many technical terms has a clearly different scope.
+The \textsc{Nips} corpus with its scientific papers and many technical terms has a clearly different scope.
 
 For this reasons, we decided to conduct a manual study on the \textsc{Nips} corpus.
 We evaluated the quality of a topic model by the word intrusion task by Chang et al.~\cite{Chang2009}.
 In this task, a subject is presented with a list of six words.
 Five of these six words belong to the top words of one topic of the topic model.
-The sixth word is chosen randomly from another topic.
+The sixth word was chosen randomly from another topic.
 This word is called the \emph{intruder}.
-Our potential intruders had to be in the top ten words of another topic, but not in the top fifty words of the topic the first five words stem from.
-The word order is randomized.
-The idea of this word intrusion study is the following: if the five words form a clear, coherent topic, it should be simple to detect the intruder.
+The rules for selecting the intruder were as follows:
+The intruder had to be in the top ten words of another topic, so that we picked only relevant words from the corpus.
+On the other hand, the intruder should not be in the top fifty words of the original topic to ``reduce the possibility that the intruder comes from the same semantic group''~\cite{Chang2009}.
+The word order for each sample was randomized.
+The idea of this word intrusion study is the following: if the five words form a clear and coherent topic, it should be simple to detect the intruder.
 For example, look at the word set:
 \topicbox{gaussian bayesian posterior neural distribution prior}
 The intruder ``neural'' is easily recognizable, because all other words stem from Bayesian statistics.
@@ -2261,11 +2263,12 @@ Our subject group consisted of computer science students and computer scientists
 To not bias the results, subjects were not presented with the information, whether their selection was correct~\cite{Chang2009}.
 Also, the underlying topic model was not displayed and we randomized the order of the samples.
 
-We present the results in Figures~\ref{fig:word_intrusion_20} and \ref{fig:word_intrusion_50}.
-For the plot, we calculated the accuracy of each subject on each topic model.
+We present the results in Figures~\ref{fig:word_intrusion_50} and \ref{fig:word_intrusion_20}.
+For the plots, we calculated the accuracy of each subject on each topic model.
 Each model was evaluated by at least five subjects, so we had at least five accuracy values.
 We then plotted the distribution of the accuracy for each model.
 For both $K = 20$ and $K = 50$ WELDA achieves the highest accuracy.
+For both cases, the average accuracy for WELDA was around 70 \%.
 
 \begin{figure}
        \centering
