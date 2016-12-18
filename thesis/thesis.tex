@@ -163,22 +163,31 @@ Supervisor: Dr. Ralf Krestel}
 \@openrightfalse
 
 \chapter*{Abstract}
-Probabilistic topic models, especially Latent Dirichlet Allocation (LDA), have proved to be powerful for detecting hidden topics in large text collections.
-Recently, word embedding methods have gained popularity for language modeling.
-Because of the different background of both methods, few work exists, which uses.
-
-Different nature, in which they use the distributional hypothesis.
-
-% Given a collection of documents, LDA finds hidden themes
-useful for discovering latent topics in large text collections.
-
-We propose WELDA, a new topic model, which uses word embeddings to improve the topic coherence.
-We extensively evaluate WELDA and compare it with competitive approaches.
-WELDA outperforms other models on topic coherence, while at the same time keeping acceptable performance in document classification.
-
+The distributional hypothesis poses that similar words tend to have similar contexts in which they occur.
+Many models for natural language text were motivated by this assumption.
+Two of these methods are topic models and word embeddings.
+Probabilistic topic models, especially Latent Dirichlet Allocation (LDA), have proved to be successful at detecting hidden topics in large text corpora by utilizing word co-occurrences across documents.
+Word embedding models learn word vectors, which encode semantic regularities in a low-dimensional vector space, by predicting the local context of a word.
+Due to their complementary nature, the models define different notions of word similarity.
+This observation suggests a combination of both models.
+In this master thesis, we propose WELDA, a new type of topic model, which uses word embeddings to improve topic coherence.
+We achieve this by estimating topic distributions in the word embedding space and sampling new words from this distribution to strengthen the topics.
+We compare WELDA with standard LDA and competing approaches and present an exhaustive evaluation.
+Our experiments show that WELDA outperforms all other approaches with respect to topic coherence, while at the same time keeping acceptable performance in document classification.
 
 \chapter*{Zusammenfassung}
-Abstract Deutsch
+
+Die distributionelle Hypothese besagt, dass ähnliche Worte in ähnlichen Kontexten auftreten.
+Viele Modelle für den natürlichsprachigen Text wurden von dieser Annahme motiviert.
+Zwei dieser Methoden sind Topic-Modelle und Vektorrepräsentationen von Wörtern.
+Probabilistische Topic-Modelle, insbesondere Latent Dirichlet Allocation (LDA), haben sich bei der Erkennung versteckter Themen in großen Textkorpora durch die Analyse von Kookkurrenzen bewährt.
+Wortvektoren lernen semantische Regelmäßigkeiten in einem niedrig-dimensionalen Vektorraum zu kodieren, indem sie den lokalen Kontext eines Wortes vorhersagen.
+Aufgrund ihrer komplementären Natur definieren die Modelle unterschiedliche Ansichten von Wort-Ähnlichkeit.
+Diese Beobachtung legt eine Kombination beider Modelle nahe.
+In dieser Masterarbeit führen wir WELDA ein, eine neue Art von Topic-Modell, die Vektorrepräsentationen von Wörtern verwendet, um die Kohärenz der Themen zu verbessern.
+Wir erreichen dies durch die Schätzung von Themen-Verteilungen im Wort-Vektorraum und der Stichprobe neuer Wörter aus dieser Verteilung, um die Themen zu stärken.
+Wir vergleichen WELDA mit Standard-LDA und konkurrierenden Ansätzen und präsentieren eine umfassende Evaluation.
+Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die Themenkohärenz übertrifft und gleichzeitig akzeptable Ergebnisse in der Dokumentenklassifizierung erzielt.
 
 \@openrighttrue
 \makeatother
