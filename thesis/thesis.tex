@@ -2041,7 +2041,8 @@ We will focus on two tasks: topic coherence and document classification.
 \section{Topic coherence}
 \label{sec:evaluation_topic_coherence}
 
-We will now evaluate topic coherence as described in Section~\ref{sec:topic_coherence} on all models.
+We will now evaluate topic coherence on all topic models mentioned above.
+We follow the experiment setup already described in Section~\ref{sec:topic_coherence} on all models.
 
 \subsection{Topic model solely based on word embeddings}
 \label{sec:raw_tm_we}
@@ -2053,14 +2054,14 @@ Given a word, this outputs the top $n$ similar words in the embedding space.
 Given a list of words, the corresponding word vectors are averaged first and then the most similar words in the embedding space are retrieved.
 In the original implementation, the search words are never in the output.
 We modified this, so that the search words may also be in the output.
-For one search word, the search word is always in the output, as the similarity is $1$.
+For one search word, the search word is always in the output, as the similarity to itself is $1$.
 
-As search words, we took the top topic words of a standard LDA run with 1500 iterations and $\alpha = \beta = 0.02$.
+As search words, we took the top topic words of a standard LDA run on the \textsc{20News} corpus with 1500 iterations and $\alpha = \beta = 0.02$.
 We experimented with two cases: only taking the top word and taking the average of all top ten words.
 For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is:
 \topicbox{\noindent game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer}
 
-We show the results in Table~\ref{table:raw_we_tm}.
+We show the topic coherence results of the topics identified this way in Table~\ref{table:raw_we_tm}.
 The results are worse than running LDA, thus showing that only using word embeddings is not enough.
 The information contained in the bag-of-words and exploited by LDA is still crucial for good topics.
 \begin{table}[]
@@ -2088,8 +2089,8 @@ We tested on the \textsc{20News} and on the \textsc{Nips} corpus.
 \begin{itemize}
   \item
     \textbf{Standard LDA:}
-    We ran LDA with different values of $\alpha$ and $\beta$.
-    However, there is no influence of these parameters on the classification results.
+    We evaluated LDA with different values of $\alpha$ and $\beta$.
+    However we showed in Section~\ref{sec:lda_as_baseline} already, that this does not have influence on the topic coherence.
     We report the results for $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
   \item
     \textbf{Gaussian LDA:}
@@ -2513,8 +2514,8 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
                         TopicVec + Avg. Emb.     & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
                         WELDA                    & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
                         WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
-                        Gaussian LDA             & 53.7    & 54.3    & 52.3   && TODO    & xxxx     & xxxx   \\
-                        Gaussian LDA + Avg. Emb. & 77.6    & 76.8    & 76.6   && xxxx    & xxxx     & xxxx   \\
+                        Gaussian LDA             & 53.7    & 54.3    & 52.3   && 59.2    & 59.5     & 57.8   \\
+                        Gaussian LDA + Avg. Emb. & 77.6    & 76.8    & 76.6   && 77.8    & 77.0     & 77.0   \\
     \bottomrule
     \end{tabular}
   \end{table}
