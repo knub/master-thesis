@@ -26,4 +26,4 @@ bibtex:
 	@cp library.bib .output/ && cd .output && bibtex $(FILE) && cd ..
 
 clean:
-	rm .output/*.aux .output/*.log
+	rm -r .output
