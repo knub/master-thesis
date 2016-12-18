@@ -2029,7 +2029,7 @@ In the original implementation, the search words are never in the output.
 We modified this, so that the search words may also be in the output.
 For one search word, the search word is always in the output, as the similarity is $1$.
 
-As search words, we took the top topic words of a standard LDA run with $iterations=1500, \alpha=0.02, \beta=0.02$.
+As search words, we took the top topic words of a standard LDA run with 1500 iterations and $\alpha = \beta = 0.02$.
 We experimented with two cases: only taking the top word and taking the average of all top ten words.
 For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is:
 \topicbox{\noindent game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer}
@@ -2053,8 +2053,9 @@ The information contained in the bag-of-words and exploited by LDA is still cruc
 \end{table}
 
 \subsection{Contenders}
-We now present the different settings for the contenders.
 
+We now present the different parameter settings for the contenders.
+All experiments were run with $K = 50$ topics.
 \begin{itemize}
   \item
     \textbf{Standard LDA:}
@@ -2066,11 +2067,15 @@ We now present the different settings for the contenders.
     Compared to the other methods, Gaussian LDA had to be trained with 50-dimensional instead of 200-dimensional word embeddings trained on Wikipedia.
     When training with higher-dimensional embeddings, Gaussian LDA does not converge and yield recognizable topics.
     We could confirm this issue in communication with the authors~\cite{Das2016}.
+    We trained for $500$ iterations.
   \item
     \textbf{LFTM:}
-    We report results for LFTM with $\lambda = 1.0$, as this yields the best topic coherence results according to the original paper.
-    We could confirm this in our experiments.
-    With $\lambda = 1.0$ every word is sampled from the embedding space and the multinomial word-distribution from standard LDA is effectively discarded.
+    We tested LFTM with $\lambda \in \{0.1, 0.3, 0.5, 0.7, 0.9 \}$.
+    Best results were achieved with $\lambda = 0.7$.
+    % We report results for LFTM with $\lambda = 1.0$, as this yields the best topic coherence results according to the original paper.
+    % We could confirm this in our experiments.
+    % With $\lambda = 1.0$ every word is sampled from the embedding space and the multinomial word-distribution from standard LDA is effectively discarded.
+    We trained for $500$ iterations.
   \item
     \textbf{NSTM:}
     We had the same problems with NSTM as with Gaussian LDA: training with 200-dimensional embeddings did not succeed.
@@ -2078,20 +2083,22 @@ We now present the different settings for the contenders.
     Thus, we again used the 50-dimensional embeddings.
     For the \textsc{20News} corpus, we could still could not obtain any results.
     We only report the results for the \textsc{Nips} corpus.
-    We preprocessed all word embeddings to have unit norm, as the von Mises-Fisher distribution in NSTM places probability mass only on the hyper-sphere.
+    We preprocessed all word embeddings to have unit norm, as the von Mises-Fisher distribution in NSTM places probability mass only on the hypersphere.
   \item
     \textbf{TopicVec:}
     The authors did not evaluate the performance of TopicVec with topic coherence, so no best parameter settings are given.
-    The relevant parameters are the learning rate $\delta$ and the hypersphere radius $\gamma$.
-    We experimented with $\delta \in \{ 0.01, 0.05, 0.1, 0.2, 1.0 \}$ and $\gamma \in \{ 1, 5, 7, 10 \}$.
-    Best results were achieved with $\delta = 0.1$ and $\gamma = 7$, which are also the values reported in the paper for document classification.
+    % We tested training with different learning rates $\delta$.
+    % The relevant parameters are the learning rate $\delta$ and the hypersphere radius $\gamma$.
+    We experimented with different learning rates $\delta \in \{ 0.01, 0.05, 0.1, 0.2, 1.0 \}$.
+    Best results were achieved with $\delta = 0.1$, which is also the value reported in the paper for document classification.
     In contrast to the other methods, TopicVec needs different preprocessing, as it is trained on the context of a word, similarily to the skip-gram architecture for word-embeddings.
     Therefore, we do not lowercase the text and do not remove stop words.
     The text is tokenized into sentences, as TopicVec processes one sentence at a time.
     We trained for 500 iterations.
   \item
     \textbf{WELDA:}
-    TODO
+    We report the results of WELDA with Gaussian distributions and $\lambda = 0.4$, $N_{pca} = 50$ and $N_{top} = 200$.
+    We used background topic sampling and trained for $200$ iterations.
 \end{itemize}
 
 To eliminate random effects, we ran all methods with the best settings three times and report the best results.
@@ -2117,8 +2124,8 @@ The two remaining methods, Gaussian LDA and NSTM, perform even worse than standa
                               Gaussian LDA & 38.5          & 40.3       && 39.2          & 39.5     \\
                               LFTM         & 43.9          & 45.6       && 41.6          & 43.5     \\
                               NSTM         & --            & --         && 37.5          & 36.8     \\
-                              TopicVec     & 48.5          & 46.2       && 43.4          & 43.6     \\
-                              WELDA        & TODO          &            &&               &          \\
+                              TopicVec     & 48.1          & 46.2       && 43.4          & 43.6     \\
+                              WELDA        & 48.6          & 47.4       && 44.2          &      \\
                               \bottomrule
   \end{tabular}
 \end{table}
@@ -2401,7 +2408,7 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
   \begin{figure}[H]
          \centering
          \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_50.png}
-         \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings}
+         \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings and $N_{pca} = 10$}
          \label{fig:welda_gaussian_nips_50}
   \end{figure}
   \begin{figure}[H]
