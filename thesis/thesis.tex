@@ -452,7 +452,7 @@ Note that every occurrence of a term gets assigned a topic, not only each term i
 This way, a term can occur with different topics throughout the corpus, which covers homonyms.
 For example, the term ``club'' could reference a weapon or a sport club.
 Consequently, it could occur in a \emph{crime} topic in one document and in a \emph{sports} topic in another.
-Each word has exactly one topic. % TODO: Clear?
+Each word has exactly one topic.
 Then, for a number of iterations $M$ (line 3), the Gibbs sampling algorithm iterates over all documents and all words in these documents (lines 4-7).
 The main idea is now to repeatedly and step-by-step sample new topics for all words in the documents.
 During sampling, all \emph{other} topic assignments are assumed fixed and the conditional distribution over the topics for the current word is considered (line 12).
@@ -1950,7 +1950,6 @@ As expected, WELDA performs far worse than before, reaching only $TC = 39.1$ wit
 
 With random initialization, WELDA is actually harmful, as we do not even reach standard LDA's topic coherence of $TC = 41.9$.
 The topic coherence development during the $1500$ iterations is displayed in Figure~\ref{fig:standard_lda_as_prerequisite} in Appendix~\ref{sec:appendix_lda_prerequisite}.
-% \subsubsection{Strange behaviour for $\lambda_{act} = 1.0$} TODO
 % When the words are spread far apart and the mean is in the middle of nowhere, things tend to overfit.
 % /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
