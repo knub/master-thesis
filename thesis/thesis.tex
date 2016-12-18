@@ -640,7 +640,7 @@ Imagine, we want to encode different objects like cars, bikes and trucks (exampl
 The objects can have different colors: red, green and blue.
 With a distributed representation, one needs six dimensions to represent each feature.
 A red car can then be represented using high values in the cars and in the redness dimension.
-With a non-distributed representation, we would need one dimension for red cars, one for blue cars, and for the entire cross product.
+With a non-distributed representation, we would need one dimension for red cars, one for blue cars, and so on for the entire cross product.
 In this example, distributed representations already require only six dimensions compared to the nine dimensions of 1-of-V encoding.
 Recently, the term \emph{word embeddings} was also used to describe the approach of training distributed representations for words.
 We will use the terms \emph{distributed representations}, \emph{word vectors} and \emph{word embeddings} interchangeably in this thesis.
@@ -1115,7 +1115,7 @@ Embedding models, on the other hand, assign high similarity to immediately obvio
            professor, lecturer \newline
            poetry, prose
            &
-           africa, uganda \newline
+           games, statistics \newline
            war, commander \newline
            rights, discriminated \\
            && \vspace{0.05cm}Low       &
@@ -1356,9 +1356,9 @@ We discuss the nearest neighbour search, how we fix the vocabulary mismatch betw
 \subsection{Nearest neighbour search}
 After we obtained a sample from the topic distribution, we want to find the closest word to our sample in the embedding space (see line 13 in Algorithm~\ref{alg:welda_gibbs_sampling}).
 The naive algorithm uses linear search and evaluates all words in the embedding space.
-This is very expensive, especially because it happens in the innermost loop of Gibbs sampling and is therefore executed very often, approximately $\lambda * N * N_{words}$ times, where $N_{words}$ represents the number of words in the entire corpus.
-However, there are methods with a better runtime: we use two either k-d trees or locality-sensitive hashing depending on the number of dimensions.
-K-d trees by Bentley~\cite{Bentley1975} aranges the points in a tree structure, which allows to retrieve the nearest neighbour in $\mathcal{O}(\log n)$ on average.
+This is very expensive, especially because it happens in the innermost loop of Gibbs sampling and is therefore executed very often, approximately $\lambda * N * N_{words}$ times, where $N_{words}$ represents the number of words in the entire corpus, $N$ the number of Gibbs sampling iterations and   $\lambda$ the resampling probability.
+However, there are methods with a better runtime: we use either k-d trees or locality-sensitive hashing depending on the number of dimensions.
+K-d trees by Bentley~\cite{Bentley1975} arranges the points in a tree structure, which allows to retrieve the nearest neighbour in $\mathcal{O}(\log n)$ on average.
 K-d trees are guaranteed to find the nearest neighbour.
 However, for high dimensions, the search degenerates to the linear search due to the curse of dimensionality.
 Thus we use locality-sensitive hashing (LSH) by Indyk et al.~\cite{Indyk1998} for higher dimensions.
@@ -1427,20 +1427,19 @@ We call this first topic the \emph{background topic}, because it occurs in many 
 We call the corpus-specific stop words background words.
 
 We experimented with different values of $\alpha_0^{boost}$ and show the results in Table~\ref{table:alpha0_boost}.
-The second row shows the percentage of documents containing the background topic and the third row shows the percentage of words in the background topic.
+The second row shows the percentage of documents containing the background topic and the third row shows the percentage of all words, which stem from the background topic.
 We see, that a value of fifteen is sufficient, so that the background topic occurs in more than ninety percent of the documents.
 \begin{table}[]
   \ra{1.2}
   \centering
-  \caption{Testing by which factor $\alpha_0$ must be multiplied, so that the background topic occurs in many documents.
-  All values are percentages.}
+  \caption{Testing by which factor $\alpha_0$ must be multiplied, so that the background topic occurs in many documents.}
   \label{table:alpha0_boost}
   \begin{tabular}{ccccccccccc}
     \toprule
     $\alpha_0^{boost}$                & 1     & 2     & 3     & 5     & 7     & 9     & 10    & 15    & 20    & 30    \\
     \midrule
-  doc. containing background topic  & 11  & 23  & 39  & 47  & 56  & 65  & 79  & 90  & 91  & 91  \\
-  words in background topic & 2   & 4   & 8   & 10  & 13  & 16  & 19  & 24  & 24  & 24 \\
+  \% of doc.\ with background topic  & 11  & 23  & 39  & 47  & 56  & 65  & 79  & 90  & 91  & 91  \\
+  \% of words in background topic & 2   & 4   & 8   & 10  & 13  & 16  & 19  & 24  & 24  & 24 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -1949,20 +1948,26 @@ The topic coherence development during the $1500$ iterations is displayed in Fig
 % When the words are spread far apart and the mean is in the middle of nowhere, things tend to overfit.
 % /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
-\subsubsection{WELDA with von Mises-Fisher distributions}
+\subsubsection{WELDA with other topic distributions}
 
 So far, all experiments were executed with Gaussian distributions as the topic distributions.
-We now evaluate WELDA with von Mises-Fisher distributions (vMF).
+We also evaluated WELDA with von Mises-Fisher distributions (vMF) and with Gaussian mixtures (GM).
 We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $N_{top} = 20$.
 The results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_vmf}.
-In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations.
 Interestingly, the results are different depending on the embedding used.
-WELDA vMF performs worse than Gaussian WELDA when using corpus-specific embeddings.
+WELDA with vMF performs worse than Gaussian WELDA when using corpus-specific embeddings but better than Gaussian WELDA with the Wikipedia embeddings.
+This seems to indicate, that the von Mises-Fisher distribution works better with higher-quality embeddings, which were trained on more data.
+When trained on more data, the cosine similarity function between words becomes more accurate (see Table~\ref{table:word_embeddings_performance} for performance on the analogy reasoning benchmark).
+This fits better with the assumption of directional data in the von Mises-Fisher distribution.
+
+% In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations. TODO
 
 \begin{table}[]
   \ra{1.3}
   \centering
-  \caption{Comparison of WELDA's topic coherence with Gaussian distributions and with von Mises-Fisher (vMF) distributions on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions perform worse.}
+  \caption{Comparison of WELDA's topic coherence when implemented using von Mises-Fisher (vMF) distributions and Gaussian mixtures (GM) instead of Gaussian distributions.
+  Experiments were run on the \textsc{20News} corpus.
+  on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions perform worse.}
   \label{table:welda_vmf}
   \begin{tabular}{@{}ccccccc@{}}
     \toprule
