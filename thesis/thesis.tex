@@ -1126,7 +1126,7 @@ Embedding models, on the other hand, assign high similarity to immediately obvio
            catalan, galician \newline
            prestige, respectability \newline
            obscenity, sedition
-           & \emph{completely unrelated \newline words} \\
+           & \emph{[completely unrelated \newline words]} \\
            \bottomrule
        \end{tabular}
        \label{table:tm_and_we_word_similarities}
@@ -1472,7 +1472,7 @@ We think that using a dedicated background topic and replacing its words, this p
 We will test this hypothesis in the evaluation section.
 
 \subsection{Running LDA as a prerequisite}
-Normally, we run standard LDA before we start with WELDA algorithm for further topic refining.
+Normally, we run standard LDA before we start with the WELDA algorithm for further topic refining.
 This is because the topic distributions are estimated on the top words of each topic.
 If we run WELDA from the first iteration, with topics assigned randomly and uniformly before the first iteration, the distributions are not well spread over the embedding space.
 For example, here are the top ten words of the three most-occurring topics after random initialization:
@@ -1483,7 +1483,7 @@ For example, here are the top ten words of the three most-occurring topics after
 }
 
 These are the words the distributions are estimated on.
-Consequently, the topic means and covariance matrices in the embedding space are very similar.
+Consequently, the topic means and covariance matrices in the embedding space are very similar or even identical.
 When we start running WELDA on this random initialization the advantages of WELDA disappear.
 Instead of improving clearly defined topics by sampling new words near the well-spread topic means, we end up actually generating more overly general, low information words for all topics.
 WELDA will not work in this case.
@@ -1593,7 +1593,8 @@ This approach helps to incorporate external information into the model.
 However, it also makes sense to train the embeddings on the same corpus as the topic model is built on, as this adds additional information about the corpus itself to the topic model inference.
 The topic model corpora are usually much smaller, so the word embeddings will not have a good quality when assessed in a general way.
 However, they are optimized to the small topic model corpus, and we will evaluate, how good they work when assessed in the topic coherence and document classification tasks.
-Training on the \textsc{20News} and \textsc{Nips} corpus took about two hours.
+We trained 50-dimensional embeddings on the \textsc{20News} and \textsc{Nips} corpus.
+Training took about two hours on both corpora.
 
 To get an impression on the different word embedding models, we evaluated their performance using analogy reasoning tasks published by Mikolov et al.~\cite{Mikolov2013}.
 Analogy reasoning is a standard benchmark for word embedding models.
@@ -1782,12 +1783,14 @@ In the following experiments, we ran each parameter setting three times.
 
 
 \subsubsection{Influence of the resampling parameter $\lambda$}
-We started the evaluation with the influence of the $\lambda$ parameter.
-It must be noted, that the $\lambda$ parameter the algorithm is configured with at the beginning, is not the final $\lambda$ parameter.
+We started the evaluation of WELDA with the influence of the $\lambda$ parameter.
+First, it must be noted, that the starting value of $\lambda$ is not the final value of $\lambda$.
+% It must be noted, that the $\lambda$ parameter the algorithm is configured with at the beginning, is not the final $\lambda$ parameter.
 This is because in addition to resampling when the coin flip succeeds, we also resample when corpus-specific stop words occur, that were identified from the background topic.
 The plots in the following sections always use the actual $\lambda$, which we call $\lambda_{act}$.
 This variable represents how often a word was replaced during sampling, either because it was a background word or because the coin toss was successful.
-The $\lambda_{act}$ values are slightly higher than the original $\lambda$ values, with diminishing differences for higher $\lambda$. See Table~\ref{table:actual_lambda} for the differences.
+The $\lambda_{act}$ values are slightly higher than the original $\lambda$ values, with diminishing differences for higher $\lambda$.
+See Table~\ref{table:actual_lambda} for the differences.
 \begin{table}[]
   \ra{1.2}
   \centering
@@ -1826,7 +1829,7 @@ All the other $\lambda$ parameters follow a rising trend.
 Especially the huge improvement from $\lambda_{act} = 0.0$ to $\lambda_{act} = 0.29$ shows, that the base idea of resampling words during the Gibbs sampling works.
 The values tend to reach their optimum around iteration $140$ and stay there except some random fluctuations.
 The best topic coherence value is reached with $\lambda_{act} = 0.47$ with a topic coherence of $47.4$.
-Topic coherence values less than or greater than this $\lambda_{act}$ lead to worse topic coherence, which indicates that this value achieves a good balance between topic model and word embeddings.
+Resampling probabilities less than or greater than this $\lambda_{act}$ lead to worse topic coherence, which indicates that this value achieves a good balance between topic model and word embeddings.
 All together, this is an improvement of $5.1$ over the baseline value.
 
 We now compare the results from above with the results when we run WELDA with embeddings trained on Wikipedia.
@@ -1892,7 +1895,7 @@ We conducted experiments with $\lambda = 0.5$ and the 200-dimensional Wikipedia 
 We illustrate the results in Figure~\ref{fig:welda_gaussian_pca_samples}.
 We plot the development of the topic coherence with different fixed values of $N_{pca}$ against $N_{top}$.
 The first observation is, that $N_{top}$ does not have a large influence on the topic coherence.
-The regression is almost constant for all values of $N_{pca}$.
+The regression line regarding $N_{top}$ is almost constant for all values of $N_{pca}$.
 However, large differences are visible for different values of $N_{pca}$.
 In general, the higher the value, the higher the topic coherence.
 The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
@@ -1928,7 +1931,6 @@ Experiments were conducted on the \textsc{20News} corpus with Wikipedia embeddin
 
 Figure~\ref{fig:welda_gaussian_background_topic} confirms both facts of our initial hypothesis (see Section~\ref{sec:background_topic}).
 First, using background word resampling leads to a faster convergence of the topic coherence.
-The process is accelerated.
 Second, similar topic coherence values are achieved in the end, as WELDA naturally replaces the often-occuring words more often.
 
 \begin{figure}
