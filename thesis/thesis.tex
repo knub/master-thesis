@@ -1,4 +1,3 @@
-% TODO: Do I mention $K = 50$ somewhere?
 \documentclass[
         a4paper,
         titlepage,
@@ -19,7 +18,6 @@
 \usepackage{amssymb}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
-% \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage{pifont}
 \usepackage{booktabs}
@@ -43,10 +41,8 @@
 
 \graphicspath{{./figures/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
-\usepackage{rotating}
 \usepackage[labelsep=colon]{caption}
 \usepackage{subcaption}
-\usepackage{threeparttable}
 
 % bibtex
 \usepackage{url}
@@ -85,13 +81,17 @@
 \usepackage{hyperref}
 \hypersetup{
   colorlinks=true,
-  citecolor=darkgreen,
-  linkcolor=darkred,
-  urlcolor=darkblue,
-  filecolor=red,
-  pdftitle={Master's Thesis},
+  % citecolor=darkgreen,
+  % linkcolor=darkred,
+  % urlcolor=darkblue,
+  % filecolor=red,
+  citecolor=black,
+  linkcolor=black,
+  urlcolor=black,
+  filecolor=black,
+  pdftitle={Improving Probabilistic Topic Models using Word Embeddings, Master's Thesis by Stefan Bunk},
   pdfauthor={Stefan Bunk},
-  pdfpagemode={UseNone}
+  % pdfpagemode={UseNone}
 }
 \usepackage{cleveref}
 \usepackage{varwidth}
@@ -119,7 +119,6 @@
 {\newline}{}
 \theoremstyle{break}
 \newtheorem{exmp}{Example}[section]
-\crefname{exmp}{Example}{Examples}
 
 %\newenvironment{fexmp}
 %  {\begin{mdframed}\begin{exmp}}
@@ -2427,7 +2426,7 @@ curse of dimensionality for nearest neighbour search
 fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
-% \printbibliography
+\printbibliography
 
 \begin{appendices}
 \chapter{Plots}
