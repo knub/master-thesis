@@ -2028,6 +2028,7 @@ Depending on the word embeddings used (see Table~\ref{table:word_embeddings_perf
 \subsection{Results}
 
 
+
 \chapter{Comparative evaluation of word-embedding-improved topic models}
 \label{sec:comparative_evaluation}
 
@@ -2076,6 +2077,7 @@ The information contained in the bag-of-words and exploited by LDA is still cruc
 \end{table}
 
 \subsection{Contenders}
+\label{sec:tc_contenders}
 
 We now present the different parameter settings for the contenders.
 All experiments were run with $K = 50$ topics.
@@ -2139,7 +2141,6 @@ WELDA achieves the highest topic coherence with $TC = 44.2$, an improvement of $
 Then, TopicVec and LFTM follow with $43.6$ respectively $43.8$.
 The two remaining methods, Gaussian LDA and NSTM, perform even worse than standard LDA.
 
-
 \begin{table}[]
   \ra{1.3}
   \centering
@@ -2165,8 +2166,10 @@ The two remaining methods, Gaussian LDA and NSTM, perform even worse than standa
 To investigate the effects of the different word embedding-enhanced topic models on document classification, we conducted a series of experiments, which we will present in the next sections.
 We used the same experiment setup as described in Section~\ref{sec:dc_setup}.
 
-
 \subsection{Contenders}
+
+We now present the different parameter settings for the contenders.
+All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{20News}.
 
 \begin{itemize}
   \item
@@ -2175,29 +2178,32 @@ We used the same experiment setup as described in Section~\ref{sec:dc_setup}.
     However, there is no influence of this parameters on the classification results.
     We report the results for $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
   \item
+    \textbf{Mean of word embeddings:}
+    As a baseline, we also evaluated the document classification performance, if we only take the average word vector of all words of a document as features.
+  \item
     \textbf{TopicVec:}
     Contrary to the paper by Li et al.~\cite{Li2016}, we configured TopicVec to only learn one set of topics.
     In their paper, they learn 14 topics separately on each classification category and then combine them, resulting in 280 topics.
-    However, to allow a fair comparison, we 
+    However, to allow a fair comparison, we learn only one set of topics for the entire document collection.
     The learning rate was set to $\delta = 0.1$, as they reported in the paper.
-    We used the parameters they reported in their paper, 
-  \item
-    \textbf{Mean of word embeddings:}
-    As a baseline, we also 
+    TopicVec was ran for 500 iterations.
   \item
     \textbf{WELDA:}
-    WELDA with lambda = 0.3
+    WELDA with lambda = 0.3 TODO
   \item
     \textbf{LFTM:}
     We report results for LFTM with $\lambda = 0.6$, as this yields the best document classification results according to the original paper.
     We could confirm this in our experiments.
+    LFTM ran for 500 iterations.
   \item
     \textbf{Gaussian LDA:}
     Compared to the other methods, Gaussian LDA had to be trained with 50-dimensional instead of 200-dimensional word embeddings trained on Wikipedia.
     When training with higher-dimensional embeddings, Gaussian LDA does not converge and yield interpretable results~\cite{Das2016}.
     When adding the average word vector to the features, we still used the 200-dimensional Wikipedia embeddings.
+  \item
+    \textbf{NSTM:}
+    As mentioned in Section~\ref{sec:tc_contenders} we could not obtain any results for the NSTM method on the \textsc{20News} corpus, so we had to exclude it from the analysis.
 \end{itemize}
-
 
 \subsection{Results}
 
