@@ -1953,36 +1953,44 @@ The topic coherence development during the $1500$ iterations is displayed in Fig
 So far, all experiments were executed with Gaussian distributions as the topic distributions.
 We also evaluated WELDA with von Mises-Fisher distributions (vMF) and with Gaussian mixtures (GM).
 We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $N_{top} = 20$.
-The results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_vmf}.
+The results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_other_distributions}.
 Interestingly, the results are different depending on the embedding used.
 WELDA with vMF performs worse than Gaussian WELDA when using corpus-specific embeddings but better than Gaussian WELDA with the Wikipedia embeddings.
 This seems to indicate, that the von Mises-Fisher distribution works better with higher-quality embeddings, which were trained on more data.
 When trained on more data, the cosine similarity function between words becomes more accurate (see Table~\ref{table:word_embeddings_performance} for performance on the analogy reasoning benchmark).
 This fits better with the assumption of directional data in the von Mises-Fisher distribution.
+For the Gaussian mixtures, we observe the same performance drop with the \textsc{20News} embeddings.
+With Wikipedia embeddings, the topic coherence values are similar to Gaussian WELDA.
+The average number of mixtures for the topic distributions was $2.09$, with a standard deviation of $0.61$.
+
+We ran additional experiments with $N_{pca} = 50$ and $N_{top} = 200$ to test how the distributions performance with a higher dimensionality of the word embeddings.
+For WELDA vMF, there was no improvment of the topic coherence.
+However, the Gaussian mixtures could especially benefit from more dimensions when using the Wikipedia embeddings.
+We show the results in Table~\ref{table:welda_gm} in Appendix~\ref{sec:appendix_welda_gm}.
+In this setup, we could achieve a topic coherence value of $TC = 48.6$.
+The average number of mixtures for the topic distributions was $2.65$, with a standard deviation of $0.51$.
 
 % In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations. TODO
 
 \begin{table}[]
   \ra{1.3}
   \centering
-  \caption{Comparison of WELDA's topic coherence when implemented using von Mises-Fisher (vMF) distributions and Gaussian mixtures (GM) instead of Gaussian distributions.
-  Experiments were run on the \textsc{20News} corpus.
-  on \textsc{20News}. The $\Delta TC$ columns indicate the difference. A negative value indicates that von Mises-Fisher distributions perform worse.}
-  \label{table:welda_vmf}
+  \caption{Comparison of WELDA's topic coherence ($TC$) when implemented using von Mises-Fisher (vMF) distributions and Gaussian mixtures (GM) instead of Gaussian distributions.
+  Experiments were run on the \textsc{20News} corpus with either Wikipedia or \textsc{20News} embeddings. 
+  A positive value indicates that the distribution performed better than Gaussian WELDA.}
+  \label{table:welda_other_distributions}
   \begin{tabular}{@{}ccccccc@{}}
     \toprule
-                     &                 & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{Wikipedia} \\
-           \cmidrule{3-4} \cmidrule{6-7}
-           $\lambda$ & $\lambda_{act}$ & $TC~vMF$        & $TC~GM$ &           & $TC~vMF$         & $TC~GM$      \\
-           \midrule
-           0.2       & 0.29            & 45.8 $\pm 0.0$  & 46.0 $+0.2$    && 46.1   $+1.1$  & 45.0 $\pm 0.0$ \\
-           0.4       & 0.47            & 45.3 $-1.8$     & 45.7 $-1.4$    && 45.9   $+0.3$  & 44.7 $-0.9$     \\
-           0.5       & 0.56            & 45.6 $-1.1$     & 46.0 $-0.7$    && 46.0   $+0.5$  & 44.8 $-0.7$     \\
-           0.6       & 0.64            & 45.1 $-0.4$     & 44.8 $-0.7$    && 45.6   $+0.8$  & 45.5 $+0.7$     \\
-           0.8       & 0.82            & 45.0 $-0.9$     & 44.5 $-1.4$    && 44.8   $+1.4$  & 44.3 $+0.9$     \\ \bottomrule
-           % some of these were run with 300 iterations, see welda-vmf-longer.log
-                     % &                 & \multicolumn{4}{c}{\textsc{20News}} && \multicolumn{4}{c}{Wikipedia} \\ \cmidrule{3-6} \cmidrule{8-11}
-           % $\lambda$ & $\lambda_{act}$ & $TC~vMF$             & $\Delta TC$ & $TC~GM$             & $\Delta TC GM$ &          & $TC~vMF$   & $\Delta TC vMF$ & $TC~GM$  & $\Delta TC GM$      \\
+    \multicolumn{2}{r}{Embeddings:} & \multicolumn{2}{c}{\textsc{20News}} && \multicolumn{2}{c}{Wikipedia} \\
+    \cmidrule{3-4} \cmidrule{6-7}
+    $\lambda$ & $\lambda_{act}$     & $TC~vMF$        & $TC~GM$           && $TC~vMF$       & $TC~GM$      \\
+    \midrule
+    0.2       & 0.29                & 45.8 $\pm 0.0$  & 46.0 $+0.2$       && 46.1   $+1.1$  & 45.0 $\pm 0.0$ \\
+    0.4       & 0.47                & 45.3 $-1.8$     & 45.7 $-1.4$       && 45.9   $+0.3$  & 45.3 $-0.3$     \\
+    0.5       & 0.56                & 45.6 $-1.1$     & 46.0 $-0.7$       && 46.0   $+0.5$  & 45.4 $-0.1$     \\
+    0.6       & 0.64                & 45.1 $-0.4$     & 44.8 $-0.7$       && 45.6   $+0.8$  & 45.1 $+0.3$     \\
+    0.8       & 0.82                & 45.0 $-0.9$     & 44.5 $-1.4$       && 44.8   $+1.4$  & 43.6 $+0.2$     \\ \bottomrule
+    % some of these were run with 300 iterations, see welda-vmf-longer.log
   \end{tabular}
 \end{table}
 
@@ -2036,7 +2044,7 @@ The information contained in the bag-of-words and exploited by LDA is still cruc
   \label{table:raw_we_tm}
   \begin{tabular}{ccc}
     \toprule
-    search word     & 200-dim., \textsc{Wikipedia} & 50-dim., \textsc{20News} \\
+    search word     & 200-dim., Wikipedia & 50-dim., \textsc{20News} \\
     \midrule
     top word                 & 0.414                        & 0.410                    \\
     average of top ten words & 0.419                        & 0.389 \\
@@ -2439,6 +2447,22 @@ fewer: dimensions: slower runtime, loosing information; more dimensions, usually
          \caption{Von Mises-Fisher WELDA's topic coherence development on \textsc{20News} for different $\lambda_{act}$ values with corpus-specific embeddings. At the end, we plot the respective $TC$ values for Gaussian WELDA, which is superior in this case.}
          \label{fig:welda_vmf_20news}
   \end{figure}
+
+  \subsection{WELDA with Gaussian mixtures}
+  \label{sec:appendix_welda_gm}
+  \begin{table}[]
+    \ra{1.3}
+    \centering
+    \caption{Topic coherence on the \textsc{20News} corpus for WELDA with Gaussian mixtures and $N_{pca} = 50$. Wikipedia embeddings were used.}
+    \label{table:welda_gm}
+    \begin{tabular}{llllll}
+      \toprule
+      $\lambda$ & 0.2  & 0.4  & 0.5  & 0.6  & 0.8  \\
+      $TC$     & 48.0 & 48.6 & 48.4 & 47.9 & 47.4 \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+
 
   \section{Comparative Evaluation}
   \subsection{Document classification on 20N{\footnotesize EWS} with corpus-specific embeddings}
