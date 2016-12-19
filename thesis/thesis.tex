@@ -1,7 +1,7 @@
 \documentclass[
         a4paper,
         titlepage,
-        twoside,
+        oneside,
         parskip,
         numbers=noenddot
         ]{scrbook}
@@ -46,7 +46,34 @@
 
 % bibtex
 \usepackage{url}
-\usepackage[backend=bibtex, style=numeric]{biblatex}
+
+%%% Option 1:
+% \usepackage[backend=bibtex, bibstyle=numeric, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false]{biblatex}
+%%% Option 2:
+\usepackage[backend=bibtex, bibstyle=authoryear, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
+\DeclareNameAlias{sortname}{first-last}
+\DeclareFieldFormat{labelnumberwidth}{\mkbibbrackets{#1}}
+\defbibenvironment{bibliography}
+  {\list
+     {\printtext[labelnumberwidth]{%
+    \printfield{prefixnumber}%
+    \printfield{labelnumber}}}
+     {\setlength{\labelwidth}{\labelnumberwidth}%
+      \setlength{\leftmargin}{\labelwidth}%
+      \setlength{\labelsep}{\biblabelsep}%
+      \addtolength{\leftmargin}{\labelsep}%
+      \setlength{\itemsep}{\bibitemsep}%
+      \setlength{\parsep}{\bibparsep}}%
+      \renewcommand*{\makelabel}[1]{\hss##1}}
+  {\endlist}
+  {\item}
+\usepackage{xpatch}
+\xpatchbibmacro{date+extrayear}{%
+  \printtext[parens]%
+}{%
+  \setunit{\addperiod\space}%
+  \printtext%
+}{}{}
 
 \bibliography{library}
 
@@ -256,7 +283,7 @@ Topic modeling tries to reconstruct the topics in a collection of text with an u
 It assumes that an author has certain topics in mind when writing a document, which are chosen before any documents are written.
 For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then picks the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
 Topic modeling techniques try to recover the hidden topics in large corpora, i.e.\ find out that ``soccer'' and ``ball'' come from the same topic.
-The state of the art is Latent Dirichlet Allocation (LDA) by Blei et al.~\cite{Blei2003}.
+The state of the art is Latent Dirichlet Allocation (LDA) by Blei, Ng and Jordan.~\cite{Blei2003}.
 Topic models are probabilistic models, which means they provide probability distributions as the result.
 Therefore, the topics can be easily interpreted by humans.
 Topic models have several applications, mostly in information retrieval, where they can help navigate large corpora or augment search queries.
@@ -1007,7 +1034,7 @@ The first method performed best in their word similarity and text classification
 Using the additional topic information when training word embeddings has practical benefits for similarity evaluation.
 When the model is asked for similar words to the word ``apple'', it returns ``peach'', ``juice'', ``strawberry'' or it returns ``mac'', ``ipod'', ``android'' depending on the topic of the word.
 
-A similar idea is used by Cheng et al.~\cite{Cheng2015}.
+Cheng et al.~\cite{Cheng2015} use a similar idea.
 In fact, the first model they propose is the same as the first model from Liu et al.~\cite{Liu2015}.
 Additionally, they propose two models, which do not model the topic and the word independently.
 Rather, they divide the task of choosing a word in two steps: ``locating the right concept and then searching for a word underneath the chosen concept''~\cite{Cheng2015}.
@@ -1266,7 +1293,7 @@ There are several configurable parameters in the algorithm, which we will detail
     We tested three distributions for the topic distributions.
     First, we used the well-known multivariate Gaussian distribution.
     Second, we also tested a Gaussian mixture model.
-    Last, by inspiration of Batmanghelich et al. \cite{Batmanghelich2016}, we used the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
+    Last, by inspiration of Batmanghelich et al.\ \cite{Batmanghelich2016}, we used the multivariate von Mises-Fisher distribution, a distribution on the hypersphere.
     According to the authors, this distribution is ``well suited for directional data'' and can leverage word similarity correlations better \cite{Batmanghelich2016}.
     We demonstrate these three in detail in the next sections.
   \item \textbf{Resampling probability $\boldsymbol{\lambda}$} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 10):

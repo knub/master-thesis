@@ -8,7 +8,7 @@ plot:
 	cd plots && build
 
 when-changed:
-	@clear && when-changed -1 -s $(FILE).tex -c 'printf "\033c" && echo "Building" && make -s build && echo "Succeeded"'
+	@clear && when-changed -1 -s $(FILE).tex -c 'printf "\033c" && echo "Building" && make -s bib && make -s build && echo "Succeeded"'
 
 convert:
 	cd plots && make convert
@@ -22,7 +22,7 @@ error:
 	@vim + .output/error
 
 
-bibtex:
+bib:
 	@cp library.bib .output/ && cd .output && bibtex $(FILE) && cd ..
 
 clean:
