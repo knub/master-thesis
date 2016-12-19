@@ -308,6 +308,8 @@ object Main {
                     yield args.copy(
                         modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
                         lambda = lambda,
+                        pcaDimensions = 50,
+                        distributionEstimationSamples = 200,
                         modelNamePrefix = s"welda-gaussian-lambda-dc",
                         embeddingFileName = embedding._1,
                         numDocuments = embedding._2
