@@ -2028,7 +2028,7 @@ The average number of mixtures for the topic distributions was $2.65$, with a st
   \ra{1.3}
   \centering
   \caption{Comparison of WELDA's topic coherence ($TC$) when implemented using von Mises-Fisher (vMF) distributions and Gaussian mixtures (GM) instead of Gaussian distributions.
-  Experiments were run on the \textsc{20News} corpus with either Wikipedia or \textsc{20News} embeddings. 
+  Experiments were run on the \textsc{20News} corpus with either Wikipedia or \textsc{20News} embeddings.
   A positive value indicates that the distribution performed better than Gaussian WELDA.}
   \label{table:welda_other_distributions}
   \begin{tabular}{@{}ccccccc@{}}
@@ -2469,10 +2469,8 @@ Our observations also help to understand both models better.
 We reached our best performance when the knowledge from both models is balanced with medium $\lambda$ values ranging from $0.4$ to $0.6$.
 We could also confirm the assumption, that higher dimensionality leads to higher performance, as more semantic regularities can be encoded in the embedding space.
 We then accelerated the progress of our method by detecting special background words, which are always resampled.
-
-Our experiments with different topic distributions indicated
-Finally, We tested different Gaussian distributions, von Mises-Fisher distributions and Gaussian mixtures to 
-We especially showed that corpus-specific embeddings, albeit with a , can still help to improve topic coherence.
+Our experiments with different topic distributions indicated comparable performance for all distributions. % TODO: Seriously?
+We also showed that corpus-specific embeddings, albeit lacking quality when evaluating the embeddings alne, can still help to improve topic coherence, because they are learned on the same documents.
 
 In addition to proposing WELDA, we also evaluated four comparable approaches as well as standard LDA.
 This comparative evaluation of the models TopicVec, Gaussian LDA, LFTM and NSTM did not exist before.
@@ -2482,27 +2480,32 @@ WELDA could achieve the best performance on topic coherence, while LDA remains u
 Our work leaves several directions open for future work.
 Currently, we use one word vector for each term.
 However, this neglects the existence of polysemous words.
-The word similarity for polysemous words needs to c
-As LDA 
+When such a word occurs in a topic.
+For example, imagine the top words of a topic are
+\topicbox{weapon blunt force club crime,} but the word ``club'' is near the words ``sport'' and ``football'' in the embedding space.
+In this case, ``club'' pollutes the general violence theme and distorts its topic distribution.
+This is especially bothersome, as LDA is able to distinguish different word meanings via different topics.
+Leveraging this information could help to improve the topic distributions.
 
-
-An idea would be to 
-Topic specific replacement
-Our topic distributions are currently estimated from the data.
-By setting priors on the topic distributions one could define a certain set of expected topics.
-For example, when learning topics on the \textsc{20News} corpus, one might be fine with only one topic about \emph{sports}, but want several topics fine-grained topics about \emph{computer science}.
-
+Another direction for future work is the word replacement in WELDA.
 Currently, we base the decision of whether we replace a word simply on the result of the coin flip.
 There is no dependency on the word, which we are replacing.
 Our experiments with the background topic already showed the potential of treating certain words differently.
 A more sophisticated replacement scheme might converge faster or even better.
 The same is true for the replacement words.
 Currently, they are sampled randomly from the topic distribution, independent of the word they are replacing.
-Better schemes 
+More intelligent schemes can be devised, for example only replacing exact synonyms or a given word is only ever replaced for one topic.
+% Topic specific replacement
 
-Document classification
+Another idea would be to use the topic distributions for inserting prior knowledge in the topic models.
+Currently they are estimated from the data.
+By setting priors on the topic distributions one could define a certain set of expected topics.
+For example, when learning topics on the \textsc{20News} corpus, one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{computer science}.
 
-Our methods has potential applications in document retrieval, clustering and 
+% Document classification
+% Our methods has potential applications in document retrieval, clustering and 
+We only focused on improved topic models.
+Or jointly training both models.
 
 % \section{Other notes}
 % Concept categorization
