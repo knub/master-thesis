@@ -1751,7 +1751,7 @@ The topic coherence evaluation for one set of ten top words is calculated in fou
     While they seldom occur together, their contexts are similar, thus a high coherence score is beneficial.
   \item \textbf{Averaging}:
     As we have $N$ pairs of tuples $(W', W^*)$, the $coherence$ values need to be averaged.
-    $C_V$ uses arithmetic mean.
+    $C_V$ uses the arithmetic mean.
 \end{enumerate}
 
 As $C_V$ outputs one coherence value for each topic, we need to average again to obtain a metric for the entire topic model.
@@ -1759,7 +1759,7 @@ Again, we use arithmetic mean here.
 Finally, we multiply the resulting value by the factor 100 to achieve a value between 0 and 100.
 
 \label{sec:tc_setup}
-We directly4use the author's4i3plementation of $C_V$ in their Palmetto\footnote{\url{https://github.com/AKSW/Palmetto}} topic quality measuring toolkit.
+We directly use the authors' implementation of $C_V$ in their Palmetto\footnote{\url{https://github.com/AKSW/Palmetto}} topic quality measuring toolkit.
 Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured by $C_V$ in the \textsc{20News} corpus.
 \begin{table}[]
   \ra{1.15}
@@ -1864,8 +1864,8 @@ We start with the analysis of the topic models using the embeddings trained on t
 We tested with $\lambda \in \{ 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0 \}$.
 The results with the corresponding $\lambda_{act}$ values in the legend are plotted in Figure~\ref{fig:welda_gaussian_lambda_20news}.
 All runs start with the same value $TC = 41.9$ at iteration 0 because the models are initialized with the topic assignments from LDA.
-For $\lambda = 0.0$ the topic coherence does not change afterwards except of random fluctuations.
-This behaviour is expected, as WELDA with no replacement corresponds to standard LDA.
+For $\lambda = 0.0$, the topic coherence does not change afterwards except of random fluctuations.
+This behavior is expected, as WELDA with no replacement corresponds to standard LDA.
 The same low topic coherence values can be observed when $\lambda = 1.0$, i.e. when all words are replaced.
 This observation indicates, that just relying on the word embeddings to achieve good topics and completely disregarding the standard LDA structure, does not work.
 Intuitively, when all words are resampled, the means of the topics roughly stay the same after each iteration, as no knowledge from the text is incorporated into the model anymore.
@@ -1881,14 +1881,14 @@ Altogether, this is an improvement of $5.1$ over the baseline value.
 
 We now compare the results from above with the results when we run WELDA with embeddings trained on Wikipedia.
 We show the same plot as above for Wikipedia embeddings in Figure~\ref{fig:welda_gaussian_lambda_200}.
-Interestingly, the topic coherence values are lower on average when using this embeddings.
+Interestingly, the topic coherence values are lower on average when using these embeddings.
 This observation goes against the intuition because topic coherence is evaluated using Wikipedia as a reference corpus.
 One would expect, that knowledge from the Wikipedia corpus leaks into the topics during resampling and thus leads to better topic models.
 However, this is not the case.
 The observations for $\lambda_{act} = 0.0$ and $\lambda_{act} = 1.0$ are the same as above.
-However, the same phanomenon as for $\lambda_{act} = 1.0$ here also occurs already for $\lambda_{act} = 0.82$.
+However, the same phenomenon as for $\lambda_{act} = 1.0$ here also occurs already for $\lambda_{act} = 0.82$.
 The reason for this is the same as above: resampling too often throws away the corpus and just operates on the embeddings.
-The best results with this embeddings is only $45.8$ as compared to $47.4$ with the corpus-specific embeddings.
+The best results with these embeddings is only $45.8$ as compared to $47.4$ with the corpus-specific embeddings.
 This is only an improvement of $3.9$ over the baseline value.
 
 \begin{figure}
@@ -1946,13 +1946,13 @@ The regression line regarding $N_{top}$ is almost constant for all values of $N_
 However, large differences are visible for different values of $N_{pca}$.
 In general, the higher the value, the higher the topic coherence.
 The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
-It seems that the first two dimensions encode already a lot information for WELDA.
+It seems that the first two dimensions encode already a lot of information for WELDA.
 Still, in general the trend shows higher topic coherence for higher values of $N_{pca}$ with a strong positive correlation.
 For fixed $N_{top} = 200$, the correlation between $N_{pca}$ and $TC$ is $r_{Pearson} = 0.91$.
 This observation can be explained, as dimensionality reduction always loses information.
 With more dimensions more semantic information can be encoded in the embedding space and the similarity function between two words becomes more accurate.
 We illustrate this in Figure~\ref{fig:embedding_model_dimensions_vs_similarity_corr} in Appendix~\ref{sec:embedding_model_dimensions_vs_similarity_corr}.
-There, we project the Wikipedia embeddings to less dimensions using principal component analysis and then evaluate the word similarity correlation with human ratings from the \textsc{WordSim-353}~\cite{Agirre2009} data set.
+There, we project the Wikipedia embeddings to fewer dimensions using principal component analysis and then evaluate the word similarity correlation with human ratings from the \textsc{WordSim-353}~\cite{Agirre2009} data set.
 There is a clear trend towards higher correlation with more dimensions.
 The same experiment on the \textsc{Nips} corpus can be seen in Figure~\ref{fig:welda_gaussian_nips_pca_samples} in Appendix~\ref{sec:appendix_welda_gaussian_nips_pca_samples}.
 The results are similar.
@@ -1990,7 +1990,7 @@ Second, similar topic coherence values are achieved in the end, as WELDA natural
 \subsubsection{Running LDA as a prerequisite}
 
 We run standard LDA before WELDA to estimate the topic distributions on already well-defined topics.
-We now evalute the performance of WELDA, when we initialize topics randomly as standard LDA.
+We now evaluate the performance of WELDA, when we initialize topics randomly as standard LDA.
 This initial setup has a topic coherence value of $TC = 31.1$.
 As convergence takes longer with random initialization, we ran WELDA for $1500$ iterations on \textsc{20News} with $\lambda = 0.5$.
 As expected, WELDA performs far worse than before, reaching only $TC = 39.1$ with corpus-specific and $TC = 40.0$ with Wikipedia embeddings.
@@ -2017,8 +2017,8 @@ For the Gaussian mixtures, we observe the same performance drop with the \textsc
 With Wikipedia embeddings, the topic coherence values are similar to Gaussian WELDA.
 The average number of mixtures for the topic distributions was $2.09$, with a standard deviation of $0.61$.
 
-We ran additional experiments with $N_{pca} = 50$ and $N_{top} = 200$ to test how the distributions performance with a higher dimensionality of the word embeddings.
-For WELDA vMF, there was no improvment of the topic coherence.
+We ran additional experiments with $N_{pca} = 50$ and $N_{top} = 200$ to test how the distributions performance changes with a higher dimensionality of the word embeddings.
+For WELDA vMF, there was no improvement of the topic coherence.
 However, the Gaussian mixtures could especially benefit from more dimensions when using the Wikipedia embeddings.
 We show the results in Table~\ref{table:welda_gm} in Appendix~\ref{sec:appendix_welda_gm}.
 In this setup, we could achieve a topic coherence value of $TC = 48.6$.
@@ -2051,7 +2051,7 @@ The average number of mixtures for the topic distributions was $2.65$, with a st
 
 \section{Document classification}
 We also evaluated topic models on another commonly used task: document classification.
-In contrast to topic coherence, this allows using topic models in an supervised setting with clear evaluation metrics.
+In contrast to topic coherence, this allows using topic models in a supervised setting with clear evaluation metrics.
 Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
 
 \subsection{Experiment setup}
@@ -2072,7 +2072,7 @@ Additionally, we wanted to analyze how the word embedding vectors itself help wi
 For this, we conducted additional experiments, where we added the average word embedding of each document to the features.
 The average was calculated by taking the bag-of-words representation of the documents from the topic model, retrieving all word vectors using the word-matching technique described in Section~\ref{sec:vocabulary_mismatch} and then calculating their average.
 Stop words were not relevant for the average word vector calculation, as they were already removed during the topic model preprocessing.
-Depending on the word embeddings used (see Table~\ref{table:word_embeddings_performance}), this added another fifty or two-hundred features to the instances.
+Depending on the word embeddings used (see Table~\ref{table:word_embeddings_performance}), this added another fifty or two hundred features to the instances.
 
 \subsection{Results}
 
@@ -2137,7 +2137,7 @@ We tested on the \textsc{20News} and on the \textsc{Nips} corpus.
   \item
     \textbf{Standard LDA:}
     We evaluated LDA with different values of $\alpha$ and $\beta$.
-    However we showed in Section~\ref{sec:lda_as_baseline} already, that this does not have influence on the topic coherence.
+    However, we showed in Section~\ref{sec:lda_as_baseline} already, that this does not have an influence on the topic coherence.
     We report the results for $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
   \item
     \textbf{Gaussian LDA:}
@@ -2321,7 +2321,7 @@ The order of the remaining methods is not different from before.
 The same holds for the number of topics: $K = 250$ performs better than $K = 50$ for all models.
 
 As a summary, using the word embeddings during the inference does not help to create better document representations.
-While most methods were able to generate better topics (see Section~\ref{sec:evaluation_topic_coherence}), this seems to come at the expense of loosing accuracy in document classification.
+While most methods were able to generate better topics (see Section~\ref{sec:evaluation_topic_coherence}), this seems to come at the expense of losing accuracy in document classification.
 However, in general, topic model features and word embedding features (in the form of the average word vector) complement each other.
 Both features combined are always better than just one of the two models.
 Also, the fact that the average word vector alone already has a high F1 score indicates, that word embeddings are well-suited for document classification in general.
@@ -2343,7 +2343,7 @@ Five of these six words belong to the top words of one topic of the topic model.
 The sixth word was chosen randomly from another topic.
 This word is called the \emph{intruder}.
 The rules for selecting the intruder were as follows:
-The intruder had to be in the top ten words of another topic, so that we picked only relevant words from the corpus.
+The intruder had to be in the top ten words of another topic so that we picked only relevant words from the corpus.
 On the other hand, the intruder should not be in the top fifty words of the original topic to ``reduce the possibility that the intruder comes from the same semantic group''~\cite{Chang2009}.
 The word order for each sample was randomized.
 The idea of this word intrusion study is the following: if the five words form a clear and coherent topic, it should be simple to detect the intruder.
@@ -2390,7 +2390,7 @@ For both cases, the average accuracy for WELDA was around 70 \%.
 
 In this section we present the running time of the different algorithms.
 Runtime is not a crucial factor for topic models, as they are usually not executed in an online setting.
-Still, to gain an impression on the computational complexity of each model, we present their runtimes here.
+Still, to gain an impression of the computational complexity of each model, we present their runtimes here.
 
 Experiments were conducted on a 32-core, Intel Xeon CPU E7-8837 @ 2.67GHz machine with 256 GB main memory.
 While same techniques have parallelized implementations available, other's have not.
@@ -2403,19 +2403,19 @@ Mallet is the only highly optimized library in this benchmark.
 The LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
 The only step, which is parallelized is the optimization of the topic vector, which happens after each Gibbs sampling iteration.
 We ran LFTM for $500$ iterations, as suggested in the paper.
-TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers an parallel implementation, which mostly relies on existing parallelization in linear algebra libraries, as TopicVec heavily works with matrix operations.
+TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers a parallel implementation, which mostly relies on existing parallelization in linear algebra libraries, as TopicVec heavily works with matrix operations.
 We ran TopicVec for $500$ iterations.
 Gaussian LDA\footnote{\url{https://github.com/rajarshd/Gaussian_LDA}} is not parallelized and no straightforward parallelization is possible.
 Gaussian LDA was run for $150$ iterations,  which is when the log likelihood converges.
 WELDA is not parallelized, however a parallel implementation with the same ideas as Newman et al.~\cite{Newman2009} is possible.
 As usual, we run WELDA for $200$ iterations.
 
-For all methods we chose the number of iterations so that the method converged.
+For all methods, we chose the number of iterations so that the method converged.
 % See the previous sections for details.
 Of all methods, standard LDA is by far the fastest.
 The next best method is WELDA, but it is already slower by a factor of ten.
 Note that especially WELDA's performance largely depends on the resampling probability $\lambda$.
-The higher $\lambda$, the more new words are sample, which leads to more nearest-neighbor searches.
+The higher $\lambda$, the more new words are sampled, which leads to more nearest-neighbor searches.
 The nearest-neighbor search is the most expensive operation, hence it dominates the runtime.
 We illustrate this dependency in Figure~\ref{fig:welda_lambda_runtime}.
 Still, even with $\lambda = 1.0$ the runtime of WELDA is 164 min, which is still faster than the next-fastest TopicVec.
@@ -2464,15 +2464,15 @@ This topic distribution captures the position of words belonging to the topic.
 By learning a full distribution and not only a single topic vector, we are also capturing the shape of the word positions in the embedding space.
 We then randomly resample words from this distribution and during the Gibbs sampling inference.
 With this method, we utilize both the word co-occurrences across documents and the word-context co-occurrences at the same time.
-We shift probability mass from general, low-information words to specific, high-information words, which strenghten the main theme of the topic.
+We shift probability mass from general, low-information words to specific, high-information words, which strengthen the main theme of the topic.
 
-Our exhaustive evaluation proved the success of the WELDA model on the topic coherence task, while keeping acceptable performance on the document classification task.
+Our exhaustive evaluation proved the success of the WELDA model on the topic coherence task while keeping acceptable performance on the document classification task.
 Our observations also help to understand both models better.
 We reached our best performance when the knowledge from both models is balanced with medium $\lambda$ values ranging from $0.4$ to $0.6$.
 We could also confirm the assumption, that higher dimensionality leads to higher performance, as more semantic regularities can be encoded in the embedding space.
 We then accelerated the progress of our method by detecting special background words, which are always resampled.
 Our experiments with different topic distributions indicated comparable performance for all distributions. % TODO: Seriously?
-We also showed that corpus-specific embeddings, albeit lacking quality when evaluating the embeddings alne, can still help to improve topic coherence because they are learned on the same documents.
+We also showed that corpus-specific embeddings, albeit lacking quality when evaluating the embeddings alone, can still help to improve topic coherence because they are learned on the same documents.
 
 In addition to proposing WELDA, we also evaluated four comparable approaches as well as standard LDA.
 This comparative evaluation of the models TopicVec, Gaussian LDA, LFTM and NSTM did not exist before.
@@ -2500,7 +2500,7 @@ More intelligent schemes can be devised, for example only replacing exact synony
 % Topic specific replacement
 
 Another idea would be to use the topic distributions for inserting prior knowledge in the topic models.
-Currently they are estimated from the data.
+Currently, they are estimated from the data.
 By setting priors on the topic distributions one could define a certain set of expected topics.
 For example, when learning topics on the \textsc{20News} corpus, one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{computer science}.
 
@@ -2519,7 +2519,7 @@ Or jointly training both models.
 
 % Beim resampling: sanity check, ABER: optimiert auf, Wort nur in 1 topic
 % curse of dimensionality for nearest neighbor search
-% fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
+% fewer: dimensions: slower runtime, losing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
 \printbibliography
