@@ -2437,6 +2437,13 @@ Especially LFTM is very slow with 200-dimensional embeddings, making it infeasib
 \chapter{Conclusion and future work}
 \label{sec:conclusion}
 
+In this master thesis, we proposed WELDA
+
+handle polysemous words
+by setting priors on the topic distributions 
+Our topic distributions are currently estimated from the data.
+By setting priors on the distributions  one could set a prior on the types of topics we want.
+
 Document classification
 Topic specific replacement
 
@@ -2449,8 +2456,8 @@ Motivation: topic with countries
 Paper: Schwächen, Stärken, ausführlich
 
 Beim resampling: sanity check, ABER: optimiert auf, Wort nur in 1 topic
-curse of dimensionality for nearest neighbour search
-fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
+% curse of dimensionality for nearest neighbour search
+% fewer: dimensions: slower runtime, loosing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
 \printbibliography
