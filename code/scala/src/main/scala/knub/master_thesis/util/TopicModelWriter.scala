@@ -81,7 +81,7 @@ class TopicModelWriter(private val model: ReplacementWELDA) {
         val docTopicMatrix = Array.ofDim[Double](params.numDocuments, model.numTopics)
         for (i <- 0 until params.numDocuments) {
             for (j <- 0 until model.numTopics) {
-                val pro = (model.docTopicCountAveraged(i)(j) + params.alpha) / (model.docWordCount(i) + model.alphaSum)
+                val pro = (model.docTopicCountAveraged(i)(j) + model.alpha(j)) / (model.docWordCount(i) + model.alpha.sum)
                 docTopicMatrix(i)(j) = pro
                 if (j == 0)
                     writer.write(pro.toString)
