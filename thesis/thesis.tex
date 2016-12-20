@@ -1,12 +1,12 @@
 \documentclass[
         a4paper,
-        draft,
+        % draft,
         titlepage,
         twoside,
         parskip,
         numbers=noenddot
         ]{scrbook}
-% \usepackage[left=0.82675in,textwidth=5.78853in]{geometry}
+\usepackage[left=2.6cm,right=3.7cm]{geometry}
 \setlength{\parskip}{6pt}
 \setlength{\parindent}{15pt}
 
@@ -16,6 +16,8 @@
 \definecolor{darkblue}{rgb}{0,0,0.5}
 
 \usepackage{layouts} % printinunitsof % TODO
+% \usepackage{showframe}
+
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{algorithm}
@@ -50,7 +52,7 @@
 \usepackage{url}
 
 %%% Option 1:
-\usepackage[backend=bibtex, bibstyle=numeric, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
+\usepackage[backend=bibtex, bibstyle=ieee, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
 %%% Option 2:
 % \usepackage[backend=bibtex, bibstyle=authoryear, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
 % \DeclareNameAlias{sortname}{first-last}
@@ -221,21 +223,22 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 \makeatother
 
 % TODO: Remove
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{4}
+% \setcounter{secnumdepth}{4}
+% \setcounter{tocdepth}{4}
 \tableofcontents
 % \mainmatter
 
 \chapter{Introduction}
 \label{sec:introduction}
-\printinunitsof{in}\prntlen{\hoffset}
-\printinunitsof{in}\prntlen{\oddsidemargin}
-\printinunitsof{in}\prntlen{\evensidemargin}
+% \printinunitsof{cm}\prntlen{\hoffset}
+% \printinunitsof{cm}\prntlen{\oddsidemargin}
+% \printinunitsof{cm}\prntlen{\evensidemargin}
 
-\printinunitsof{in}\prntlen{\textwidth}
-\printinunitsof{in}\prntlen{\textheight}
+% \printinunitsof{cm}\prntlen{\textwidth}
+% \printinunitsof{cm}\prntlen{\textheight}
 % \the\oddsidemargin
 % \the\evensidemargin
+
 % \begin{algorithm}
 %   \caption{Gibbs sampling in LDA}
 %   \label{alg:welda_init}
@@ -282,7 +285,7 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 % \end{algorithm}
 
 A core task in natural language processing (NLP) is to understand the meaning of words.
-Many downstream NLP tasks benefit from this, for example, text categorization, part-of-speech tagging and machine translation.
+Many downstream NLP tasks benefit from this, for example text categorization, part-of-speech tagging and machine translation.
 A popular concept to quantify the meaning of a word is to look at the contexts in which the word appears.
 A famous quote by Firth says: ``You shall know a word by the company it keeps''~\cite{Firth1957}.
 In other words, if two words occur in similar contexts, they are similar.
@@ -1495,12 +1498,12 @@ We see, that a value of fifteen is sufficient, so that the background topic occu
     \bottomrule
   \end{tabular}
 \end{table}
-Indeed, if we look at the top words in the background topic in the \textsc{20News} corpus, we find corpus-specific stop words: \\
-\noindent\fbox{
-    \parbox{0.8\textwidth}{
-would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
-}
-
+Indeed, if we look at the top words in the background topic in the \textsc{20News} corpus, we find corpus-specific stop words:
+\topicbox{\noindent would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
+% \noindent\fbox{
+%     \parbox{0.8\textwidth}{
+% would one writes like article think get know time people even good much well way make see really want apr right also going still say sure since first something back thing never take many better may things}
+% }
 We treat the fifty top words in the background topic specially.
 Whenever one of these words occurs, we always resample the word, even if the coin toss in the WELDA algorithm failed.
 Note that we keep this list fixed during the WELDA iterations.
