@@ -1,6 +1,6 @@
 \documentclass[
         a4paper,
-        % draft,
+        draft,
         titlepage,
         twoside,
         parskip,
@@ -1616,7 +1616,7 @@ Document classification will be evaluated on \textsc{20News}, as \textsc{Nips} d
   \begin{tabular}{|l|l|l|}
     \hline
     \begin{tabular}[c]{@{}l@{}}comp.graphics (584)\\ comp.os.ms-windows.misc (572)\\ comp.sys.ibm.pc.hardware (590)\\ comp.sys.mac.hardware (578)\\ comp.windows.x (593)\end{tabular} & \begin{tabular}[c]{@{}l@{}}rec.autos (594)\\ rec.motorcycles (598)\\ rec.sport.baseball (597)\\ rec.sport.hockey (600)\end{tabular} & \begin{tabular}[c]{@{}l@{}}sci.crypt (595)\\ sci.electronics (591)\\ sci.med (594)\\ sci.space (593)\end{tabular}         \\ \hline
-      misc.forsale (585)                                                                                                                                        & \begin{tabular}[c]{@{}l@{}}talk.politics.misc (465)\\ talk.politics.guns (545)\\ talk.politics.mideast (564)\end{tabular}      & \begin{tabular}[c]{@{}l@{}}talk.religion.misc (377)\\ alt.atheism (480)\\ soc.religion.christian (598)\end{tabular} \\ \hline
+      \begin{tabular}[c]{@{}l@{}}talk.religion.misc (377)\\ alt.atheism (480)\\ soc.religion.christian (598)\end{tabular}                                                                                                                                        & \begin{tabular}[c]{@{}l@{}}talk.politics.misc (465)\\ talk.politics.guns (545)\\ talk.politics.mideast (564)\end{tabular}      & misc.forsale (585) \\ \hline
   \end{tabular}
 \end{table}
 
@@ -1776,7 +1776,7 @@ Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured 
   76.4               & team, hockey, players, season, game, nhl, league, teams, games, play \\
   ...                &                    \\
   33.9               & good, find, figuring, exciting, sure, things, anybody, mistake, hopefully, decent \\
-  30.5               & radar, detector, realizing, saturn, make, insurance, car, detectors, dealer, weight \\ \bottomrule
+  30.5               & radar, detector, realize, saturn, make, insurance, car, detectors, dealer, weight \\ \bottomrule
   \end{tabular}
   \label{table:best_worst_cv_topics}
 \end{table}
@@ -2397,7 +2397,7 @@ The word order for each sample was randomized.
 The idea of this word intrusion study is the following: if the five words form a clear and coherent topic, it should be simple to detect the intruder.
 For example, look at the word set:
 \topicbox{gaussian bayesian posterior neural distribution prior}
-The intruder ``neural'' is easily recognizable because all other words stem from Bayesian statistics.
+\noindent The intruder ``neural'' is easily recognizable because all other words stem from Bayesian statistics.
 However, in the sample:
 \topicbox{error generalization hypothesis convergence evidence probability}
 the intruder ``convergence'' is much harder to recognize.
