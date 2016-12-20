@@ -1,5 +1,6 @@
 \documentclass[
         a4paper,
+        draft,
         titlepage,
         twoside,
         parskip,
@@ -174,7 +175,7 @@
 \publishers{
 Information Systems Group \\
 Hasso-Plattner-Institute, Potsdam, Germany \\ \vspace{1cm}
-Supervisor: Dr. Ralf Krestel}
+Supervisor: Dr.\ Ralf Krestel}
 
 \pagestyle{headings}
 \makeatletter
@@ -2005,9 +2006,9 @@ The topic coherence development during the $1500$ iterations is displayed in Fig
 \subsubsection{WELDA with other topic distributions}
 
 So far, all experiments were executed with Gaussian distributions as the topic distributions.
-We also evaluated WELDA with von Mises-Fisher distributions (vMF) and with Gaussian mixtures (GM).
+However, we also evaluated WELDA with von Mises-Fisher distributions (vMF) and with Gaussian mixtures (GM).
 We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $N_{top} = 20$.
-The results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_other_distributions}.
+The topic coherence results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_other_distributions}.
 Interestingly, the results are different depending on the embedding used.
 WELDA with vMF performs worse than Gaussian WELDA when using corpus-specific embeddings but better than Gaussian WELDA with the Wikipedia embeddings.
 This seems to indicate, that the von Mises-Fisher distribution works better with higher-quality embeddings, which were trained on more data.
