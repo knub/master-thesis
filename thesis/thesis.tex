@@ -2065,7 +2065,7 @@ For classification, we ran a three-fold stratified cross validation.
 In each fold, we used a linear \emph{l}-1 regularized SVM classifier, where we trained $K$ one-vs-rest classifiers.
 The results for the different classes were macro-averaged.
 The results for the three folds were macro-averaged again.
-We will report this number in the tables in the following sections.
+We will report precision, accuracy and F1 score in the tables and figures in the following sections.
 We used the \emph{LinearSVC} implementation from the Python scikit-learn~\cite{Pedregosa2012} library.
 
 Additionally, we wanted to analyze how the word embedding vectors itself help with document classification.
@@ -2076,7 +2076,26 @@ Depending on the word embeddings used (see Table~\ref{table:word_embeddings_perf
 
 \subsection{Results}
 
+We first start with analyzing the standard LDA algorithm with regards to document classification performance to establish a baseline.
+We will then analyze WELDA with different topic distributions, $\lambda$ values and $N_{pca}$ values.
 
+\subsubsection{Standard LDA as baseline}
+
+We ran a grid search using $[0.002, 0.005, 0.01, 0.02, 0.05]$ as possible values for $\alpha$ and $[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]$ as possible values for $\beta$.
+However, again there is no clear correlation between these values and the final F1 value.
+This impression is further strengthened by Figure~\ref{fig:standard_lda_alpha_beta_dc}, where we plot the average topic coherence for a fixed $\alpha$ respectively $\beta$.
+This observation allows us to use $\alpha = \beta = 0.02$ again just as in the topic coherence experiments.
+This configuration has an F1 score of $69.3$.
+
+\begin{figure}
+       \centering
+       \includegraphics[width=12cm]{figures/standard_lda_alpha_beta_dc.png}
+       \caption{Average F1 score for a fixed $\alpha$ respectively $\beta$, while averaging over all values of $\beta$ respectively $\alpha$. $\alpha$ and $\beta$ seem to not have a strong influence on the document classification performance.}
+       \label{fig:standard_lda_alpha_beta_dc}
+\end{figure}
+
+\subsubsection{}
+WELDA
 
 \chapter{Comparative evaluation of word-embedding-improved topic models}
 \label{sec:comparative_evaluation}
