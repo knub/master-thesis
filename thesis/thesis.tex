@@ -1680,14 +1680,14 @@ As discussed in Section~\ref{sec:evaluation_of_topic_models}, topic coherence is
 In this section, we evaluate WELDA's design decisions with respect to topic coherence in several experiments.
 \subsection{Topic coherence metric $C_V$}
 
-We will use topic coherence as a metric to evaluate the quality of our topics.
+We will use topic coherence to evaluate the quality of our topics.
 As a topic coherence metric, we use the $C_V$ metric from Röder et al.~\cite{Roder2015}, who did an extensive survey on topic coherence metrics.
 Their $C_V$ metric had the highest correlation with human annotators ($r_{Pearson} = 0.731$).
 
 At first, the number of top words $N$ to be considered for the measure must be chosen.
 We choose $N=10$ because ``the evaluation of topic quality is harder if the number of top words $N$ is small''~\cite{Roder2015} and because it is a common choice in the literature~\cite{Aletras2013,Roder2015}.
 We denote the set of top words with $W$.
-The topic coherence evaluation for one set of ten top words is calculated in four steps:
+The topic coherence evaluation for one set of ten top words is then calculated in four steps:
 \begin{enumerate}
   \item \textbf{Word Segmentation}:
     The set $W$ of top words is segmented into pairs of word-sets, for which the coherence is calculated separately in the following step.
@@ -1764,7 +1764,7 @@ Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured 
 \begin{table}[]
   \ra{1.15}
   \centering
-  \caption{Best and worst topics in our best topic model on the \textsc{20News}-corpus with 50 topics according to $C_V$}
+  \caption{Best and worst topics in our best topic model on the \textsc{20News} corpus with 50 topics according to $C_V$}
   \begin{tabular}{ll}
   \toprule
   $C_V$ & Top words \\ \midrule
@@ -1795,7 +1795,7 @@ Unless noted otherwise, all our experiments are run with $1500$ standard LDA ite
 \end{figure}
 As a baseline, we started with evaluating the topic coherence $TC$ of the standard LDA algorithm on the \textsc{20News} corpus.
 We also used this to determine good values for the LDA parameters $\alpha$ and $\beta$.
-We ran a grid search using $[0.002, 0.005, 0.01, 0.02, 0.05]$ as possible values for $\alpha$ and $[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]$ as possible values for $\beta$.
+We ran a grid search using $\{0.002, 0.005, 0.01, 0.02, 0.05\}$ as possible values for $\alpha$ and $\{0.002, 0.005, 0.01, 0.02, 0.05, 0.1\}$ as possible values for $\beta$.
 Interestingly, there is no clear trend visible.
 The best topic coherence results were achieved with $(\alpha=0.01,\beta=0.02)$, $(\alpha=0.005,\beta=0.005)$ and $(\alpha=0.02,\beta=0.1)$.
 However, all results were in a very close range, with a standard deviation of all results of $0.6$, indicating no relationship between $\alpha$, $\beta$ and the topic coherence.
@@ -1954,8 +1954,9 @@ With more dimensions more semantic information can be encoded in the embedding s
 We illustrate this in Figure~\ref{fig:embedding_model_dimensions_vs_similarity_corr} in Appendix~\ref{sec:embedding_model_dimensions_vs_similarity_corr}.
 There, we project the Wikipedia embeddings to fewer dimensions using principal component analysis and then evaluate the word similarity correlation with human ratings from the \textsc{WordSim-353}~\cite{Agirre2009} data set.
 There is a clear trend towards higher correlation with more dimensions.
-The same experiment on the \textsc{Nips} corpus can be seen in Figure~\ref{fig:welda_gaussian_nips_pca_samples} in Appendix~\ref{sec:appendix_welda_gaussian_nips_pca_samples}.
-The results are similar.
+
+We conducted the analysis regarding $N_{pca}$ and $N_{top}$ also on the \textsc{Nips} corpus.
+The results, which can be seen in Figure~\ref{fig:welda_gaussian_nips_pca_samples} in Appendix~\ref{sec:appendix_welda_gaussian_nips_pca_samples}, are similar to the \textsc{20News} corpus.
 
 \begin{figure}
        \centering
@@ -1963,7 +1964,6 @@ The results are similar.
        \caption{Final topic coherence values after 200 iterations for different values of $N_{pca}$ and $N_{top}$ on the \textsc{20News} corpus with Wikipedia embeddings. We also plotted a regression line indicating the development for increasing $N_{top}$. $N_{top}$ does not have a huge influence on the topic coherence. In contrast, the higher $N_{pca}$ the better the topic coherence.}
        \label{fig:welda_gaussian_pca_samples}
 \end{figure}
-
 
 \subsubsection{Influence of the background topic sampling}
 
@@ -2307,24 +2307,25 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
   \centering
   \caption{Document classification results for the \textsc{20News} corpus when using 200-dimensional embeddings trained on Wikipedia.
   We tested with $K = 50$ topics and with $K = 250$ topics and report macro-averaged precision ($Prec$), recall ($Rec$) and F1 score ($F1$).
+  Additionally, we tested performance when we added the average word embedding to the features (AE).
   All word-embedding-improved topic models perform worse than standard LDA.}
   \label{table:document_classification_dim-200}
   \begin{tabular}{lrrrcrrr}
     \toprule
     \multirow{2}{*}{} & \multicolumn{3}{c}{$K = 50$} & \phantom{a} & \multicolumn{3}{c}{$K = 250$} \\ \cmidrule{2-4} \cmidrule{6-8}
                       & $Prec$    & $Rec$     & $F1$     && $Prec$    & $Rec$   & $F1$     \\ \midrule
-                      Only Avg. Emb. (200)     & 71.5    & 70.4    & 69.9   && \multicolumn{3}{c}{--------------------}        \\
-                      Only Avg. Emb. (50)      & 57.3    & 58.3    & 56.7   && \multicolumn{3}{c}{--------------------}        \\
-                      LDA                      & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
-                      LDA + Avg. Emb.          & \textbf{76.5}    & \textbf{76.2}    & \textbf{77.0}   && \textbf{78.1}    & \textbf{77.7}     & \textbf{77.6}   \\
-                      LFTM                     & 69.0    & 67.7    & 66.5   && 71.4    & 71.0     & 70.8   \\
-                      LFTM + Avg. Emb.         & 74.6    & 74.5    & 73.9   && 77.4    & 77.0     & 76.9   \\
-                      TopicVec                 & 34.7    & 34.4    & 31.4   && 40.9    & 37.3     & 33.7   \\
-                      TopicVec + Avg. Emb.     & 74.2    & 73.1    & 72.1   && 74.3    & 73.4     & 72.5   \\
-                      WELDA                    & 62.1    & 61.3    & 61.0   && 67.1    & 64.8     & 65.1   \\
-                      WELDA + Avg. Emb.        & 73.4    & 73.2    & 72.7   && 76.8    & 76.5     & 76.3   \\
-                      Gaussian LDA             & 41.6    & 43.4    & 40.5   && 40.3    & 42.5     & 39.1   \\
-                      Gaussian LDA + Avg. Emb. & 72.7    & 72.3    & 71.8   && 68.0    & 68.9     & 67.8   \\
+                      Only AE (200)     & 71.5    & 70.4    & 69.9   && \multicolumn{3}{c}{--------------------}        \\
+                      Only AE (50)      & 57.3    & 58.3    & 56.7   && \multicolumn{3}{c}{--------------------}        \\
+                      LDA               & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
+                      LDA + AE          & \textbf{76.5}    & \textbf{76.2}    & \textbf{77.0}   && \textbf{78.1}    & \textbf{77.7}     & \textbf{77.6}   \\
+                      LFTM              & 69.0    & 67.7    & 66.5   && 71.4    & 71.0     & 70.8   \\
+                      LFTM + AE         & 74.6    & 74.5    & 73.9   && 77.4    & 77.0     & 76.9   \\
+                      TopicVec          & 34.7    & 34.4    & 31.4   && 40.9    & 37.3     & 33.7   \\
+                      TopicVec + AE     & 74.2    & 73.1    & 72.1   && 74.3    & 73.4     & 72.5   \\
+                      WELDA             & 62.1    & 61.3    & 61.0   && 67.1    & 64.8     & 65.1   \\
+                      WELDA + AE        & 73.4    & 73.2    & 72.7   && 76.8    & 76.5     & 76.3   \\
+                      Gaussian LDA      & 41.6    & 43.4    & 40.5   && 40.3    & 42.5     & 39.1   \\
+                      Gaussian LDA + AE & 72.7    & 72.3    & 71.8   && 68.0    & 68.9     & 67.8   \\
   \bottomrule
   \end{tabular}
 \end{table}
@@ -2637,8 +2638,6 @@ Or jointly training both models.
     \end{tabular}
   \end{table}
 
-  \section{Document Classification}
-
   \subsection{Document classification performance depending on word embeddings used}
   \label{sec:appendix_welda_dc_different_embeddings}
   \begin{figure}
@@ -2652,27 +2651,27 @@ Or jointly training both models.
   \section{Comparative Evaluation}
   \subsection{Document classification on 20N{\footnotesize EWS} with corpus-specific embeddings}
   \label{sec:appendix_document_classification_corpus_specific}
-  \begin{table}[]
+  \begin{table}[H]
     \ra{1.3}
     \centering
     \caption{Document classification results for the \textsc{20News} corpus when using 50-dimensional embeddings trained on \textsc{20News}.
-    All methods are worse than standard LDA.}
+    LFTM consistently provides the best performance.}
     \label{table:document_classification_dim-50}
     \begin{tabular}{lrrrcrrr}
       \toprule
       \multirow{2}{*}{} & \multicolumn{3}{c}{$K = 50$} & \phantom{a} & \multicolumn{3}{c}{$K = 250$} \\ \cmidrule{2-4} \cmidrule{6-8}
                         & $Prec$    & $Rec$     & $F1$     && $Prec$    & $Rec$   & $F1$     \\ \midrule
-                        Only Avg. Emb.           & 78.6    & 78.1    & 78.0   && \multicolumn{3}{l}{}        \\
-                        LDA                      & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
-                        LDA + Avg. Emb.          & 79.1    & 78.6    & 78.5   && 80.3    & 80.1     & 80.0   \\
-                        LFTM                     & 69.8    & 68.2    & 67.3   && 73.2    & 72.9     & 72.6   \\
-                        LFTM + Avg. Emb.         & \textbf{80.2}    & \textbf{79.9}    & \textbf{79.7}   && \textbf{81.1}    & \textbf{81.5}     & \textbf{81.5}   \\
-                        TopicVec                 & 35.1    & 33.0    & 30.6   && 42.1    & 40.1     & 39.7   \\
-                        TopicVec + Avg. Emb.     & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
-                        WELDA                    & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
-                        WELDA + Avg. Emb.        & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
-                        Gaussian LDA             & 53.7    & 54.3    & 52.3   && 59.2    & 59.5     & 57.8   \\
-                        Gaussian LDA + Avg. Emb. & 77.6    & 76.8    & 76.6   && 77.8    & 77.0     & 77.0   \\
+                        Only AE                          & 78.6    & 78.1    & 78.0   && \multicolumn{3}{l}{}        \\
+                        LDA                              & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
+                        LDA + AE                         & 79.1    & 78.6    & 78.5   && 80.3    & 80.1     & 80.0   \\
+                        LFTM                             & 69.8    & 68.2    & 67.3   && 73.2    & 72.9     & 72.6   \\
+                        LFTM + AE                        & \textbf{80.2}    & \textbf{79.9}    & \textbf{79.7}   && \textbf{81.1}    & \textbf{81.5}     & \textbf{81.5}   \\
+                        TopicVec                         & 35.1    & 33.0    & 30.6   && 42.1    & 40.1     & 39.7   \\
+                        TopicVec + AE                    & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
+                        WELDA $\lambda_{act} = 0.4$      & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
+                        WELDA $\lambda_{act} = 0.4$ + AE & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
+                        Gaussian LDA                     & 53.7    & 54.3    & 52.3   && 59.2    & 59.5     & 57.8   \\
+                        Gaussian LDA + AE                & 77.6    & 76.8    & 76.6   && 77.8    & 77.0     & 77.0   \\
     \bottomrule
     \end{tabular}
   \end{table}
