@@ -74,6 +74,7 @@ object Main {
             "welda-gaussian", "welda-vmf",
             "welda-vmf-pca",
             "welda-vmf-lambda-dc",
+            "welda-gaussian-mixture-lambda-dc",
             "welda-lda",
             "welda-gaussian-lambda-dc",
             "welda-gaussian-lambda", "welda-gaussian-random-init",
@@ -327,6 +328,17 @@ object Main {
                         numDocuments = embedding._2
                     )
                 runCases(cases, 30, new VmfWELDA(_))
+            case "welda-gaussian-mixture-lambda-dc" =>
+                val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+                val cases = for (embedding <- embeddings.take(1); lambda <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        modelNamePrefix = s"welda-gaussian-mixture-lambda-dc",
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2
+                    )
+                runCases(cases, 30, new GaussianMixtureWELDA(_))
             case "welda-gaussian-nips" =>
                 val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
                 val cases = for (embedding <- nipsEmbeddings; lambda <- lambdas; idx <- 0 until 5)
