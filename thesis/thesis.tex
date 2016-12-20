@@ -207,9 +207,9 @@ Our experiments show that WELDA outperforms all other approaches with respect to
 
 Die distributionelle Hypothese besagt, dass ähnliche Worte in ähnlichen Kontexten auftreten.
 Viele Modelle für natürlichsprachlichen Text wurden von dieser Annahme motiviert.
-Zwei dieser Modelle sind Topic-Modelle und Vektorrepräsentationen von Wörtern.
+Zwei dieser Modelle sind Topic-Modelle und Vektorrepräsentationen von Wör\-tern.
 Probabilistische Topic-Modelle, insbesondere Latent Dirichlet Allocation (LDA), haben sich bei der Erkennung versteckter Themen in großen Textkorpora durch die Analyse von Kookkurrenzen bewährt.
-Wortvektoren lernen semantische Regelmäßigkeiten in einem niedrig-dimensionalen Vektorraum zu kodieren, indem sie den lokalen Kontext eines Wortes vorhersagen.
+Wortvektoren lernen semantische Regel\-mäßig\-keiten in einem niedrig-dimensionalen Vektorraum zu kodieren, indem sie den lokalen Kontext eines Wortes vorhersagen.
 Aufgrund ihrer komplementären Natur definieren die Modelle unterschiedliche Ansichten von Wort-Ähnlichkeit.
 Diese Beobachtung legt eine Kombination beider Modelle nahe.
 In dieser Masterarbeit führen wir WELDA ein, eine neue Art von Topic-Modell, die Vektorrepräsentationen von Wörtern verwendet, um die Kohärenz der Themen zu verbessern.
@@ -2010,21 +2010,20 @@ However, we also evaluated WELDA with von Mises-Fisher distributions (vMF) and w
 We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $N_{top} = 20$.
 The topic coherence results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_other_distributions}.
 Interestingly, the results are different depending on the embedding used.
-WELDA with vMF performs worse than Gaussian WELDA when using corpus-specific embeddings but better than Gaussian WELDA with the Wikipedia embeddings.
+The performance of WELDA vMF is worse than Gaussian WELDA when using corpus-specific embeddings but better than Gaussian WELDA with the Wikipedia embeddings.
 This seems to indicate, that the von Mises-Fisher distribution works better with higher-quality embeddings, which were trained on more data.
 When trained on more data, the cosine similarity function between words becomes more accurate (see Table~\ref{table:word_embeddings_performance} for performance on the analogy reasoning benchmark).
 This fits better with the assumption of directional data in the von Mises-Fisher distribution.
 For the Gaussian mixtures, we observe the same performance drop with the \textsc{20News} embeddings.
 With Wikipedia embeddings, the topic coherence values are similar to Gaussian WELDA.
-The average number of mixtures for the topic distributions was $2.09$, with a standard deviation of $0.61$.
+On average, we estimated 2.09 mixtures for the topic distributions (standard deviation: 0.61).
 
-We ran additional experiments with $N_{pca} = 50$ and $N_{top} = 200$ to test how the distributions performance changes with a higher dimensionality of the word embeddings.
+We ran additional experiments with $N_{pca} = 50$ and $N_{top} = 200$ to test how the performance changes with a higher dimensionality of the word embeddings.
 For WELDA vMF, there was no improvement of the topic coherence.
 However, the Gaussian mixtures could especially benefit from more dimensions when using the Wikipedia embeddings.
 We show the results in Table~\ref{table:welda_gm} in Appendix~\ref{sec:appendix_welda_gm}.
-In this setup, we could achieve a topic coherence value of $TC = 48.6$.
+In this setup, we could achieve a topic coherence value of up to $TC = 48.6$.
 The average number of mixtures for the topic distributions was $2.65$, with a standard deviation of $0.51$.
-
 % In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations. TODO
 
 \begin{table}[]
@@ -2057,7 +2056,8 @@ Given a set of documents, which belong to different semantic groups, the task of
 
 \subsection{Experiment setup}
 \label{sec:dc_setup}
-As features, we took the document-topic matrix: this matrix contains the distribution of topics in each document.
+As document classification is a supervised machine learning task, we need features to describe the instances.
+We used the document-topic matrix: this matrix contains the distribution of topics in each document.
 Each row sums to probability one.
 The number of features is equal to the number of topics.
 We ran experiments for all approaches using $K = 50$ and $K = 250$.
@@ -2069,7 +2069,7 @@ The results for the three folds were macro-averaged again.
 We will report precision, accuracy and F1 score in the tables and figures in the following sections.
 We used the \emph{LinearSVC} implementation from the Python scikit-learn~\cite{Pedregosa2012} library.
 
-Additionally, we wanted to analyze how the word embedding vectors itself help with document classification.
+Additionally, we wanted to analyze how the word embedding vectors themselves help with document classification.
 For this, we conducted additional experiments, where we added the average word embedding of each document to the features.
 The average was calculated by taking the bag-of-words representation of the documents from the topic model, retrieving all word vectors using the word-matching technique described in Section~\ref{sec:vocabulary_mismatch} and then calculating their average.
 Stop words were not relevant for the average word vector calculation, as they were already removed during the topic model preprocessing.
