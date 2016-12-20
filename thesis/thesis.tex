@@ -49,32 +49,32 @@
 \usepackage{url}
 
 %%% Option 1:
-% \usepackage[backend=bibtex, bibstyle=numeric, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false]{biblatex}
+\usepackage[backend=bibtex, bibstyle=numeric, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
 %%% Option 2:
-\usepackage[backend=bibtex, bibstyle=authoryear, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
-\DeclareNameAlias{sortname}{first-last}
-\DeclareFieldFormat{labelnumberwidth}{\mkbibbrackets{#1}}
-\defbibenvironment{bibliography}
-  {\list
-     {\printtext[labelnumberwidth]{%
-    \printfield{prefixnumber}%
-    \printfield{labelnumber}}}
-     {\setlength{\labelwidth}{\labelnumberwidth}%
-      \setlength{\leftmargin}{\labelwidth}%
-      \setlength{\labelsep}{\biblabelsep}%
-      \addtolength{\leftmargin}{\labelsep}%
-      \setlength{\itemsep}{\bibitemsep}%
-      \setlength{\parsep}{\bibparsep}}%
-      \renewcommand*{\makelabel}[1]{\hss##1}}
-  {\endlist}
-  {\item}
-\usepackage{xpatch}
-\xpatchbibmacro{date+extrayear}{%
-  \printtext[parens]%
-}{%
-  \setunit{\addperiod\space}%
-  \printtext%
-}{}{}
+% \usepackage[backend=bibtex, bibstyle=authoryear, citestyle=numeric, sorting=nty, maxnames=9, doi=false, isbn=false, eprint=false]{biblatex}
+% \DeclareNameAlias{sortname}{first-last}
+% \DeclareFieldFormat{labelnumberwidth}{\mkbibbrackets{#1}}
+% \defbibenvironment{bibliography}
+%   {\list
+%      {\printtext[labelnumberwidth]{%
+%     \printfield{prefixnumber}%
+%     \printfield{labelnumber}}}
+%      {\setlength{\labelwidth}{\labelnumberwidth}%
+%       \setlength{\leftmargin}{\labelwidth}%
+%       \setlength{\labelsep}{\biblabelsep}%
+%       \addtolength{\leftmargin}{\labelsep}%
+%       \setlength{\itemsep}{\bibitemsep}%
+%       \setlength{\parsep}{\bibparsep}}%
+%       \renewcommand*{\makelabel}[1]{\hss##1}}
+%   {\endlist}
+%   {\item}
+% \usepackage{xpatch}
+% \xpatchbibmacro{date+extrayear}{%
+%   \printtext[parens]%
+% }{%
+%   \setunit{\addperiod\space}%
+%   \printtext%
+% }{}{}
 
 \bibliography{library}
 
