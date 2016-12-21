@@ -1,5 +1,3 @@
-% TODO: then
-% TODO: Appendix
 \documentclass[
         a4paper,
         % draft,
@@ -222,9 +220,8 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 \@openrighttrue
 \makeatother
 
-% TODO
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{4}
+% \setcounter{secnumdepth}{4}
+% \setcounter{tocdepth}{4}
 \tableofcontents
 % \mainmatter
 
@@ -294,7 +291,7 @@ This assumption, also known as the distributional hypothesis, has driven the dev
 Two of these models are topic models and word embeddings, which we will focus on in this thesis.
 Topic modeling tries to reconstruct the topics in a collection of text with an unsupervised learning approach.
 It assumes that an author has certain topics in mind when writing a document, which are chosen before any documents are written.
-For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then picks the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
+For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then pick the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
 Topic modeling techniques try to recover the hidden topics in large corpora, i.e.,\ find out that ``soccer'' and ``ball'' come from the same topic.
 The state of the art is Latent Dirichlet Allocation (LDA) by Blei, Ng and Jordan.~\cite{Blei2003}.
 Topic models are probabilistic models, which means they provide probability distributions as the result.
@@ -308,7 +305,7 @@ Typically, the vector space contains 50 to 600 dimensions~\cite{Mikolov2013}.
 The word embeddings are learned automatically using neural networks.
 Although the idea is quite old~\cite{Bengio2003,Rumelhart1988}, the method has recently gained a lot of popularity in the research community~\cite{Levy2014,Levy2014a,Mikolov2013b}.
 This is because of performance improvements of CPUs and GPUs and because of better training algorithms, which made training these models on huge amounts of data feasible in recent years.
-Especially the work of Mikolov et al.~\cite{Mikolov2013b,Mikolov2013,Mikolov2013a} and the publication of the open-source tool \emph{word2vec}, which allows training on billions of words in a realistic time frame, must be mentioned.
+Especially the work of Mikolov et al.~\cite{Mikolov2013,Mikolov2013a,Mikolov2013b} and the publication of the open-source tool \emph{word2vec}, which allows training on billions of words in a realistic time frame, must be mentioned.
 The training in word2vec works in a supervised manner.
 A sliding window runs over the text and each word must try to predict its surrounding words.
 In this way, the context of a word is encoded in the vector representation of a word.
@@ -635,7 +632,7 @@ Boyd-Graber et al.~\cite{Boyd-graber2014} identify different types of poor topic
 Topic coherence can be evaluated by humans.
 Given the top words of a topic, human annotators can rate the topic on a three-point Likert scale 1-3 as either ``useless'', ``average'', or ``useful''~\cite{Aletras2013}.
 Averaging the annotations from several annotators yields the gold standard for the topic coherence of a set of words.
-However, this is an extensive and time-consuming approach in itself and then needs to be done again for every new topic model with its own new topics.
+However, this is an extensive and time-consuming approach in itself and needs to be done again for every new topic model with its own new topics.
 
 The goal of an automatic topic coherence metric is to capture the usefulness of a topic for a human user automatically without depending on human annotators.
 The base idea for such an automatic measure was introduced by Newman et al.~\cite{Newman2010}.
@@ -659,7 +656,7 @@ It is important to realize, that they could reuse previously published topic rat
 The topic coherence is solely based on the coherence of a set of words.
 Because of this, an automatic topic coherence measure can be selected based on an arbitrary set of topic ratings by human annotators and then be used for new topic models.
 
-Altogether, Röder et al.~\cite{Roder2015} evaluated a total of $237,912$ coherence measures, which they created by parameterizing each step of the computation and then testing the cross product of all parameter settings.
+Altogether, Röder et al.~\cite{Roder2015} evaluated a total of $237,912$ coherence measures, which they created by parameterizing each step of the computation and testing the cross product of all parameter settings.
 The best metric, called $C_V$ in the original paper, had a correlation of $0.731$ with human ratings.
 This shows, that topics with high values in the $C_V$ metric can usually be easily interpreted by humans.
 We will use the $C_V$ metric in this master thesis to evaluate topic coherence.
@@ -702,7 +699,7 @@ We will use the terms \emph{distributed representations}, \emph{word vectors} an
 The use of distributed representations for words was proposed by Bengio et al.~\cite{Bengio2003}.
 In their work, they train a neural network to predict a word given the preceding context.
 However, the training was slow and the model did not scale well to large data sets.
-In a series of papers, Mikolov et al.~\cite{Mikolov2013b,Mikolov2013,Mikolov2013a} provided a better neural architecture to train the word vectors.
+In a series of papers, Mikolov et al.~\cite{Mikolov2013,Mikolov2013a,Mikolov2013b} provided a better neural architecture to train the word vectors.
 Contrary to the trend of ever deeper models, a shallower model with no hidden layer was more successful in building better word vectors because it can be trained on more data.
 As Mikolov et al.~\cite{Mikolov2013a} state, ``it might not be able to represent data as precisely as neural networks, but can possibly be trained on much more data efficiently.''
 Due to the state-of-the-art performance and the free open source implementation \emph{word2vec}\footnote{\url{https://code.google.com/archive/p/word2vec/}} this method gained popularity in the research community~\cite{Baroni2014,Goth2016,Navigli2015} and will also be used in this thesis.
@@ -794,7 +791,7 @@ Word embeddings, on the other hand, generate the next word based only on a small
 
 Both LDA and word embeddings can provide a vector representation for words.
 In LDA, this works by taking the topic distribution for a word as the embedding in the topic space.
-However, this representation is not good at keeping linear relationships~\cite{Mikolov2013b,Mikolov2013a}.
+However, this representation is not good at keeping linear relationships~\cite{Mikolov2013a,Mikolov2013b}.
 Also, it tends to yield sparse vectors as LDA tries to keep the number of topics per word small.
 
 The different nature of the models is also represented in the standard evaluation method for each.
@@ -1122,7 +1119,7 @@ However, the method is not evaluated extensively and it is unclear, whether this
 In this chapter, we start with a series of experiments with word similarity calculations in topic models and embedding models, that motivate our newly-developed approach.
 We will then present our approach, which is based on re-sampling words using information from the word embedding models.
 Our model, called WELDA (for \textbf{W}ord \textbf{E}mbedding \textbf{LDA}), is a new type of topic model which leverages information from word embeddings.
-We will present the modified Gibbs sampling algorithm and then discuss a series of important design decisions.
+We will present the modified Gibbs sampling algorithm and discuss a series of important design decisions.
 Afterwards, we will analyze the different topic models and word embedding-enhanced topic models in two standard tasks for topic models: topic coherence and document classification.
 
 \section{Approach}
@@ -1137,13 +1134,13 @@ To this end, we ran initial experiments on the Wikipedia corpus\footnote{Full En
 We then evaluated the similarities between the words to understand the different strengths of both models.
 For embedding models, we used the cosine similarity between the two vectors.
 For topic models, we built the topic distribution of a word by retrieving the word's probability in all topics in the topic-word matrix.
-We then normalized these probabilities to one and treat it as a distribution.
+We normalized these probabilities to one and treat it as a distribution.
 To calculate the similarity between two words, we calculated the Jensen--Shannon divergence, which is a symmetrized and smoothed version of the Kullback--Leibler divergence~\cite{Kullback1951}:
 \begin{equation*}
   JSD(P~||~Q) = \frac{1}{2} KL(P~||~M) + \frac{1}{2} KL(Q~||~M),~where~M = \frac{1}{2} ( P + Q)
 \end{equation*}
 When using base two logarithm for the Kullback--Leibler divergence the Jensen--Shannon divergence is between zero and one.
-Zero corresponds to the highest similarity because then the probability distributions are identical.
+Zero corresponds to the highest similarity because in thise case the probability distributions are identical.
 We therefore use $1 - JSD(P~||~Q)$ as the similarity metric.
 
 Even though both word embeddings and topic models exploit the distributional hypothesis~\cite{Firth1957}, the correlation of word similarities is surprisingly low.
@@ -1328,7 +1325,7 @@ There are several configurable parameters in the algorithm, which we will detail
     Before estimating the multivariate distribution in the embedding space, we project the high-dimensional embedding space to a lower space.
     There is a tradeoff between the $N_{pca}$ parameter and the $N_{top}$ parameter.
     The lower the final dimension number, the fewer words we need for estimating the distribution.
-    Fewer words are better because then we can use the really good top words at the start of a topic, and not the later ones.
+    Fewer words are better because in this case we can use the really good top words at the start of a topic, and not the later ones.
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
     In general, we expect a higher dimensionality to perform better.
   \item \textbf{Dimensionality reduction method} (Algorithm~\ref{alg:welda_init}, line 5):
@@ -1604,7 +1601,7 @@ We will evaluate, which corpus type can benefit better from the external knowled
 During topic model preprocessing, the entire corpus was lowercased and tokenized.
 A token was defined as a sequence of letters or punctuation characters not divided by a whitespace character.
 Trailing punctuation at the end of a token was removed.
-We then removed stop words, using the stop words list from the Python nltk~\cite{Bird2009} toolkit.
+We removed stop words, using the stop words list from the Python nltk~\cite{Bird2009} toolkit.
 The list contains 150 general English stop words.
 As WELDA always uses an embedding model, we additionally removed all words, which are not in the embedding model.
 The different embeddings are described in the next section.
@@ -1636,7 +1633,7 @@ During preprocessing, we split the corpora into sentences.
 Words were not lowercased and no stop words were removed, as both have been shown to harm the performance of the resulting vectors~\cite{Mikolov2013d}.
 
 We trained 200-dimensional vectors on the English Wikipedia.
-We only considered article pages and then furthermore discarded disambiguation pages, lists and tables.
+We only considered article pages and furthermore discarded disambiguation pages, lists and tables.
 The Wikipedia markup also contains templates, which are skeletons for further content.
 We did not resolve these templates.
 We furthermore removed the headings, as they do not form a sentence usually.
@@ -2031,6 +2028,11 @@ However, the Gaussian mixtures could especially benefit from more dimensions whe
 We show the results in Table~\ref{table:welda_gm} in Appendix~\ref{sec:appendix_welda_gm}.
 In this setup, we could achieve a topic coherence value of up to $TC = 48.6$.
 The average number of mixtures for the topic distributions was $2.65$, with a standard deviation of $0.51$.
+
+Altogether, we can conclude that von Mises-Fisher distributions perform slightly worse overall than the Gaussian distributions, especially with a higher dimensionality of the word embeddings.
+The theoretically better representation of the models did not manifest in better experimental results.
+Gaussian distributions and Gaussian mixtures show the same performance.
+There is no additional benefit from using the mixture model, so the Gaussian model is preferable.
 
 \begin{table}[]
   \ra{1.3}
@@ -2502,7 +2504,7 @@ The same holds for Gaussian LDA.
     LFTM, $\lambda = 0.6$           & ~~~~~~~~~~~~~~~~\xmark                     & 3672 min                            &   71 min \\
     TopicVec                        & ~~~~~~~~~~~~~~~~\cmark                     &  178 min                            &  116 min \\
     Gaussian LDA                    & ~~~~~~~~~~~~~~~~\xmark                     & 1403 min                            & 2880 min \\
-    WELDA Gaussian, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                     &   67 min                            & TODO \\  % 4027 sec,
+    WELDA Gaussian, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                     &   67 min                            &   49 min \\  % 4027 sec,
     % WELDA vMF, $\lambda = 0.5$      & ~~~~~~~~~~~~~~~~\xmark                     &  101 min                            & \\
     \bottomrule
   \end{tabular}
@@ -2510,7 +2512,7 @@ The same holds for Gaussian LDA.
 
 \begin{figure}
        \centering
-       \includegraphics[width=0.9\textwidth]{figures/welda_lambda_runtime.png}
+       \includegraphics[width=12cm]{figures/welda_lambda_runtime.png}
        \caption{Runtime of WELDA depending on the resampling parameter $\lambda$ with Wikipedia embeddings and $N_{pca} = 10$.}
        \label{fig:welda_lambda_runtime}
 \end{figure}
@@ -2538,7 +2540,7 @@ Our observations also help to understand both models better.
 We reached our best performance when the knowledge from both models is balanced with medium $\lambda$ values ranging from $0.4$ to $0.6$.
 We could also confirm the assumption, that higher dimensionality leads to higher performance, as more semantic regularities can be encoded in the embedding space.
 We accelerated the progress of our method by detecting special background words, which are always resampled.
-Our experiments with different topic distributions indicated comparable performance for all distributions. % TODO: Seriously?
+Our experiments with different topic distributions indicated best performance with Gaussian distributions as topic distributions.
 We also showed that corpus-specific embeddings, albeit lacking quality when evaluating the embeddings alone, can still help to improve topic coherence because they are learned on the same documents.
 
 In addition to proposing WELDA, we also evaluated WELDA and four comparable approaches in comparison to standard LDA.
@@ -2557,7 +2559,6 @@ In this case, ``club'' pollutes the general \emph{violence} theme and distorts i
 This is especially bothersome, as LDA is able to distinguish different word meanings via different topics.
 Leveraging this information could help to improve the topic distributions.
 If LDA were used to learn different word embeddings for different meanings, then the improved word embeddings could in turn help WELDA create better topics.
-% Especially training both word embeddings and topic models at the same time could lead to better word embeddings, which in turn also improves the topic model. % TODO:
 
 Another direction for future work is the way we replace words in WELDA.
 Currently, we base the decision of whether we replace a word simply on the result of the coin flip.
@@ -2607,6 +2608,7 @@ This way, LDA would be inclined to produce the desired topics.
          \caption{Topic coherence development for Gaussian WELDA on \textsc{Nips} with corpus-specific embeddings and $N_{pca} = 10$}
          \label{fig:welda_gaussian_nips_50}
   \end{figure}
+  \newpage
   \begin{figure}[H]
          \centering
          \includegraphics[width=\textwidth]{figures/welda_gaussian_nips_200.png}
@@ -2623,6 +2625,7 @@ This way, LDA would be inclined to produce the desired topics.
          \caption{Final topic coherence values after 200 iterations for different values of $N_{pca}$ and $N_{top}$ on the \textsc{Nips} corpus with Wikipedia embeddings. We also plotted a regression line indicating the development for increasing $N_{top}$. The results are similar to the \textsc{20News} corpus: $N_{top}$ has no impact on the topic coherence, $N_{pca}$ has a strong positive correlation. For fixed $N_{top} = 200$, the correlation between $N_{pca}$ and $TC$ is $r_{Pearson} = 0.99$.}
          \label{fig:welda_gaussian_nips_pca_samples}
   \end{figure}
+  \newpage
 
   \subsection{LDA as prerequisite}
   \label{sec:appendix_lda_prerequisite}
@@ -2632,6 +2635,7 @@ This way, LDA would be inclined to produce the desired topics.
          \caption{WELDA with $\lambda = 0.5$ and random topic initialization. }
          \label{fig:standard_lda_as_prerequisite}
   \end{figure}
+  \newpage
 
   \subsection{Accuracy of word similarity depending on the number of dimensions in the embedding model}
   \label{sec:embedding_model_dimensions_vs_similarity_corr}
@@ -2641,6 +2645,7 @@ This way, LDA would be inclined to produce the desired topics.
          \caption{We used the 200-dimensional Wikipedia embeddings and projected them down to fewer dimensions. Then for each dimensionality, we evaluated the correlation with human similarity ratings from the \textsc{WordSim-353}~\cite{Agirre2009} data set. The trend shows, that more dimensions help to capture the word similarity better. Starting at around dimensionality 100, the improvements are only marginal. We use a randomized PCA algorithm, therefore the correlation is not strictly monotonously increasing.}
          \label{fig:embedding_model_dimensions_vs_similarity_corr}
   \end{figure}
+  \newpage
 
   \subsection{WELDA with von Mises-Fisher distributions}
   \label{sec:appendix_welda_vmf}
@@ -2690,6 +2695,7 @@ This way, LDA would be inclined to produce the desired topics.
          \caption{Document classification $F1$ score for WELDA with different $N_{pca}$ values, with and without adding the average embedding (AE) to the features. A higher dimensionality does not help to improve document classification performance.}
          \label{fig:welda_dc_ntop}
   \end{figure}
+  \newpage
 
   \section{Comparative Evaluation}
   \subsection{Document classification on 20N{\footnotesize EWS} with corpus-specific embeddings}
