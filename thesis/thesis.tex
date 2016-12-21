@@ -200,7 +200,7 @@ Due to their complementary nature, the models define different notions of word s
 This observation suggests a combination of both models.
 In this master thesis, we propose WELDA, a new type of topic model, which uses word embeddings to improve topic coherence.
 We achieve this by estimating topic distributions in the word embedding space and sampling new words from this distribution to strengthen the topics.
-We compare WELDA with standard LDA and competing approaches and present an exhaustive evaluation.
+We compare WELDA with standard LDA and competing approaches and present an extensive evaluation.
 Our experiments show that WELDA outperforms all other approaches with respect to topic coherence, while at the same time keeping acceptable performance in document classification.
 
 \chapter*{Zusammenfassung}
@@ -357,7 +357,7 @@ The contributions of this thesis are:
     We will present the full inference algorithm, discuss the implementation details and thoroughly evaluate WELDA.
   \item
     Recently, there has been a lot of research on combining topic models and word embeddings for improved topic models~\cite{Batmanghelich2016,Das2015,Li2016,Nguyen2015} .
-    We run an exhaustive evaluation of these models and WELDA on two tasks.
+    We run an extensive evaluation of these models and WELDA on two tasks.
     The first, topic coherence, evaluates the top words in a topic with respect to interpretability by humans, i.e., how helpful and understandable are the topics.
     The second task, document classification, uses the topic model output for text classification.
     To complete the evaluation, we also ran a manual evaluation on the word intrusion task~\cite{Chang2009}.
@@ -2450,14 +2450,14 @@ Runtime is not a crucial factor for topic models, as they are usually not execut
 Still, to gain an impression of the computational complexity of each model, we present their runtimes here.
 
 Experiments were conducted on a 32-core, Intel Xeon CPU E7-8837 @ 2.67GHz machine with 256 GB main memory.
-While same techniques have parallelized implementations available, other's have not.
+While some techniques have parallelized implementations available, others have not.
 To ensure comparability, we ran all techniques with only a single core.
 
 We will now present the different implementations and also whether they can be parallelized.
 For LDA, we ran the implementation in Mallet~\cite{McCallum2002}, which implements the approach by Newman et al.~\cite{Newman2009} for distributed LDA.
 However, we will use only the single-threaded implementation, running for 1,500 iterations.
 Mallet is the only highly optimized library in this benchmark.
-The LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
+LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
 The only step, which is parallelized is the optimization of the topic vector, which happens after each Gibbs sampling iteration.
 We ran LFTM for 500 iterations, as suggested in the paper.
 TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers a parallel implementation, which mostly relies on existing parallelization in linear algebra libraries, as TopicVec heavily works with matrix operations.
@@ -2469,6 +2469,7 @@ As usual, we run WELDA for 200 iterations.
 
 For all methods, we chose the number of iterations so that the method converged.
 % See the previous sections for details.
+We present the running times of the different approaches in Table~\ref{table:runtime}.
 Of all methods, standard LDA is by far the fastest.
 The next best method is WELDA, but it is already slower by a factor of ten.
 Note that especially WELDA's performance largely depends on the resampling probability $\lambda$.
@@ -2477,6 +2478,7 @@ The nearest-neighbor search is the most expensive operation, hence it dominates 
 We illustrate this dependency in Figure~\ref{fig:welda_lambda_runtime}.
 Still, even with $\lambda = 1.0$ the runtime of WELDA is 164 min, which is still faster than the next-fastest TopicVec.
 Especially LFTM is very slow with 200-dimensional embeddings, making it infeasible to run on larger corpora.
+The same holds for Gaussian LDA.
 
 \begin{table}[]
   \ra{1.2}
@@ -2494,14 +2496,15 @@ Especially LFTM is very slow with 200-dimensional embeddings, making it infeasib
     TopicVec                        & ~~~~~~~~~~~~~~~~\cmark                     &  178 min                            &  116 min \\
     Gaussian LDA                    & ~~~~~~~~~~~~~~~~\xmark                     & 1403 min                            & 2880 min \\
     WELDA Gaussian, $\lambda = 0.5$ & ~~~~~~~~~~~~~~~~\xmark                     &   67 min                            & TODO \\  % 4027 sec,
-    WELDA vMF, $\lambda = 0.5$      & ~~~~~~~~~~~~~~~~\xmark                     &  101 min                            & TODO \\ \bottomrule
+    % WELDA vMF, $\lambda = 0.5$      & ~~~~~~~~~~~~~~~~\xmark                     &  101 min                            & \\
+    \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{figure}
        \centering
        \includegraphics[width=0.9\textwidth]{figures/welda_lambda_runtime.png}
-       \caption{Runtime of WELDA depending on the resampling parameter $\lambda$.}
+       \caption{Runtime of WELDA depending on the resampling parameter $\lambda$ with Wikipedia embeddings and $N_{pca} = 10$.}
        \label{fig:welda_lambda_runtime}
 \end{figure}
 
@@ -2519,11 +2522,11 @@ Based on this analysis, we then proposed WELDA, a new type of topic model aiming
 WELDA learns topic distributions for all topics in the word embedding space.
 This topic distribution captures the position of words belonging to the topic.
 By learning a full distribution and not only a single topic vector, we are also capturing the shape of the word positions in the embedding space.
-We then randomly resample words from this distribution and during the Gibbs sampling inference.
+We then randomly resample words from this distribution during the Gibbs sampling inference.
 With this method, we utilize both the word co-occurrences across documents and the word-context co-occurrences at the same time.
 We shift probability mass from general, low-information words to specific, high-information words, which strengthen the main theme of the topic.
 
-Our exhaustive evaluation proved the success of the WELDA model on the topic coherence task while keeping acceptable performance on the document classification task.
+Our extensive evaluation proved the success of the WELDA model on the topic coherence task while keeping acceptable performance on the document classification task.
 Our observations also help to understand both models better.
 We reached our best performance when the knowledge from both models is balanced with medium $\lambda$ values ranging from $0.4$ to $0.6$.
 We could also confirm the assumption, that higher dimensionality leads to higher performance, as more semantic regularities can be encoded in the embedding space.
@@ -2531,7 +2534,7 @@ We then accelerated the progress of our method by detecting special background w
 Our experiments with different topic distributions indicated comparable performance for all distributions. % TODO: Seriously?
 We also showed that corpus-specific embeddings, albeit lacking quality when evaluating the embeddings alone, can still help to improve topic coherence because they are learned on the same documents.
 
-In addition to proposing WELDA, we also evaluated four comparable approaches as well as standard LDA.
+In addition to proposing WELDA, we also evaluated WELDA and four comparable approaches in comparison to standard LDA.
 This comparative evaluation of the models TopicVec, Gaussian LDA, LFTM and NSTM did not exist before.
 We ensured similar conditions for all models and evaluated topic coherence on two corpora and document classification on one.
 WELDA could achieve the best performance on topic coherence, while LDA remains unbeaten on document classification.
@@ -2539,44 +2542,35 @@ WELDA could achieve the best performance on topic coherence, while LDA remains u
 Our work leaves several directions open for future work.
 Currently, we use one word vector for each term.
 However, this neglects the existence of polysemous words.
-When such a word occurs in a topic.
+When such a word occurs in a topic, it moves the topic distribution towards a wrong direction in the embedding space.
 For example, imagine the top words of a topic are
-\topicbox{weapon blunt force club crime,} but the word ``club'' is near the words ``sport'' and ``football'' in the embedding space.
-In this case, ``club'' pollutes the general violence theme and distorts its topic distribution.
+\topicbox{weapon blunt force club crime,}
+\noindent but the word ``club'' is near the words ``sport'' and ``football'' in the embedding space.
+In this case, ``club'' pollutes the general \emph{violence} theme and distorts its topic distribution.
 This is especially bothersome, as LDA is able to distinguish different word meanings via different topics.
 Leveraging this information could help to improve the topic distributions.
 
-Another direction for future work is the word replacement in WELDA.
+Another direction for future work is the way we replace words in WELDA.
 Currently, we base the decision of whether we replace a word simply on the result of the coin flip.
-There is no dependency on the word, which we are replacing.
+There is no dependence on the word, which we are replacing.
 Our experiments with the background topic already showed the potential of treating certain words differently.
 A more sophisticated replacement scheme might converge faster or even better.
 The same is true for the replacement words.
 Currently, they are sampled randomly from the topic distribution, independent of the word they are replacing.
-More intelligent schemes can be devised, for example only replacing exact synonyms or a given word is only ever replaced for one topic.
+More intelligent schemes can be devised, for example only replacing exact synonyms or only replacing words for at most one topic.
 % Topic specific replacement
 
 Another idea would be to use the topic distributions for inserting prior knowledge in the topic models.
-Currently, they are estimated from the data.
+Currently, these distributions are estimated from the data, i.e., the top words in the topics.
 By setting priors on the topic distributions one could define a certain set of expected topics.
-For example, when learning topics on the \textsc{20News} corpus, one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{computer science}.
+For example, when learning topics on the \textsc{20News} corpus, one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{politics}.
 
 % Document classification
 % Our methods has potential applications in document retrieval, clustering and 
+For our work, we assumed fixed pre-trained word embeddings and only focused on improved topic models.
+Both these assumptions 
 We only focused on improved topic models.
 Or jointly training both models.
-
-% \section{Other notes}
-% Concept categorization
-% Visualize in tsne
-
-% Hyperparameter optimization
-% Motivation: topic with countries
-% Paper: Schwächen, Stärken, ausführlich
-
-% Beim resampling: sanity check, ABER: optimiert auf, Wort nur in 1 topic
-% curse of dimensionality for nearest neighbor search
-% fewer: dimensions: slower runtime, losing information; more dimensions, usually only one cluster because of CoD
 
 \clearpage
 \printbibliography
