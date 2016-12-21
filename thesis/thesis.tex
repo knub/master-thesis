@@ -296,7 +296,7 @@ Topic modeling tries to reconstruct the topics in a collection of text with an u
 It assumes that an author has certain topics in mind when writing a document, which are chosen before any documents are written.
 For example, an author could decide to write a document about \emph{politics} (70~\%) in \emph{sports} (30~\%) and then pick the words ``coalition'', ``election'' and ``corruption'' for \emph{politics} and the words ``soccer'' and ``ball'' for \emph{sports}.
 Topic modeling techniques try to recover the hidden topics in large corpora, i.e.,\ find out that ``soccer'' and ``ball'' come from the same topic.
-The state of the art is Latent Dirichlet Allocation (LDA) by Blei, Ng and Jordan.~\cite{Blei2003}.
+The state of the art is Latent Dirichlet Allocation (LDA) by Blei, Ng and Jordan~\cite{Blei2003}.
 Topic models are probabilistic models, which means they provide probability distributions as the result.
 Therefore, the topics can be easily interpreted by humans.
 Topic models have several applications, mostly in information retrieval, where they can help navigate large corpora or augment search queries.
@@ -366,6 +366,7 @@ The contributions of this thesis are:
     The second task, document classification, uses the topic model output for text classification.
     To complete the evaluation, we also ran a manual evaluation on the word intrusion task~\cite{Chang2009}.
   \item
+    \enlargethispage{-\baselineskip}
     We demonstrate the usefulness of word embeddings trained on small corpora when training topic models.
     In general, word embeddings need huge amounts of training data to be accurate.
     However, when evaluating embeddings with respect to typical topic model metrics such as topic coherence or document classification, embeddings trained on the small corpora itself can be superior.
@@ -2059,8 +2060,8 @@ There is no additional benefit from using the mixture model, so the Gaussian mod
   \end{tabular}
 \end{table}
 
-\section{Document classification}
 \addtocontents{toc}{\protect\newpage}
+\section{Document classification}
 We also evaluated topic models on another commonly used task: document classification.
 In contrast to topic coherence, this allows using topic models in a supervised setting with clear evaluation metrics.
 Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
@@ -2690,7 +2691,7 @@ This way, LDA would be inclined to produce the desired topics.
   \end{figure}
 
   \newpage
-  \subsection{Document classification performance depending on $\mathbf{N_{pca}}$}
+  \subsection{Document classification performance depending on $N_{pca}$}
   \label{sec:appendix_welda_dc_ntop}
   \begin{figure}[H]
          \centering
