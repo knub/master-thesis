@@ -301,7 +301,7 @@ Topic models have also been applied in bioinformatics, where they help understan
 
 The idea of word embeddings is to assign each word in a vocabulary a vector in a high-dimensional vector space.
 This vector representation of the word is called the embedding of the word.
-Typically, the vector space contains $50$ to $600$ dimensions~\cite{Mikolov2013}.
+Typically, the vector space contains 50 to 600 dimensions~\cite{Mikolov2013}.
 The word embeddings are learned automatically using neural networks.
 Although the idea is quite old~\cite{Bengio2003,Rumelhart1988}, the method has recently gained a lot of popularity in the research community~\cite{Levy2014,Levy2014a,Mikolov2013b}.
 This is because of performance improvements of CPUs and GPUs and because of better training algorithms, which made training these models on huge amounts of data feasible in recent years.
@@ -683,7 +683,7 @@ When using the one-hot encoding, both the words ``house'' and ``houses'' get a u
 If one would employ cosine distance or euclidean distance to assess similarity in the vector space, all words would be equally similar or dissimilar.
 
 In contrast to this, the idea of \emph{distributed representations} is to not represent objects by discrete counts but rather by continuous points in a vector space $\mathbb{R}^M$, where $M$ is much smaller than $|V|$.
-Typically, $M$ is between $50$ and $600$.
+Typically, $M$ is between 50 and 600.
 The idea of distributed representations has a long history, dating back to the mid-eighties with work from Hinton and Rumelhart~\cite{Hinton1986,Rumelhart1988}.
 Intuitively, instead of using one dimension for each atomic unit, distributed representations assign meanings to the dimensions and then recombine these meanings for a specific object.
 Imagine, we want to encode different objects like cars, bikes and trucks (example taken from Goodfellow et al.~\cite{Goodfellow2016}) .
@@ -1702,9 +1702,9 @@ The topic coherence evaluation for one set of ten top words is then calculated i
     Similarly, the probability of a set of words is estimated as the number of documents all words in the set occur divided by the total number of documents.
     The $C_V$ metric does not use the original Wikipedia articles as documents, but rather runs a sliding window over the Wikipedia articles.
     The sliding window advances one token at a time and creates a new virtual document.
-    The size of the sliding window is set to $110$ tokens.
+    The size of the sliding window is set to 110 tokens.
     Using these new virtual documents has two advantages.
-    First, it creates many more documents, as the average Wikipedia article is longer than $110$ tokens.
+    First, it creates many more documents, as the average Wikipedia article is longer than 110 tokens.
     Second and more importantly, it exploits context information.
     Only words, which occur near each other are taken into account.
     Thus, words which occur far apart in a long document, do not increase their joint probability.
@@ -1782,7 +1782,7 @@ Table~\ref{table:best_worst_cv_topics} shows the best and worst topics measured 
 When evaluating topic coherence, we will first start with the standard LDA algorithm to establish a baseline $C_V$ score.
 We will then focus on the analysis of our basic algorithm, which uses a Gaussian distribution to estimate the topic-word distribution in the embedding space.
 Only then we will evaluate the more complex von Mises-Fisher distribution and the Gaussian mixtures.
-Unless noted otherwise, all our experiments are run with $1500$ standard LDA iterations and then $200$ following WELDA iterations.
+Unless noted otherwise, all our experiments are run with 1500 standard LDA iterations and then 200 following WELDA iterations.
 
 \subsubsection{Standard LDA as baseline}
 \label{sec:lda_as_baseline}
@@ -1874,7 +1874,7 @@ Also see Section~\ref{sec:raw_tm_we}, where we experiment with a topic model sol
 
 All the other $\lambda$ parameters follow a rising trend.
 Especially the huge improvement from $\lambda_{act} = 0.0$ to $\lambda_{act} = 0.29$ shows, that the base idea of resampling words during the Gibbs sampling works.
-The values tend to reach their optimum around iteration $140$ and stay there except some random fluctuations.
+The values tend to reach their optimum around iteration 140 and stay there except some random fluctuations.
 The best topic coherence value is reached with $\lambda_{act} = 0.47$ with a topic coherence of $47.4$.
 Resampling probabilities less than or greater than this $\lambda_{act}$ lead to worse topic coherence, which indicates that this value achieves a good balance between topic model and word embeddings.
 Altogether, this is an improvement of $5.1$ over the baseline value.
@@ -1992,13 +1992,13 @@ Second, similar topic coherence values are achieved in the end, as WELDA natural
 We run standard LDA before WELDA to estimate the topic distributions on already well-defined topics.
 We now evaluate the performance of WELDA, when we initialize topics randomly as standard LDA.
 This initial setup has a topic coherence value of $TC = 31.1$.
-As convergence takes longer with random initialization, we ran WELDA for $1500$ iterations on \textsc{20News} with $\lambda = 0.5$.
+As convergence takes longer with random initialization, we ran WELDA for 1500 iterations on \textsc{20News} with $\lambda = 0.5$.
 As expected, WELDA performs far worse than before, reaching only $TC = 39.1$ with corpus-specific and $TC = 40.0$ with Wikipedia embeddings.
 
 
 
 With random initialization, WELDA is actually harmful, as we do not even reach standard LDA's topic coherence of $TC = 41.9$.
-The topic coherence development during the $1500$ iterations is displayed in Figure~\ref{fig:standard_lda_as_prerequisite} in Appendix~\ref{sec:appendix_lda_prerequisite}.
+The topic coherence development during the 1500 iterations is displayed in Figure~\ref{fig:standard_lda_as_prerequisite} in Appendix~\ref{sec:appendix_lda_prerequisite}.
 % When the words are spread far apart and the mean is in the middle of nowhere, things tend to overfit.
 % /data/wikipedia/2016-06-21/topic-models/topic.20news.50-1500.alpha-0-02.beta-0-02/model.20news.dim-50.skip-gram.embedding.welda.gaussian.distance-cos.lambda-1-0/welda.iteration-200.topics
 
@@ -2148,7 +2148,7 @@ Given a word, this outputs the top $n$ similar words in the embedding space.
 Given a list of words, the corresponding word vectors are averaged first and then the most similar words in the embedding space are retrieved.
 In the original implementation, the search words are never in the output.
 We modified this, so that the search words may also be in the output.
-For one search word, the search word is always in the output, as the similarity to itself is $1$.
+For one search word, the search word is always in the output, as the similarity to itself is 1.0.
 
 As search words, we took the top topic words of a standard LDA run on the \textsc{20News} corpus with 1500 iterations and $\alpha = \beta = 0.02$.
 We experimented with two cases: only taking the top word and taking the average of all top ten words.
@@ -2192,7 +2192,7 @@ We tested on the \textsc{20News} and on the \textsc{Nips} corpus.
     Compared to the other methods, Gaussian LDA had to be trained with 50-dimensional instead of 200-dimensional word embeddings trained on Wikipedia.
     When training with higher-dimensional embeddings, Gaussian LDA does not converge and yield recognizable topics.
     We could confirm this issue in communication with the authors~\cite{Das2016}.
-    We trained for $500$ iterations.
+    We trained for 500 iterations.
   \item
     \textbf{LFTM:}
     We tested LFTM with $\lambda \in \{0.1, 0.3, 0.5, 0.7, 0.9 \}$.
@@ -2200,7 +2200,7 @@ We tested on the \textsc{20News} and on the \textsc{Nips} corpus.
     % We report results for LFTM with $\lambda = 1.0$, as this yields the best topic coherence results according to the original paper.
     % We could confirm this in our experiments.
     % With $\lambda = 1.0$ every word is sampled from the embedding space and the multinomial word-distribution from standard LDA is effectively discarded.
-    We trained for $500$ iterations.
+    We trained for 500 iterations.
   \item
     \textbf{NSTM:}
     We had the same problems with NSTM as with Gaussian LDA: training with 200-dimensional embeddings did not succeed.
@@ -2223,7 +2223,7 @@ We tested on the \textsc{20News} and on the \textsc{Nips} corpus.
   \item
     \textbf{WELDA:}
     We report the results of WELDA with Gaussian distributions and $\lambda = 0.4$, $N_{pca} = 50$ and $N_{top} = 200$.
-    We used background topic sampling and trained for $200$ iterations.
+    We used background topic sampling and trained for 200 iterations.
 \end{itemize}
 
 To eliminate random effects, we ran all methods with the best settings three times and report the best results.
@@ -2282,7 +2282,7 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
 \begin{itemize}
   \item
     \textbf{Standard LDA:}
-    As mentioned before, we run $1500$ iterations of LDA with $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
+    As mentioned before, we run 1500 iterations of LDA with $\alpha = \beta = 0.02$ and use the same values in the other methods, if applicable.
   \item
     \textbf{Mean of word embeddings:}
     As a baseline, we also evaluated the document classification performance, if we only take the average word vector of all words of a document as features.
@@ -2454,17 +2454,17 @@ To ensure comparability, we ran all techniques with only a single core.
 
 We will now present the different implementations and also whether they can be parallelized.
 For LDA, we ran the implementation in Mallet~\cite{McCallum2002}, which implements the approach by Newman et al.~\cite{Newman2009} for distributed LDA.
-However, we will use only the single-threaded implementation, running for $1500$ iterations.
+However, we will use only the single-threaded implementation, running for 1500 iterations.
 Mallet is the only highly optimized library in this benchmark.
 The LFTM\footnote{\url{https://github.com/datquocnguyen/LFTM}} does not offer a parallelized implementation.
 The only step, which is parallelized is the optimization of the topic vector, which happens after each Gibbs sampling iteration.
-We ran LFTM for $500$ iterations, as suggested in the paper.
+We ran LFTM for 500 iterations, as suggested in the paper.
 TopicVec\footnote{\url{https://github.com/askerlee/topicvec}} offers a parallel implementation, which mostly relies on existing parallelization in linear algebra libraries, as TopicVec heavily works with matrix operations.
-We ran TopicVec for $500$ iterations.
+We ran TopicVec for 500 iterations.
 Gaussian LDA\footnote{\url{https://github.com/rajarshd/Gaussian_LDA}} is not parallelized and no straightforward parallelization is possible.
-Gaussian LDA was run for $150$ iterations,  which is when the log likelihood converges.
+Gaussian LDA was run for 150 iterations,  which is when the log likelihood converges.
 WELDA is not parallelized, however a parallel implementation with the same ideas as Newman et al.~\cite{Newman2009} is possible.
-As usual, we run WELDA for $200$ iterations.
+As usual, we run WELDA for 200 iterations.
 
 For all methods, we chose the number of iterations so that the method converged.
 % See the previous sections for details.
