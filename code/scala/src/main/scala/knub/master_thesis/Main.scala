@@ -72,7 +72,7 @@ object Main {
             "text-preprocessing", "word-similarity",
             "supply-tm-similarity", "welda-sim",
             "welda-gaussian", "welda-vmf",
-            "welda-vmf-pca",
+            "welda-vmf-pca", "welda-gaussian-nips-performance",
             "welda-vmf-lambda-dc",
             "welda-gaussian-mixture-lambda-dc",
             "welda-lda",
@@ -339,6 +339,17 @@ object Main {
                         numDocuments = embedding._2
                     )
                 runCases(cases, 30, new GaussianMixtureWELDA(_))
+            case "welda-gaussian-nips-performance" =>
+                val lambdas = List(0.5)
+                val cases = for (embedding <- nipsEmbeddings.drop(1); lambda <- lambdas)
+                    yield args.copy(
+                        modelFileName = "/data/wikipedia/2016-06-21/topic-models/topic.nips.50-1500.alpha-0-02.beta-0-02/model",
+                        lambda = lambda,
+                        modelNamePrefix = s"welda-gaussian-nips-performance",
+                        embeddingFileName = embedding._1,
+                        numDocuments = embedding._2
+                    )
+                runCases(cases, 1, new GaussianWELDA(_))
             case "welda-gaussian-nips" =>
                 val lambdas = List(0.0, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
                 val cases = for (embedding <- nipsEmbeddings; lambda <- lambdas; idx <- 0 until 5)
