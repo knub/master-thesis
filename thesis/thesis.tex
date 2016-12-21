@@ -2274,6 +2274,7 @@ To investigate the effects of the different word embedding-enhanced topic models
 We used the same experiment setup as described in Section~\ref{sec:dc_setup}.
 
 \subsection{Experiment settings}
+\label{sec:dc_experiment_settings}
 
 We now present the different parameter settings for all competing approaches.
 All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{20News} corpus.
@@ -2332,7 +2333,7 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
                       LFTM + AE         & 74.6    & 74.5    & 73.9   && 77.4    & 77.0     & 76.9   \\
                       TopicVec          & 34.7    & 34.4    & 31.4   && 40.9    & 37.3     & 33.7   \\
                       TopicVec + AE     & 74.2    & 73.1    & 72.1   && 74.3    & 73.4     & 72.5   \\
-                      WELDA             & 58.1    & 58.3    & 57.4   && 67.1    & 64.8     & 65.1   \\
+                      WELDA             & 58.1    & 58.3    & 57.4   && 67.1    & 64.8     & 65.1   \\ % TODO: 250
                       WELDA + AE        & 73.4    & 73.2    & 73.2   && 76.8    & 76.5     & 76.3   \\
                       Gaussian LDA      & 41.6    & 43.4    & 40.5   && 40.3    & 42.5     & 39.1   \\
                       Gaussian LDA + AE & 72.7    & 72.3    & 71.8   && 68.0    & 68.9     & 67.8   \\
@@ -2347,12 +2348,12 @@ The other baseline we use is standard LDA, which achieves 70.1 \%, slightly bett
 Combining the two baselines, i.e. taking standard LDA's document-topic matrix and the average word vector, yields the highest F1 score for both $K = 50$ and $K = 250$.
 The scores are 77.0 \% and 77.6 \% respectively.
 No other technique can beat standard LDA in the document classification task.
-However, all methods at least can improve over the average word vector with their features.
+However, all methods at least can improve over the average word vector with the topic model features.
 TopicVec has the largest improvements when adding the average word embedding vector, however, it also had the worst results without.
 When looking at the word-embedding-improved topic models without the average word vector, LFTM fares best, followed by WELDA with 7 \% distance.
 Gaussian LDA and TopicVec follow with a huge gap.
 Especially, TopicVec shows a surprisingly low performance.
-In their paper,  Li et al.~\cite{Li2016} train topics independently on each class and achieve the comparatively best performance in their document classification tests.
+In their paper,  Li et al.~\cite{Li2016} trained topics independently on each class and achieve the comparatively best performance in their document classification tests.
 We did not follow this methodology because it leads to a different number of topics and we wanted to compare all methods in their standard setting.
 It seems that most of its predictive power stems from this training approach.
 
@@ -2363,15 +2364,16 @@ However, the improvement is only a few percent for all models.
 We also tested all methods with embeddings, which were trained on the corpus itself.
 The results with the 50-dimensional \textsc{20News} embeddings are displayed in Table~\ref{table:document_classification_dim-50} in Appendix~\ref{sec:appendix_document_classification_corpus_specific}.
 Interestingly, the predictive power of the embeddings is already much higher than before, even though these embeddings failed in the analogy reasoning benchmark (see Table~\ref{table:word_embeddings_performance}).
-The F1 score of these embeddings when only taking the average word vector of each document is already 78.0 \%.
+When using only the average word embedding as features the F1 score of these embeddings is already 78.0 \%.
 Also, all methods perform better even without the average word vector features compared to the 200-dimensional Wikipedia embeddings.
-The comparatively low number of dimensions for word embeddings does not seem to harm the performance in this use case.
+This indicates that embeddings trained on the corpus itself should be preferred when optimizing for document classification.
+The comparatively low number of dimensions of the corpus-specific embeddings do not seem to harm the performance in this use case.
 
-Especially LFTM profits from the different embeddings.
+Especially LFTM profits from the corpus-specific embeddings.
 It is now able to surpass standard LDA for both $K = 50$ and $K = 250$, achieving the highest F1-score of 81.5 \% in all our document classification tests.
 It is worth to note, that the raw LFTM topic model features does not perform better than LDA, but only when adding the average word vector.
-The order of the remaining methods is not different from before.
-The same holds for the number of topics: $K = 250$ performs better than $K = 50$ for all models.
+The order of the remaining approaches is not different from before: LDA is followed by WELDA, Gaussian LDA and TopicVec in this order.
+The influence of the number of topics $K$ also did not change: $K = 250$ performed better than $K = 50$ for all models.
 
 As a summary, using the word embeddings during the inference does not help to create better document representations.
 While most methods were able to generate better topics (see Section~\ref{sec:evaluation_topic_coherence}), this seems to come at the expense of losing accuracy in document classification.
@@ -2419,10 +2421,11 @@ Also, the underlying topic model was not displayed and we randomized the order o
 
 We present the results in Figures~\ref{fig:word_intrusion_50} and \ref{fig:word_intrusion_20}.
 For the plots, we calculated the accuracy of each subject on each topic model.
-Each model was evaluated by at least five subjects, so we had at least five accuracy values.
+Each model was evaluated by at least five subjects (seven at most), so we had at least five accuracy values.
 We then plotted the distribution of the accuracy for each model.
 For both $K = 20$ and $K = 50$ WELDA achieves the highest accuracy.
 For both cases, the average accuracy for WELDA was around 70 \%.
+With 50 topics, all three advanced models improve over standard LDA, which has a median accuracy of only 54 \%.
 
 \begin{figure}
        \centering
@@ -2679,7 +2682,7 @@ Or jointly training both models.
     \ra{1.3}
     \centering
     \caption{Document classification results for the \textsc{20News} corpus when using 50-dimensional embeddings trained on \textsc{20News}.
-    LFTM consistently provides the best performance.}
+    LFTM consistently provides the best performance. See Section~\ref{sec:dc_experiment_settings} for parameter settings of the different approaches.}
     \label{table:document_classification_dim-50}
     \begin{tabular}{lrrrcrrr}
       \toprule
@@ -2692,8 +2695,8 @@ Or jointly training both models.
                         LFTM + AE                        & \textbf{80.2}    & \textbf{79.9}    & \textbf{79.7}   && \textbf{81.1}    & \textbf{81.5}     & \textbf{81.5}   \\
                         TopicVec                         & 35.1    & 33.0    & 30.6   && 42.1    & 40.1     & 39.7   \\
                         TopicVec + AE                    & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
-                        WELDA $\lambda_{act} = 0.4$      & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
-                        WELDA $\lambda_{act} = 0.4$ + AE & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
+                        WELDA                            & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
+                        WELDA                       + AE & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
                         Gaussian LDA                     & 53.7    & 54.3    & 52.3   && 59.2    & 59.5     & 57.8   \\
                         Gaussian LDA + AE                & 77.6    & 76.8    & 76.6   && 77.8    & 77.0     & 77.0   \\
     \bottomrule
