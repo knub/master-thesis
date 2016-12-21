@@ -1,3 +1,4 @@
+% TODO: then
 \documentclass[
         a4paper,
         % draft,
@@ -220,8 +221,8 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 \@openrighttrue
 \makeatother
 
-% \setcounter{secnumdepth}{4}
-% \setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
 \tableofcontents
 % \mainmatter
 
@@ -1322,6 +1323,7 @@ There are several configurable parameters in the algorithm, which we will detail
     There is a tradeoff between the $N_{pca}$ parameter and the $N_{top}$ parameter.
     The lower the final dimension number, the fewer words we need for estimating the distribution.
     Fewer words are better because then we can use the really good top words at the start of a topic, and not the later ones.
+    % TODO:
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
   \item \textbf{Dimensionality reduction method} (Algorithm~\ref{alg:welda_init}, line 5):
     We use principal component analysis (PCA) to reduce the number of dimensions while maximizing the variance for all remaining dimensions.
@@ -2097,10 +2099,10 @@ These two values are our baseline for the following section.
        \label{fig:standard_lda_alpha_beta_dc}
 \end{figure}
 
-\subsubsection{Results}
+\subsubsection{Influence of the resampling parameter $\mathbf{\lambda}$ and the topic distributions}
 
 We show the results for different $\lambda_{act}$ values and all three potential topic distributions in Figure~\ref{fig:welda_dc}.
-The experiments were conducted with Wikipedia embeddings, 200 WELDA iterations, $N_{pca} = 10$, $N_{top} = 20$ and with background sampling.
+The experiments were conducted with Wikipedia embeddings, $N_{pca} = 10$, $N_{top} = 20$, background sampling and running WELDA for 200 iterations.
 From the figure, we can observe that the topic distribution does not have a strong effect on the performance.
 All three topic distributions follow the same trend and are always close to each other, both with and without adding the average word vector to the features.
 \begin{figure}
@@ -2112,8 +2114,10 @@ All three topic distributions follow the same trend and are always close to each
 
 For $\lambda_{act} = 0.4$, which produced the best values in the topic coherence analysis, we reach an F1 score of 57.4 \% without and 73.2 \% with the average embedding.
 This value is 11.9 \% respectively 3.8 \% below standard LDA.
-This can be explained by the fact, that WELDA is increasingly disregarding the documents with increasing $\lambda$.
-During resampling, the words are chosen according to the topic distribution and not according to the current document.
+This can be explained by the fact, that WELDA is increasingly disregarding the documents with higher $\lambda$.
+During resampling, the words are drawn from the topic distribution and not according to the current document.
+% TODO
+% The topic distributions are learned over all documents, not specific to a single document.
 This is especially evident for $\lambda = 1.0$.
 In this case, WELDA samples all words from the embedding space.
 The words from the actual documents do not play a role anymore in this case.
@@ -2516,13 +2520,14 @@ The same holds for Gaussian LDA.
 In this master thesis, we have shown that word embeddings can help to improve topic models.
 We started from the distributional hypothesis and analyzed its different realization in topic models and in word embedding models.
 Word embeddings exploit local co-occurrences in a small context window, while topic models exploit document-wide co-occurrences.
-We then concluded the different notions of word similarity implicitly implemented in both models (see Section~\ref{sec:welda_motivation} for examples).
+We concluded the different notions of word similarity implicitly implemented in both models (see Section~\ref{sec:welda_motivation} for examples).
 
-Based on this analysis, we then proposed WELDA, a new type of topic model aiming to utilize the strengths of both models.
+Based on this analysis, we proposed WELDA, a new type of topic model aiming to utilize the strengths of both models.
 WELDA learns topic distributions for all topics in the word embedding space.
+% TODO:
 This topic distribution captures the position of words belonging to the topic.
 By learning a full distribution and not only a single topic vector, we are also capturing the shape of the word positions in the embedding space.
-We then randomly resample words from this distribution during the Gibbs sampling inference.
+We randomly resample words from this distribution during the Gibbs sampling inference.
 With this method, we utilize both the word co-occurrences across documents and the word-context co-occurrences at the same time.
 We shift probability mass from general, low-information words to specific, high-information words, which strengthen the main theme of the topic.
 
@@ -2530,7 +2535,7 @@ Our extensive evaluation proved the success of the WELDA model on the topic cohe
 Our observations also help to understand both models better.
 We reached our best performance when the knowledge from both models is balanced with medium $\lambda$ values ranging from $0.4$ to $0.6$.
 We could also confirm the assumption, that higher dimensionality leads to higher performance, as more semantic regularities can be encoded in the embedding space.
-We then accelerated the progress of our method by detecting special background words, which are always resampled.
+We accelerated the progress of our method by detecting special background words, which are always resampled.
 Our experiments with different topic distributions indicated comparable performance for all distributions. % TODO: Seriously?
 We also showed that corpus-specific embeddings, albeit lacking quality when evaluating the embeddings alone, can still help to improve topic coherence because they are learned on the same documents.
 
@@ -2541,7 +2546,7 @@ WELDA could achieve the best performance on topic coherence, while LDA remains u
 
 Our work leaves several directions open for future work.
 Currently, we use one word vector for each term.
-However, this neglects the existence of polysemous words.
+However, this neglects the existence of polysemous words (words with several meanings).
 When such a word occurs in a topic, it moves the topic distribution towards a wrong direction in the embedding space.
 For example, imagine the top words of a topic are
 \topicbox{weapon blunt force club crime,}
@@ -2549,6 +2554,7 @@ For example, imagine the top words of a topic are
 In this case, ``club'' pollutes the general \emph{violence} theme and distorts its topic distribution.
 This is especially bothersome, as LDA is able to distinguish different word meanings via different topics.
 Leveraging this information could help to improve the topic distributions.
+Especially training both word embeddings and topic models at the same time could lead to better word embeddings, which in turn also improves the topic model. % TODO:
 
 Another direction for future work is the way we replace words in WELDA.
 Currently, we base the decision of whether we replace a word simply on the result of the coin flip.
@@ -2563,14 +2569,26 @@ More intelligent schemes can be devised, for example only replacing exact synony
 Another idea would be to use the topic distributions for inserting prior knowledge in the topic models.
 Currently, these distributions are estimated from the data, i.e., the top words in the topics.
 By setting priors on the topic distributions one could define a certain set of expected topics.
-For example, when learning topics on the \textsc{20News} corpus, one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{politics}.
+For example, assume a user is especially interested in \emph{politics} when learning topics on the \textsc{20News} corpus, but less interested in \emph{sports}.
+The user could set several topic distributions so that they capture certain subtopics of \emph{politics}, such as \emph{elections}, \emph{foreign policy} and \emph{scandals}.
+On the other hand, the user would set only one topic distribution with a high variance covering the entire \emph{sports} topic.
+This way, LDA would be inclined to produce the desired topics.
+% This way, the topic model could learn several fine-grained topics about politics, while putting all sports-related words in one topic.
+% when learning topics on the \textsc{20News} corpus, let
+% the user is especially interested
+% may shift to those kind of themes
+% one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{politics}. % TODO
 
 % Document classification
 % Our methods has potential applications in document retrieval, clustering and 
-For our work, we assumed fixed pre-trained word embeddings and only focused on improved topic models.
-Both these assumptions 
-We only focused on improved topic models.
-Or jointly training both models.
+
+% For our work, we assumed fixed pre-trained word embeddings.
+% This assumption can be challenged: when training topics and word embeddings simultaneously, one could improve both models at the same time, for example by learning different word embedding vectors for each word meaning.
+% This, in turn, would help the topic model again, as it allows for better word replacements.
+
+% and only focused on improved topic models.
+% We only focused on improved topic models.
+% Or jointly training both models.
 
 \clearpage
 \printbibliography
@@ -2656,7 +2674,7 @@ Or jointly training both models.
   \begin{figure}[H]
          \centering
          \includegraphics[width=14cm]{figures/welda_dc_different_embeddings.png}
-         \caption{Document classification $F1$ score for WELDA with different $\lambda_{act}$ values depending on the word embedding model used. We plot results for Gaussian WELDA with $N_{pca} = 10$, $N_{top} = 20$ for both Wikipedia and corpus-specific embeddings. We also show the results if we add the average embedding vector (AE) to the features. Corpus-specific embeddings are worse, when the average word vector is not added, but better when it is.}
+         \caption{$F1$ score of the document classification for WELDA with different $\lambda_{act}$ values depending on the word embedding model used. We plot results for Gaussian WELDA with $N_{pca} = 10$, $N_{top} = 20$ for both Wikipedia and corpus-specific embeddings. We also show the results if we add the average embedding vector (AE) to the features. Corpus-specific embeddings are worse, when the average word vector is not added, but better when it is.}
          \label{fig:welda_dc_different_embeddings}
   \end{figure}
 
