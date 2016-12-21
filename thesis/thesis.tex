@@ -6,6 +6,7 @@
         parskip,
         numbers=noenddot
         ]{scrbook}
+\renewcommand*\contentsname{Table of contents}
 % \widowpenalty10000
 % \clubpenalty10000
 
@@ -191,7 +192,6 @@ Supervisor: Dr.\ Ralf Krestel}
 \cleardoublepage
 
 \makeatletter
-\@openrightfalse
 
 \chapter*{Abstract}
 The distributional hypothesis poses that similar words tend to have similar contexts in which they occur.
@@ -220,8 +220,8 @@ Wir erreichen dies durch die Schätzung von Themen-Verteilungen im Wort-Vektorra
 Wir vergleichen WELDA mit Standard-LDA und konkurrierenden Ansätzen und präsentieren eine umfassende Evaluation.
 Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die Themenkohärenz übertrifft und gleichzeitig akzeptable Ergebnisse in der Dokumentenklassifizierung erzielt.
 
-\@openrighttrue
 \makeatother
+\cleardoublepage
 
 % \setcounter{secnumdepth}{4}
 % \setcounter{tocdepth}{4}
@@ -2253,16 +2253,7 @@ WELDA achieves the highest topic coherence with $TC = 44.2$, an improvement of $
 Then, TopicVec and LFTM follow with $43.6$ respectively $43.8$.
 The two remaining methods, Gaussian LDA and NSTM, perform even worse than standard LDA.
 
-The good performance of WELDA can be explained by the fact, that WELDA learns a full distribution in the embedding space.
-For TopicVec and LFTM, a topic is only a vector in the embedding space, without any information about the distribution of the topic's words around that vector.
-By learning a full distribution in the embedding space, WELDA is able to capture the shape of a topic better than with just a mean vector.
-
-We tried to the best of our knowledge to obtain reasonable results for Gaussian LDA and NSTM.
-However, especially for Gaussian LDA, all we could achieve were highly uniform topics.
-Almost the same top words occured in all topics.
-The same observations were reported by Li et al.~\cite{Li2016}.
-
-\begin{table}[]
+\begin{table}[H]
   \ra{1.3}
   \centering
   \caption{Topic coherence on the \textsc{20News} and \textsc{Nips} corpus with Wikipedia and corpus-specific embeddings. WELDA reaches the highest topic coherence on both corpora.}
@@ -2281,6 +2272,15 @@ The same observations were reported by Li et al.~\cite{Li2016}.
                               \bottomrule
   \end{tabular}
 \end{table}
+
+The good performance of WELDA can be explained by the fact, that WELDA learns a full distribution in the embedding space.
+For TopicVec and LFTM, a topic is only a vector in the embedding space, without any information about the distribution of the topic's words around that vector.
+By learning a full distribution in the embedding space, WELDA is able to capture the shape of a topic better than with just a mean vector.
+
+We tried to the best of our knowledge to obtain reasonable results for Gaussian LDA and NSTM.
+However, especially for Gaussian LDA, all we could achieve were highly uniform topics.
+Almost the same top words occured in all topics.
+The same observations were reported by Li et al.~\cite{Li2016}.
 
 \section{Document classification}
 
@@ -2347,7 +2347,7 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
                       LFTM + AE         & 74.6    & 74.5    & 73.9   && 77.4    & 77.0     & 76.9   \\
                       TopicVec          & 34.7    & 34.4    & 31.4   && 40.9    & 37.3     & 33.7   \\
                       TopicVec + AE     & 74.2    & 73.1    & 72.1   && 74.3    & 73.4     & 72.5   \\
-                      WELDA             & 58.1    & 58.3    & 57.4   && 67.1    & 64.8     & 65.1   \\ % TODO: 250
+                      WELDA             & 58.1    & 58.3    & 57.4   && 66.8    & 64.1     & 64.5   \\
                       WELDA + AE        & 73.4    & 73.2    & 73.2   && 76.8    & 76.5     & 76.3   \\
                       Gaussian LDA      & 41.6    & 43.4    & 40.5   && 40.3    & 42.5     & 39.1   \\
                       Gaussian LDA + AE & 72.7    & 72.3    & 71.8   && 68.0    & 68.9     & 67.8   \\
@@ -2493,7 +2493,7 @@ Still, even with $\lambda = 1.0$ the runtime of WELDA is 164 min, which is still
 Especially LFTM is very slow with 200-dimensional embeddings, making it infeasible to run on larger corpora.
 The same holds for Gaussian LDA.
 
-\begin{table}[]
+\begin{table}[H]
   \ra{1.2}
   \centering
   \caption{Runtimes of the different methods with $K = 50$ on the \textsc{20News} and \textsc{Nips} corpus.
@@ -2514,13 +2514,12 @@ The same holds for Gaussian LDA.
   \end{tabular}
 \end{table}
 
-\begin{figure}
+\begin{figure}[H]
        \centering
        \includegraphics[width=12cm]{figures/welda_lambda_runtime.png}
        \caption{Runtime of WELDA depending on the resampling parameter $\lambda$ with Wikipedia embeddings and $N_{pca} = 10$.}
        \label{fig:welda_lambda_runtime}
 \end{figure}
-
 
 
 \chapter{Conclusion and future work}
@@ -2599,6 +2598,7 @@ This way, LDA would be inclined to produce the desired topics.
 % Or jointly training both models.
 
 \clearpage
+\newpage \phantom{newpage}
 \printbibliography
 
 \begin{appendices}
@@ -2721,7 +2721,7 @@ This way, LDA would be inclined to produce the desired topics.
                         LFTM + AE                        & \textbf{80.2}    & \textbf{79.9}    & \textbf{79.7}   && \textbf{81.1}    & \textbf{81.5}     & \textbf{81.5}   \\
                         TopicVec                         & 35.1    & 33.0    & 30.6   && 42.1    & 40.1     & 39.7   \\
                         TopicVec + AE                    & 78.4    & 78.1    & 78.0   && 78.6    & 78.1     & 78.1   \\
-                        WELDA                            & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\ % lambda = 0.3
+                        WELDA                            & 61.3    & 60.9    & 60.8   && 65.6    & 63.7     & 63.9   \\
                         WELDA                       + AE & 79.2    & 78.6    & 78.3   && 80.4    & 80.1     & 80.1   \\
                         Gaussian LDA                     & 53.7    & 54.3    & 52.3   && 59.2    & 59.5     & 57.8   \\
                         Gaussian LDA + AE                & 77.6    & 76.8    & 76.6   && 77.8    & 77.0     & 77.0   \\
