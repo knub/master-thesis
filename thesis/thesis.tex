@@ -6,6 +6,9 @@
         parskip,
         numbers=noenddot
         ]{scrbook}
+% \widowpenalty10000
+% \clubpenalty10000
+
 \usepackage[left=2.6cm,right=3.7cm]{geometry}
 \setlength{\parskip}{6pt}
 \setlength{\parindent}{15pt}
@@ -2056,8 +2059,8 @@ There is no additional benefit from using the mixture model, so the Gaussian mod
   \end{tabular}
 \end{table}
 
-
 \section{Document classification}
+\addtocontents{toc}{\protect\newpage}
 We also evaluated topic models on another commonly used task: document classification.
 In contrast to topic coherence, this allows using topic models in a supervised setting with clear evaluation metrics.
 Given a set of documents, which belong to different semantic groups, the task of document classification is to correctly classify unseen documents into these groups.
@@ -2652,7 +2655,7 @@ This way, LDA would be inclined to produce the desired topics.
   \begin{figure}[H]
          \centering
          \includegraphics[width=\textwidth]{figures/welda_vmf_20news.png}
-         \caption{Von Mises-Fisher WELDA's topic coherence development on \textsc{20News} for different $\lambda_{act}$ values with corpus-specific embeddings. At the end, we plot the respective $TC$ values for Gaussian WELDA, which is superior in this case.}
+         \caption{Von Mises-Fisher WELDA's topic coherence development on \textsc{20News} for different $\lambda_{act}$ values with corpus-specific embeddings. At the end, we plot the respective $TC$ values for Gaussian WELDA (diamonds), which is superior in this case.}
          \label{fig:welda_vmf_20news}
   \end{figure}
   \begin{figure}[H]
@@ -2710,7 +2713,7 @@ This way, LDA would be inclined to produce the desired topics.
       \toprule
       \multirow{2}{*}{} & \multicolumn{3}{c}{$K = 50$} & \phantom{a} & \multicolumn{3}{c}{$K = 250$} \\ \cmidrule{2-4} \cmidrule{6-8}
                         & $Prec$    & $Rec$     & $F1$     && $Prec$    & $Rec$   & $F1$     \\ \midrule
-                        Only AE                          & 78.6    & 78.1    & 78.0   && \multicolumn{3}{l}{}        \\
+                        Only AE                          & 78.6    & 78.1    & 78.0   && \multicolumn{3}{c}{--------------------}        \\
                         LDA                              & 71.1    & 71.2    & 70.1   && 73.2    & 72.8     & 72.6   \\
                         LDA + AE                         & 79.1    & 78.6    & 78.5   && 80.3    & 80.1     & 80.0   \\
                         LFTM                             & 69.8    & 68.2    & 67.3   && 73.2    & 72.9     & 72.6   \\
@@ -2728,6 +2731,7 @@ This way, LDA would be inclined to produce the desired topics.
 \end{appendices}
 
 \cleardoublepage
+\pagestyle{empty}
 \section*{Declaration}
 \label{sec:declaration}
 
