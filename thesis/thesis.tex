@@ -1,6 +1,6 @@
 \documentclass[
         a4paper,
-        draft,
+        % draft,
         titlepage,
         twoside,
         parskip,
@@ -15,9 +15,7 @@
 \definecolor{darkgreen}{rgb}{0,0.4,0}
 \definecolor{darkblue}{rgb}{0,0,0.5}
 
-\usepackage{layouts} % printinunitsof % TODO
 % \usepackage{showframe}
-
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{algorithm}
@@ -222,7 +220,6 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 \@openrighttrue
 \makeatother
 
-% TODO: Remove
 % \setcounter{secnumdepth}{4}
 % \setcounter{tocdepth}{4}
 \tableofcontents
@@ -1320,7 +1317,6 @@ There are several configurable parameters in the algorithm, which we will detail
   \item \textbf{Number of top words for distribution estimation $\boldsymbol{N_{top}}$} (Algorithm~\ref{alg:welda_parameter_estimation}, line 3):
     We are using the top words of each topic to estimate the distributions.
     Usually only the first words of a topic share a common theme.
-    % TODO: Number of top words vs. topic coherence.
   \item \textbf{Number of dimensions for dimensionality reduction $\boldsymbol{N_{pca}}$} (Algorithm~\ref{alg:welda_init}, line 5):
     Before estimating the multivariate distribution in the embedding space, we project the high-dimensional embedding space to a lower space.
     There is a tradeoff between the $N_{pca}$ parameter and the $N_{top}$ parameter.
@@ -2014,6 +2010,7 @@ We conducted experiments on the \textsc{20News} corpus with $N_{pca} = 10$ and $
 The topic coherence results and the differences to Gaussian WELDA are displayed in Table~\ref{table:welda_other_distributions}.
 Interestingly, the results are different depending on the embedding used.
 The performance of WELDA vMF is worse than Gaussian WELDA when using corpus-specific embeddings but better than Gaussian WELDA with the Wikipedia embeddings.
+We show this behaviour in the plots in Appendix~\ref{sec:appendix_welda_vmf}.
 This seems to indicate, that the von Mises-Fisher distribution works better with higher-quality embeddings, which were trained on more data.
 When trained on more data, the cosine similarity function between words becomes more accurate (see Table~\ref{table:word_embeddings_performance} for performance on the analogy reasoning benchmark).
 This fits better with the assumption of directional data in the von Mises-Fisher distribution.
@@ -2027,7 +2024,6 @@ However, the Gaussian mixtures could especially benefit from more dimensions whe
 We show the results in Table~\ref{table:welda_gm} in Appendix~\ref{sec:appendix_welda_gm}.
 In this setup, we could achieve a topic coherence value of up to $TC = 48.6$.
 The average number of mixtures for the topic distributions was $2.65$, with a standard deviation of $0.51$.
-% In Appendix~\ref{sec:appendix_welda_vmf}, we also show the plots for the topic coherence development through the iterations. TODO
 
 \begin{table}[]
   \ra{1.3}
@@ -2080,14 +2076,15 @@ Depending on the word embeddings used (see Table~\ref{table:word_embeddings_perf
 
 \subsection{Results}
 
-We first start with analyzing the standard LDA algorithm with regards to document classification performance to establish a baseline.
+We first start with analyzing the standard LDA algorithm regarding document classification performance to establish a baseline.
 We will then analyze WELDA with different topic distributions, $\lambda$ values and $N_{pca}$ values.
 
 \subsubsection{Standard LDA as baseline}
 
-We ran a grid search using $[0.002, 0.005, 0.01, 0.02, 0.05]$ as possible values for $\alpha$ and $[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]$ as possible values for $\beta$.
-However, again there is no clear correlation between these values and the final F1 value.
-This impression is further strengthened by Figure~\ref{fig:standard_lda_alpha_beta_dc}, where we plot the average topic coherence for a fixed $\alpha$ respectively $\beta$.
+We ran a grid search using $\{0.002, 0.005, 0.01, 0.02, 0.05\}$ as possible values for $\alpha$ and $\{0.002, 0.005, 0.01, 0.02, 0.05, 0.1\}$ as possible values for $\beta$.
+However, similar to the topic coherence results, there is no clear correlation between the parameters and the final F1 value.
+This impression is further strengthened by Figure~\ref{fig:standard_lda_alpha_beta_dc}, where we plot the average document classification for a fixed $\alpha$ respectively $\beta$.
+No trend is recognizable.
 This observation allows us to use $\alpha = \beta = 0.02$ again just as in the topic coherence experiments.
 This configuration has an F1 score of 69.3 \%.
 If we add the average word vector to the features, standard LDA achieves an F1 score of 77.0 \%.
@@ -2095,7 +2092,7 @@ These two values are our baseline for the following section.
 \begin{figure}
        \centering
        \includegraphics[width=12cm]{figures/standard_lda_alpha_beta_dc.png}
-       \caption{Average F1 score for a fixed $\alpha$ respectively $\beta$, while averaging over all values of $\beta$ respectively $\alpha$. $\alpha$ and $\beta$ seem to not have a strong influence on the document classification performance.}
+       \caption{Average F1 score for a fixed $\alpha$ respectively $\beta$, while averaging over all values of $\beta$ respectively $\alpha$. $\alpha$ and $\beta$ do to not have a strong influence on the document classification performance.}
        \label{fig:standard_lda_alpha_beta_dc}
 \end{figure}
 
@@ -2108,22 +2105,25 @@ All three topic distributions follow the same trend and are always very close to
 \begin{figure}
        \centering
        \includegraphics[width=14cm]{figures/welda_dc.png}
-       \caption{Document classification $F1$ score for WELDA with different $\lambda_{act}$ values. We plot the results for the Gaussian distribution (G), Gaussian mixtures (GM) and von Mises-Fisher distribution (vMF). Additionally, we plot the $F1$ score, if we add the average embedding vector (AE) to the features. The results show, that there is no significant difference regarding the choice of topic distribution.}
+       \caption{Document classification $F1$ score for WELDA with different $\lambda_{act}$ values. We plot the results for the Gaussian distribution (G), Gaussian mixtures (GM) and von Mises-Fisher distribution (vMF). Additionally, we plot the $F1$ score if we add the average embedding vector (AE) to the features. The results show, that there is no significant difference regarding the choice of topic distribution.}
        \label{fig:welda_dc}
 \end{figure}
 
-For $\lambda_{act} = 0.4$, which produced the best values in the topic coherence analysis, we reach an F1 score of 56.1 \% without and 73.2 \% with the average embedding.
-This value is 13.2 \% respectively 3.8 \% below standard LDA.
+For $\lambda_{act} = 0.4$, which produced the best values in the topic coherence analysis, we reach an F1 score of 57.4 \% without and 73.2 \% with the average embedding.
+This value is 11.9 \% respectively 3.8 \% below standard LDA.
 This can be explained by the fact, that WELDA is increasingly disregarding the documents with increasing $\lambda$.
 During resampling, the words are chosen according to the topic distribution and not according to the current document.
 This is especially evident for $\lambda = 1.0$.
 In this case, WELDA samples all words from the embedding space.
 The words from the actual documents do not play a role anymore in this case.
 This explains the essentially random performance of WELDA with $\lambda = 1.0$ in the document classification task.
-We show in Figure~\ref{fig:welda_dc_different_embeddings} in Appendix~\ref{sec:appendix_welda_dc_different_embeddings} that the behavior of WELDA does not change depending on the word embeddings used during training.
-The trend is the same when we use the 50-dimensional word embeddings trained on \textsc{20News}.
+We show in Figure~\ref{fig:welda_dc_different_embeddings} in Appendix~\ref{sec:appendix_welda_dc_different_embeddings} that the behavior of WELDA does not change depending on the word embeddings used during training:
+the trend is the same when we use the 50-dimensional word embeddings trained on \textsc{20News}.
 We additionally tested whether the $F1$ score improved when we used a higher value of $N_{pca}$.
-This turned out to be not the case: the $F1$ score was identical to the experiments mentioned above.
+This turned out to be not the case: the $F1$ score was similar to the experiments mentioned above.
+This can be explained by the fact, that the underlying problem of WELDA is replacing words from outside the document.
+Just replacing better words does not help improve document classification performance.
+The plot for the $N_{pca}$ experiment is displayed in Figure~\ref{fig:welda_dc_ntop} in Appendix~\ref{sec:appendix_welda_dc_ntop}.
 
 \chapter{Comparative evaluation of word-embedding-improved topic models}
 \label{sec:comparative_evaluation}
@@ -2136,7 +2136,7 @@ We will focus on two tasks: topic coherence and document classification.
 \label{sec:evaluation_topic_coherence}
 
 We will now evaluate topic coherence on all topic models mentioned above.
-We follow the experiment setup already described in Section~\ref{sec:topic_coherence} on all models.
+We follow the experiment setup already described in Section~\ref{sec:topic_coherence}.
 
 \subsection{Topic model solely based on word embeddings}
 \label{sec:raw_tm_we}
@@ -2152,8 +2152,9 @@ For one search word, the search word is always in the output, as the similarity 
 
 As search words, we took the top topic words of a standard LDA run on the \textsc{20News} corpus with 1500 iterations and $\alpha = \beta = 0.02$.
 We experimented with two cases: only taking the top word and taking the average of all top ten words.
-For example, for the search word ``game'', the topic (in the 200-dimensional embeddings trained on Wikipedia) is:
+The resulting topic for the search word ``game'' looks as follows (with the 200-dimensional embeddings trained on Wikipedia):
 \topicbox{\noindent game games skullgirls tetris gameplay battletoads puzzle 2player picross multiplayer}
+This topic contains many specific words, which are concrete games, but does not contain words from a general gaming theme.
 
 We show the topic coherence results of the topics identified this way in Table~\ref{table:raw_we_tm}.
 The results are worse than running LDA, thus showing that only using word embeddings is not enough.
@@ -2242,6 +2243,11 @@ The good performance of WELDA can be explained by the fact, that WELDA learns a 
 For TopicVec and LFTM, a topic is only a vector in the embedding space, without any information about the distribution of the topic's words around that vector.
 By learning a full distribution in the embedding space, WELDA is able to capture the shape of a topic better than with just a mean vector.
 
+We tried to the best of our knowledge to obtain reasonable results for Gaussian LDA and NSTM.
+However, especially for Gaussian LDA, all we could achieve were highly uniform topics.
+Almost the same top words occured in all topics.
+The same observations were reported by Li et al.~\cite{Li2016}.
+
 \begin{table}[]
   \ra{1.3}
   \centering
@@ -2254,10 +2260,10 @@ By learning a full distribution in the embedding space, WELDA is able to capture
                  \midrule
                               LDA          & \multicolumn{2}{c}{------~~41.9~~------}      && \multicolumn{2}{c}{------~~40.6~~------} \\
                               Gaussian LDA & 38.5          & 40.3          && 39.2          & 39.5     \\
-                              LFTM         & 43.9          & 45.6          && 41.6          & 43.8     \\
+                              LFTM         & 43.9          & 45.6          && 41.6          & 42.8     \\
                               NSTM         & --            & --            && 37.5          & 36.8     \\
-                              TopicVec     & 48.1          & 46.2          && 43.4          & 43.6     \\
-                              WELDA        & \textbf{48.6} & \textbf{47.4} && \textbf{44.2} & \textbf{TODO}     \\
+                              TopicVec     & 48.1          & 46.2          && 43.4          & \textbf{43.6}     \\
+                              WELDA        & \textbf{48.6} & \textbf{47.4} && \textbf{44.2} & 42.9     \\
                               \bottomrule
   \end{tabular}
 \end{table}
@@ -2270,7 +2276,7 @@ We used the same experiment setup as described in Section~\ref{sec:dc_setup}.
 \subsection{Experiment settings}
 
 We now present the different parameter settings for all competing approaches.
-All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{20News}.
+All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{20News} corpus.
 
 \begin{itemize}
   \item
@@ -2288,7 +2294,7 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
     TopicVec was run for 500 iterations.
   \item
     \textbf{WELDA:}
-    WELDA with lambda = 0.3 TODO
+    We report results for Gaussian WELDA with $\lambda_{act} = 0.4$ and $N_{pca} = 10$ after 200 iterations.
   \item
     \textbf{LFTM:}
     We report results for LFTM with $\lambda = 0.6$, as this yields the best document classification results according to the original paper.
@@ -2326,8 +2332,8 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
                       LFTM + AE         & 74.6    & 74.5    & 73.9   && 77.4    & 77.0     & 76.9   \\
                       TopicVec          & 34.7    & 34.4    & 31.4   && 40.9    & 37.3     & 33.7   \\
                       TopicVec + AE     & 74.2    & 73.1    & 72.1   && 74.3    & 73.4     & 72.5   \\
-                      WELDA             & 62.1    & 61.3    & 61.0   && 67.1    & 64.8     & 65.1   \\
-                      WELDA + AE        & 73.4    & 73.2    & 72.7   && 76.8    & 76.5     & 76.3   \\
+                      WELDA             & 58.1    & 58.3    & 57.4   && 67.1    & 64.8     & 65.1   \\
+                      WELDA + AE        & 73.4    & 73.2    & 73.2   && 76.8    & 76.5     & 76.3   \\
                       Gaussian LDA      & 41.6    & 43.4    & 40.5   && 40.3    & 42.5     & 39.1   \\
                       Gaussian LDA + AE & 72.7    & 72.3    & 71.8   && 68.0    & 68.9     & 67.8   \\
   \bottomrule
@@ -2337,8 +2343,7 @@ All experiments were run with $K = 50$ and with $K = 250$ topics on the \textsc{
 The results for the different techniques with 200-dimensional Wikipedia embeddings are displayed in Table~\ref{table:document_classification_dim-200}.
 As a baseline, the first row shows the performance of the average word vector without any topic model features.
 Already these features achieve an F1-score of 69.9 \%.
-The other baseline we use is standard LDA, which achieves 70.1 \%.
-This is already slightly more than the average word embeddings.
+The other baseline we use is standard LDA, which achieves 70.1 \%, slightly better than the average word embeddings.
 Combining the two baselines, i.e. taking standard LDA's document-topic matrix and the average word vector, yields the highest F1 score for both $K = 50$ and $K = 250$.
 The scores are 77.0 \% and 77.6 \% respectively.
 No other technique can beat standard LDA in the document classification task.
@@ -2626,10 +2631,16 @@ Or jointly training both models.
          \caption{Von Mises-Fisher WELDA's topic coherence development on \textsc{20News} for different $\lambda_{act}$ values with corpus-specific embeddings. At the end, we plot the respective $TC$ values for Gaussian WELDA, which is superior in this case.}
          \label{fig:welda_vmf_20news}
   \end{figure}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=\textwidth]{figures/welda_vmf_200.png}
+         \caption{Same figure as above, but with Wikipedia embeddings. In this case, von Mises-Fisher WELDA is superior to Gaussian WELDA.}
+         \label{fig:welda_vmf_20news}
+  \end{figure}
 
   \subsection{WELDA with Gaussian mixtures}
   \label{sec:appendix_welda_gm}
-  \begin{table}[]
+  \begin{table}[H]
     \ra{1.3}
     \centering
     \caption{Topic coherence on the \textsc{20News} corpus for WELDA with Gaussian mixtures and $N_{pca} = 50$. Wikipedia embeddings were used.}
@@ -2644,13 +2655,22 @@ Or jointly training both models.
 
   \subsection{Document classification performance depending on word embeddings used}
   \label{sec:appendix_welda_dc_different_embeddings}
-  \begin{figure}
+  \begin{figure}[H]
          \centering
          \includegraphics[width=14cm]{figures/welda_dc_different_embeddings.png}
          \caption{Document classification $F1$ score for WELDA with different $\lambda_{act}$ values depending on the word embedding model used. We plot results for Gaussian WELDA with $N_{pca} = 10$, $N_{top} = 20$ for both Wikipedia and corpus-specific embeddings. We also show the results if we add the average embedding vector (AE) to the features. Corpus-specific embeddings are worse, when the average word vector is not added, but better when it is.}
          \label{fig:welda_dc_different_embeddings}
   \end{figure}
 
+  \newpage
+  \subsection{Document classification performance depending on $\mathbf{N_{pca}}$}
+  \label{sec:appendix_welda_dc_ntop}
+  \begin{figure}[H]
+         \centering
+         \includegraphics[width=12cm]{figures/welda_dc_ntop.png}
+         \caption{Document classification $F1$ score for WELDA with different $N_{pca}$ values, with and without adding the average embedding (AE) to the features. A higher dimensionality does not help to improve document classification performance.}
+         \label{fig:welda_dc_ntop}
+  \end{figure}
 
   \section{Comparative Evaluation}
   \subsection{Document classification on 20N{\footnotesize EWS} with corpus-specific embeddings}
