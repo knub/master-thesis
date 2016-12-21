@@ -1,4 +1,5 @@
 % TODO: then
+% TODO: Appendix
 \documentclass[
         a4paper,
         % draft,
@@ -221,6 +222,7 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 \@openrighttrue
 \makeatother
 
+% TODO
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{4}
 \tableofcontents
@@ -336,6 +338,7 @@ If one plots a probability distribution for the words in the embedding space (gr
 The topic could be improved by picking words in the embedding space, which are close to the existing words in the topic.
 In the figure, we illustrated this with the words ``existence'', ``faith'' and ``life'', which form a stronger topic with the rest of the words.
 We want to build a model, which leverages this information from the embedding space to create better topics.
+\phantom{This sentence is here to fill some phantom space.}
 
 \counterwithout{figure}{chapter}
 \begin{figure}
@@ -1198,6 +1201,8 @@ In this way, we help the user understand the common theme in a topic better, whi
 
 \subsection{WELDA Algorithm}
 
+\label{sec:welda_algorithm}
+
 We base our new topic modeling technique on the observations from the last chapter.
 Word embedding models are trained on predicting a certain word at an exact position.
 That means, if we look at the similar words for a given word, the model predicts a word which could have been at the same position.
@@ -1311,10 +1316,11 @@ There are several configurable parameters in the algorithm, which we will detail
     According to the authors, this distribution is ``well suited for directional data'' and can leverage word similarity correlations better~\cite{Batmanghelich2016}.
     We demonstrate these three in detail in the next sections.
   \item \textbf{Resampling probability $\boldsymbol{\lambda}$} (Algorithm~\ref{alg:welda_gibbs_sampling}, line 10):
-    The parameter $\lambda$ governs, how often a word is resampled from the topic distributions.
+    The parameter $\lambda$ decides, how often a word is resampled from the topic distributions.
+    Thus, the parameter $\lambda$ governs, how much extra information from the word embeddings is leaked into the topic model.
     Running WELDA with $\lambda = 0.0$ corresponds to standard, unmodified LDA and will not have any effect on the model because we already start with a converged topic model.
     With $\lambda = 1.0$, no single word is taken from the text, rather all words are sampled from the embedding space.
-    This parameter governs, how much extra information from the word embeddings is leaked into the topic model.
+    We will later determine, which value of $\lambda$ constitutes a good compromise between the two models.
   \item \textbf{Number of top words for distribution estimation $\boldsymbol{N_{top}}$} (Algorithm~\ref{alg:welda_parameter_estimation}, line 3):
     We are using the top words of each topic to estimate the distributions.
     Usually only the first words of a topic share a common theme.
@@ -1323,8 +1329,8 @@ There are several configurable parameters in the algorithm, which we will detail
     There is a tradeoff between the $N_{pca}$ parameter and the $N_{top}$ parameter.
     The lower the final dimension number, the fewer words we need for estimating the distribution.
     Fewer words are better because then we can use the really good top words at the start of a topic, and not the later ones.
-    % TODO:
     On the other hand, by projecting the space to a lower dimension, we throw away semantic information in the embedding space and the similarity between words becomes less reliable.
+    In general, we expect a higher dimensionality to perform better.
   \item \textbf{Dimensionality reduction method} (Algorithm~\ref{alg:welda_init}, line 5):
     We use principal component analysis (PCA) to reduce the number of dimensions while maximizing the variance for all remaining dimensions.
   % \item \textbf{Distance function for the nearest neighbor search} (Algorithm~\ref{alg:welda_init}, line 6):
@@ -1741,7 +1747,6 @@ The topic coherence evaluation for one set of ten top words is then calculated i
     Using these context coherence vectors, the coherence of a pair $(W', W^*)$ is computed using cosine similarity:
     \begin{equation*}
       \vec{u} = \vec{v}(W')
-      However, the improvement is only a few percent for all models.
     \end{equation*}
     \begin{equation*}
       \vec{w} = \vec{v}(W^*)
@@ -1862,7 +1867,6 @@ See Table~\ref{table:actual_lambda} for the differences.
        \label{fig:welda_gaussian_lambda_20news}
 \end{figure}
 
-% \printinunitsof{cm}\prntlen{\textwidth}
 We start with the analysis of the topic models using the embeddings trained on the \textsc{20News} corpus.
 We tested with $\lambda \in \{ 0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0 \}$.
 The results with the corresponding $\lambda_{act}$ values in the legend are plotted in Figure~\ref{fig:welda_gaussian_lambda_20news}.
@@ -1947,7 +1951,7 @@ We plot the development of the topic coherence with different fixed values of $N
 The first observation is, that $N_{top}$ does not have a large influence on the topic coherence.
 The regression line regarding $N_{top}$ is almost constant for all values of $N_{pca}$.
 However, large differences are visible for different values of $N_{pca}$.
-In general, the higher the value, the higher the topic coherence.
+In general, the higher the value, the higher the topic coherence, which confirms our assumption from Section~\ref{sec:welda_algorithm}.
 The exception to this observation is $N_{pca} = 2$, which performs better than $N_{pca} = 10$.
 It seems that the first two dimensions encode already a lot of information for WELDA.
 Still, in general the trend shows higher topic coherence for higher values of $N_{pca}$ with a strong positive correlation.
@@ -2116,8 +2120,7 @@ For $\lambda_{act} = 0.4$, which produced the best values in the topic coherence
 This value is 11.9 \% respectively 3.8 \% below standard LDA.
 This can be explained by the fact, that WELDA is increasingly disregarding the documents with higher $\lambda$.
 During resampling, the words are drawn from the topic distribution and not according to the current document.
-% TODO
-% The topic distributions are learned over all documents, not specific to a single document.
+Therefore, the resampling sometimes samples words, which do not occur in the document at all.
 This is especially evident for $\lambda = 1.0$.
 In this case, WELDA samples all words from the embedding space.
 The words from the actual documents do not play a role anymore in this case.
@@ -2524,9 +2527,8 @@ We concluded the different notions of word similarity implicitly implemented in 
 
 Based on this analysis, we proposed WELDA, a new type of topic model aiming to utilize the strengths of both models.
 WELDA learns topic distributions for all topics in the word embedding space.
-% TODO:
-This topic distribution captures the position of words belonging to the topic.
-By learning a full distribution and not only a single topic vector, we are also capturing the shape of the word positions in the embedding space.
+These topic distributions capture and generalize the positions of the words in the embedding space.
+By learning an entire distribution and not only a single topic vector, we are also capturing the covariance of the word positions in the embedding space.
 We randomly resample words from this distribution during the Gibbs sampling inference.
 With this method, we utilize both the word co-occurrences across documents and the word-context co-occurrences at the same time.
 We shift probability mass from general, low-information words to specific, high-information words, which strengthen the main theme of the topic.
@@ -2549,12 +2551,13 @@ Currently, we use one word vector for each term.
 However, this neglects the existence of polysemous words (words with several meanings).
 When such a word occurs in a topic, it moves the topic distribution towards a wrong direction in the embedding space.
 For example, imagine the top words of a topic are
-\topicbox{weapon blunt force club crime,}
+\topicbox{weapon blunt force club crime}
 \noindent but the word ``club'' is near the words ``sport'' and ``football'' in the embedding space.
 In this case, ``club'' pollutes the general \emph{violence} theme and distorts its topic distribution.
 This is especially bothersome, as LDA is able to distinguish different word meanings via different topics.
 Leveraging this information could help to improve the topic distributions.
-Especially training both word embeddings and topic models at the same time could lead to better word embeddings, which in turn also improves the topic model. % TODO:
+If LDA were used to learn different word embeddings for different meanings, then the improved word embeddings could in turn help WELDA create better topics.
+% Especially training both word embeddings and topic models at the same time could lead to better word embeddings, which in turn also improves the topic model. % TODO:
 
 Another direction for future work is the way we replace words in WELDA.
 Currently, we base the decision of whether we replace a word simply on the result of the coin flip.
@@ -2577,7 +2580,7 @@ This way, LDA would be inclined to produce the desired topics.
 % when learning topics on the \textsc{20News} corpus, let
 % the user is especially interested
 % may shift to those kind of themes
-% one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{politics}. % TODO
+% one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{politics}.
 
 % Document classification
 % Our methods has potential applications in document retrieval, clustering and 
