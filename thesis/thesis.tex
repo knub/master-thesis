@@ -187,7 +187,7 @@ Supervisor: Dr.\ Ralf Krestel}
 \makeatother
 
 \begin{document}
-% \frontmatter
+\frontmatter
 \maketitle
 \cleardoublepage
 
@@ -226,7 +226,7 @@ Unsere Experimente zeigen, dass WELDA alle anderen Ansätze in Bezug auf die The
 % \setcounter{secnumdepth}{4}
 % \setcounter{tocdepth}{4}
 \tableofcontents
-% \mainmatter
+\mainmatter
 
 \chapter{Introduction}
 \label{sec:introduction}
@@ -525,7 +525,7 @@ An important point for the topic distribution is, that only the topics of all ot
 The next topic is independent of the current topic of the word.
 Therefore, before calculating the topic distribution for the current word, the counters for the current word have to be decremented.
 This happens in lines 8 and 11.
-After sampling a new topic (line 12), the possibly different counters are incremented again (lines 13-15)
+After sampling a new topic (line 12), the possibly different counters are incremented again (lines 13-15).
 This repeated sampling is guaranteed to approximate the joint distribution of all variables.
 
 After running the algorithm, the final topic assignment matrix $Z$ can be used as the final result.
@@ -754,7 +754,7 @@ It was shown that
 \end{equation*}
 is closest to the vector representation of the word ``queen''~\cite{Mikolov2013b}.
 Interestingly, this relationship holds for both semantic and syntactic similarity~\cite{Mikolov2013a}.
-The word vector closest to the result of 
+The word vector closest to the result of
 \begin{equation*}
   \vec{v}_{houses} - \vec{v}_{house} + \vec{v}_{car}
 \end{equation*}
@@ -2604,7 +2604,7 @@ This way, LDA would be inclined to produce the desired topics.
 % one might be fine with only one topic about \emph{sports}, but wants several fine-grained topics about \emph{politics}.
 
 % Document classification
-% Our methods has potential applications in document retrieval, clustering and 
+% Our methods has potential applications in document retrieval, clustering and
 
 % For our work, we assumed fixed pre-trained word embeddings.
 % This assumption can be challenged: when training topics and word embeddings simultaneously, one could improve both models at the same time, for example by learning different word embedding vectors for each word meaning.
